@@ -16,6 +16,7 @@ env:
 
 install:
     - pip install -U platformio
+    - cd mock-api; npm install
 
     #
     # Libraries from PlatformIO Library Registry:
@@ -35,8 +36,6 @@ install:
     # http://platformio.org/lib/show/177/Adafruit_BluefruitLE_nRF51
 
 
-install:
-    - cd mock-api; npm install
 script:
     - echo '-------------------------'
     - cd esp; pio run
