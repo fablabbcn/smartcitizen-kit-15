@@ -241,7 +241,7 @@ bool SckESP::processMsg() {
 	 		
  			StaticJsonBuffer<240> jsonBuffer;
 			JsonObject& jsonConf = jsonBuffer.createObject();
-			jsonConf["ri"] = configuration.readInterval;
+			jsonConf["ri"] = config.publishInterval;
 			clearParam();
 			jsonConf.printTo(msgOut.param, 240);
 			SAMsendMsg();
@@ -599,26 +599,6 @@ void SckESP::startWebServer() {
 	// Handle saved configuration list
 	webServer.on("/conf", extShow);
 
-	// Handle APlist request
-	// webServer.on("/aplist", [](){
-
- //   		String json = "{\"nets\":[";
-
- //   		// int netNum = WiFi.scanNetworks();
- //   		int
-	// 	for (int i=0; i<netnumber2; i++) {
-	// 		json += "{\"ssid\":\"" + String(WiFi.SSID(i));
-	// 		json += "\",\"ch\":" + String(WiFi.channel(i));
-	// 		json += ",\"rssi\":" + String(WiFi.RSSI(i)) + "}";
-	// 		if (i < (netNumber - 1)) json += ",";
-	// 	}
-
-	// 	json += "]}";
-	// 	webServer.send(200, "text/json", json);
-	// 	json = String();
-    	
-	// });
-
 	// Handle SSDP
 	webServer.on("/description.xml", HTTP_GET, [](){
     	SSDP.schema(webServer.client());
@@ -675,58 +655,76 @@ void SckESP::webSet() {
 
 	// uint8_t score = 0;
 	
-	String response = "<!DOCTYPE html><html><head><meta name=viewport content=width=device-width, initial-scale=1><style>body {color: #434343;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;font-size: 22px;line-height: 1.1;padding: 20px;}</style></head><body>";
+	String response = "<!DOCTYPE html><html><head><meta name=viewport content=width=device-width, initial-scale=1><style>body {color: #434343;font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;font-size: 18px;line-height: 1.1;padding: 20px;}</style></head><body>";
 
 	// To send a forced status change if anything changed
 	bool somethingChanged = false;
 
-	// TODO support open networks (nopassword)
-	// If we found ssid AND pass
-	if (webServer.hasArg("ssid"))  {
+	if (webServer.hasArg("bsave")){
 
-		String tssid = webServer.arg("ssid");
-		String tpass = "";
+		// If we found ssid
+		if (webServer.hasArg("ssid"))  {
 
-		if (webServer.hasArg("password")) {
-			tpass = webServer.arg("password");
-		}
-			
-		// If ssid is no zero chars
-		if (tssid.length() > 0) {
+			String tssid = webServer.arg("ssid");
+			String tpass = "";
 
-			tssid.toCharArray(credentials.ssid, 64);
-			tpass.toCharArray(credentials.password, 64);
+			if (webServer.hasArg("password")) {
+				tpass = webServer.arg("password");
+			}
+				
+			// If ssid is no zero chars
+			if (tssid.length() > 0) {
 
-			if (addNetwork()) somethingChanged = true;
+				tssid.toCharArray(credentials.ssid, 64);
+				tpass.toCharArray(credentials.password, 64);
 
-			response += String(F("Success: New net added: ")) + tssid + " - " + tpass + "<br/>";
+				if (addNetwork()) somethingChanged = true;
 
-			// score ++;
-			
+				response += String(F("Success: New net added: ")) + tssid + " - " + tpass + "<br/>";
+
+			} else {
+				response += String(F("Error: wrong ssid or password!!<br/>"));
+			}
+		
 		} else {
-			response += String(F("Error: wrong ssid or password!!<br/>"));
+			response += String(F("Warning: can't find ssid or password!!<br/>"));
 		}
-	
-	} else {
-		response += String(F("Warning: can't find ssid or password!!<br/>"));
-	}
 
-	// If we found the token
-	if (webServer.hasArg("token")) {
-		String ttoken = webServer.arg("token");
-		if (ttoken.length() == 6) {
-			ttoken.toCharArray(token, 8);
-			saveToken();
-			somethingChanged = true;
-			response += String(F("Success: New token added: ")) + ttoken + "<br/>";
+		// // If we found the token
+		// if (webServer.hasArg("token")) {
+		// 	String ttoken = webServer.arg("token");
+		// 	if (ttoken.length() == 6) {
+		// 		ttoken.toCharArray(token, 8);
+		// 		saveToken();
+		// 		somethingChanged = true;
+		// 		response += String(F("Success: New token added: ")) + ttoken + "<br/>";
+		// 	} else {
+		// 		response += String(F("Error: token must have 6 chars!!<br/>"));
+		// 	}
+		// } else {
+		// 	response += String(F("Warning: no token received<br/>"));
+		// }
 
-			// score ++;
+		// Interval is in seconds
+		// if (webServer.hasArg("readint")) {
+			
+		// 	String tinterval = webServer.arg("readint");
+		// 	uint32_t intTinterval = tinterval.toInt();
 
-		} else {
-			response += String(F("Error: token must have 6 chars!!<br/>"));
-		}
-	} else {
-		response += String(F("Warning: no token received<br/>"));
+		// 	// 86400 one day in seconds
+		// 	if (intTinterval >= minimal_publish_interval && intTinterval <= max_publish_interval) {
+
+		// 		config.publishInterval = intTinterval;
+
+		// 		espStatus.conf = ESP_CONF_CHANGED_EVENT;
+		// 		response += String(F("Success: New Publish interval: ")) + String(intTinterval) + String(F(" seconds"));
+		// 	} else {
+		// 		response += String(F("Error: received publish interval is not valid!!!"));
+		// 	}
+			
+		// } else {
+		// 	response += String(F("Warning: no new reading interval received"));
+		// }
 	}
 
 	// If we found new time
@@ -758,37 +756,6 @@ void SckESP::webSet() {
 		response += String(F("Warning: no time received to sync<br/>"));
 	}
 
-	// Interval is in seconds
-	if (webServer.hasArg("readint")) {
-		
-		String tinterval = webServer.arg("readint");
-		uint32_t intTinterval = tinterval.toInt();
-
-		// 86400 one day in seconds
-		// if (intTinterval > minimal_sensor_reading_interval && intTinterval < max_sensor_reading_interval) {
-
-		// 	for (uint8_t i=0, i<SENSOR_COUNT, i++) {
-		// 		wichSensor = static_cast<SensorType>(i);
-		// 		config.sensor[wichSensor].interval = intTinterval;
-		// 	}
-
-		// 	espStatus.conf = ESP_CONF_CHANGED_EVENT;
-		// 	somethingChanged = true;
-		// 	response += String(F("Success: New reading interval: ")) + String(intTinterval) + String(F(" seconds"));
-		// } else {
-		// 	response += String(F("Error: received read interval is not valid!!!"));
-		// }
-		
-	} else {
-		response += String(F("Warning: no new reading interval received"));
-	}
-	
-	// Custom Making Sense message TEMP
-	// if (score == 2) {
-	// 	response += "Thank you<br/>Please finish installing the Smart Citizen Kit on the other screen";
-	// } else {
-	// 	response += "Something went wrong!!<br/>Please click kit's button until is red and try again!";
-	// }
 	
 	response += "</body></html>";
 

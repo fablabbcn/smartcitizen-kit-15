@@ -239,7 +239,7 @@ void SckBase::clearNetworks() {
 	
 	sckOut(F("Clearing networks..."));
 	msgBuff.com = ESP_CLEAR_WIFI_COM;
-	ESPqueueMsg(false, true);
+	ESPqueueMsg(true, true);
 }
 
 void SckBase::sendToken() {
@@ -252,7 +252,7 @@ void SckBase::clearToken() {
 
 	sckOut(F("Clearing token..."));
 	msgBuff.com = ESP_CLEAR_TOKEN_COM;
-	ESPqueueMsg(false, true);
+	ESPqueueMsg(true, true);
 }
 
 void SckBase::changeMode(SCKmodes newMode) {
@@ -1077,8 +1077,10 @@ void SckBase::sckIn(String strIn) {
 			if (strIn.startsWith("factory"))  {
 
 				sckOut(String F("Saving factory defaults, reseting in 5 seconds ..."), PRIO_HIGH);
-				saveConfig(true);
-				timerSet(ACTION_RESET, 5000);
+				clearNetworks();
+				clearToken();
+				// saveConfig(true);
+				timerSet(ACTION_FACTORY_RESET, 5000);
 
 			} else if (strIn.startsWith("publish interval")) {
 				strIn.replace("publish interval", "");
@@ -2536,8 +2538,8 @@ void SckBase::goToSleep(bool wakeToCheck) {
 
 	ESPcontrol(ESP_OFF);
 
-	USB->DEVICE.CTRLA.bit.SWRST = 1;
-  	while (USB->DEVICE.SYNCBUSY.bit.SWRST | (USB->DEVICE.CTRLA.bit.SWRST == 1));
+	// USB->DEVICE.CTRLA.bit.SWRST = 1;
+ //  	while (USB->DEVICE.SYNCBUSY.bit.SWRST | (USB->DEVICE.CTRLA.bit.SWRST == 1));
 
 	// USBDevice.detach();
 
@@ -2567,6 +2569,8 @@ void SckBase::checkFactoryReset() {
 
 void SckBase::factoryReset() {
 
+	sckOut("Resetting to factory defaults");
+
 	msgBuff.com = ESP_LED_OFF;
 	ESPqueueMsg(true);
 
@@ -2577,10 +2581,10 @@ void SckBase::factoryReset() {
 
 	clearToken();
 
-	saveConfig(true);
+	// saveConfig(true);
 
 	// Set a periodic timer for reset when ESP comunication (clear wifi and token) is complete
-	timerSet(ACTION_RESET, 1000);
+	timerSet(ACTION_FACTORY_RESET, 5000);
 }
 
 
@@ -3022,8 +3026,9 @@ bool SckBase::timerRun() {
 						veryLongPress();
 						break;
 
-					} case ACTION_RESET: {
+					} case ACTION_FACTORY_RESET: {
 
+						saveConfig(true);
 						softReset();
 						break;
 
