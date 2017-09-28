@@ -39,3 +39,4 @@ script:
     - echo '-------------------------'
     - cd esp; pio run
     - cd sam; pio run
+    - npm run api; npm run web; npm run test
