@@ -16,7 +16,7 @@ env:
 
 install:
     - pip install -U platformio
-    - cd mock-api; npm install
+    - cd mock-api; npm install; cd ..
 
     #
     # Libraries from PlatformIO Library Registry:
