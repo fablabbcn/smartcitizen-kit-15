@@ -35,8 +35,10 @@ install:
     # http://platformio.org/lib/show/177/Adafruit_BluefruitLE_nRF51
 
 
+install:
+    - cd mock-api; npm install
 script:
     - echo '-------------------------'
     - cd esp; pio run
     - cd sam; pio run
-    - npm run api; npm run web; npm run test
+    - cd mock-api; npm run api; npm run web; npm run test
