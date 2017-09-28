@@ -38,6 +38,9 @@ install:
 
 script:
     - echo '-------------------------'
+    - pwd
+    - cd
+    - pwd
     - cd esp; pio run
     - cd sam; pio run
     - cd mock-api; npm run api; npm run web; npm run test
