@@ -2,9 +2,9 @@ var app = new Vue({
   el: '#app',
   data: {
     // mock API
-    theUrl: 'http://localhost:3000/',
+    //theUrl: 'http://localhost:3000/',
     //theUrl: 'http://192.168.1.1/',
-    //theUrl: window.location.href,
+    theUrl: window.location.href,
     selectedwifi: '',
     advanced: true,
     notification: '(Status of the app)',
