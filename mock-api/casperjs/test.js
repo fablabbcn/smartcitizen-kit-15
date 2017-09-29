@@ -2,10 +2,11 @@
 
 var url = 'https://fablabbcn.github.io/smartcitizen-kit-15/esp/data/'
 
-if (false){
+if (true){
   // If we are running webserver locally with 'python SimpleHTTPServer' f.x.
   url = 'http://localhost:8000'
 }
+console.log('testing on: ' + url);
 
 var x = require('casper').selectXPath;
 
