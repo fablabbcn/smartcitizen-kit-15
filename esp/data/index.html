@@ -58,6 +58,8 @@
            <hr />
            <button type="button"  id="advancedbtn" class="btn " v-bind:class="{ 'btn-blue': advanced}" v-on:click="showAdvanced()">Advanced</button>
            <div v-show="advanced" id="advanced" class="">
+             <br />
+             <button type="button"  id="kitinfobtn"  class="btn " v-bind:class="{ 'btn-blue': kitinfo}"  v-on:click="showKitinfo()">Show kit info</button>
 
              <div class="font70" v-if="apiresponse">
                <p>API Response:</p>
@@ -68,7 +70,8 @@
                  </tr>
                </table>
              </div>
-             <div class="font70">
+
+             <div id="kitinfo"  v-if="kitinfo" class="font70">
                <p>Kit info:</p>
                <ul v-show="debuginfo">
                  <li v-for="value, index in debuginfo"><b>{{index}}</b>: {{value}}</li>
@@ -76,33 +79,54 @@
                <button class="btn" type="button" v-on:click="axiosFetch('status')">Refresh /status</button>
              </div>
              <hr />
-             <div>
-               <p>Estimated battery duration: {{ publishinterval * readinginterval }} Hours</p>
-             </div>
-             <div>
-               <label for="pubint">Publish interval hours: {{publishinterval}}</label>
-               <input type="range" name="pubint" id="" v-model="publishinterval" max="100" />
-             </div>
-             <div>
-               <label for="readint">Reading interval seconds: {{readinginterval}}</label>
-               <input type="range" name="readint" id="" value="60" v-model="readinginterval" max="1000" />
-             </div>
-             <h3 class="center">SD CARD</h3>
-             <div>
-               <input type="checkbox" name="usesdcard" id="sdlog" value="" v-model="sdlog" />
-               <label for="sdlog"> Log to SD Card : {{sdlog}}</label>
+
+             <div id="Intervals">
+               <h5>Intervals</h5>
+               <div>
+                 <p>Estimated battery duration: {{ publishinterval * (readinginterval / 100) }} Hours</p>
+               </div>
+               <div>
+                 <label for="pubint">Publish interval hours: {{publishinterval}}</label>
+                 <input type="range" name="pubint" id="" v-model="publishinterval" max="100" />
+               </div>
+               <div>
+                 <label for="readint">Reading interval seconds: {{readinginterval}}</label>
+                 <input type="range" name="readint" id="" value="60" v-model="readinginterval" max="1000" />
+               </div>
              </div>
 
-             <p class="font70">Your kit will be offline and save data to the SD CARD.</p>
-             <div v-show="browsertime != devicetime" id="timesync">
-               <p class="text-right font70">Browser time: {{ browsertime }}</p>
-               <p class="text-right font70">Device time: {{ devicetime }}</p>
-               <p class="text-right font70">Diff: {{ browsertime - devicetime }}</p>
-             </div>
+             <div id="sdcard">
 
-             <p class="font70">When you click this button the device will go offline and start working. </p>
-             <p class="font70">(You will loose connection to the device)</p>
-             <button class="btn" type="button" v-on:click="axiosGet('set', 'synctime')">Start logging on SD Card</button>
+               <h5>SD CARD</h5>
+               <div>
+                 <p class="font70">The kit should never post my data with Wifi</p>
+                 <input type="checkbox" name="usesdcard" id="sdlog" value="" v-model="sdlog" />
+                 <label for="sdlog"> Log *only* to SD Card : {{sdlog}}</label>
+               </div>
+               <hr />
+
+               <div>
+                 <p class="font70">1. If your kit will be offline, but should access wifi to only get the correct time, after a power outage.</p>
+                 <p class="font70">2. When your kit runs out of battery, it loses the time. This will allow the kit to go online and fetch the time.</p>
+                 <input type="checkbox" name="usewifisync" id="usewifisync" v-model="wifisync" />
+                 <label for="usewifisync"> Use Wifi to sync time : {{wifisync}}</label>
+               </div>
+               <hr />
+               <p class="font70">Your kit will be offline and save data to the SD CARD.</p>
+               <div v-show="browsertime != devicetime" id="timesync">
+                 <p class="text-right font70">Browser time: {{ browsertime }}</p>
+                 <p class="text-right font70">Device time: {{ devicetime }}</p>
+                 <p class="text-right font70">Diff: {{ browsertime - devicetime }}</p>
+               </div>
+
+               <p class="font70">When you click this button the device will go offline and start working. </p>
+               <p class="font70">(You will loose connection to the device)</p>
+               <button class="btn" type="button" v-on:click="axiosGet('set', 'synctime')">Start logging on SD Card</button>
+
+             </div> <!-- /sd card -->
+             <div id="sensors">
+               <h5>Sensors</h5>
+             </div>
 
            </div> <!-- /advanced -->
 

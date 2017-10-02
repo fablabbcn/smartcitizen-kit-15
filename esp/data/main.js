@@ -10,6 +10,7 @@ var app = new Vue({
     debuginfo: [],
     devicetime: 0,
     errors: [],
+    kitinfo: false,
     publishinterval: 2,
     readinginterval: 60,
     setuppath: 'online',
@@ -17,6 +18,7 @@ var app = new Vue({
     usertoken: '',
     wifiname: '',
     wifipass: '',
+    wifisync: false,
     wifis: {
       "nets": [
       {
@@ -60,6 +62,9 @@ var app = new Vue({
     },
     showAdvanced: function(){
       this.advanced = !this.advanced;
+    },
+    showKitinfo: function(){
+      this.kitinfo = !this.kitinfo;
     },
     jsFetch: function (path) {
       // Backup function to fetch with pure javascript
