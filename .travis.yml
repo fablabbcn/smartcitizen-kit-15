@@ -48,4 +48,7 @@ script:
     - cd sam; pio run; cd ..
     - echo 'Running end to end tests with casperjs'
     - npm -v
+    - node -v
+    - pwd
+    - ls
     - cd mock-api; npm run test
