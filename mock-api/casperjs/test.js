@@ -42,8 +42,8 @@ casper.test.begin("Find elements on our local page", 4, function(test) {
       //console.log(document.querySelector('form'))
       //casper.waitUntilVisible('.school_nav.content-panel');
       //this.captureSelector('captures/schools-nav-open.png', '.school_nav.content-panel');
-      test.assertTitleMatch(/^SCK/i, 'The page title starts with SCK');
       test.assertSelectorHasText('#connect', 'Connect');
+      test.assertTitleMatch(/^SCK/i, 'The page title starts with SCK');
       test.assertSelectorHasText('#refreshbtn', 'Refresh Wifi list');
       test.assertSelectorHasText('#advancedbtn', 'Advanced');
 

@@ -128,12 +128,17 @@
 
              </div> <!-- /sd card -->
 
-             <div id="sensors">
+             <br />
+             <button type="button"  id="sensorsbtn" class="btn " v-bind:class="{ 'btn-blue': sensors}" v-on:click="showSensors()">Show sensors</button>
+
+             <div id="sensors" v-if="sensors">
                <h5>Sensors</h5>
                <p>Sensor1 on/off</p>
                <p>Sensor2 on/off</p>
              </div><!-- /sensors -->
 
+             <br />
+             <br />
              <button type="button"  id="advancedbtn2" class="btn " v-bind:class="{ 'btn-blue': advanced}" v-on:click="showAdvanced()">Exit Advanced</button>
            </div> <!-- /advanced -->
 

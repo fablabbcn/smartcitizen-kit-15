@@ -13,6 +13,7 @@ var app = new Vue({
     kitinfo: false,
     publishinterval: 2,
     readinginterval: 60,
+    sensors: false,
     setuppath: 'online',
     sdlog: true,
     usertoken: '',
@@ -65,6 +66,9 @@ var app = new Vue({
     },
     showKitinfo: function(){
       this.kitinfo = !this.kitinfo;
+    },
+    showSensors: function(){
+      this.sensors = !this.sensors;
     },
     jsFetch: function (path) {
       // Backup function to fetch with pure javascript
