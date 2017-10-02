@@ -20,29 +20,26 @@
       </div>
 
       <div class="content">
-        <div id="main" class="center">
-          <button class="btn" v-bind:class="{ 'btn-grey': setuppath=='online'}" v-on:click="selectPath('online')">Online</button>
-          <button class="btn" v-bind:class="{ 'btn-grey': setuppath=='offline'}" v-on:click="selectPath('offline')">Offline</button>
-        </div>
 
         <div v-show="errors && errors.length" id="feedback" class="font80">
-          <hr />
           <p>Error section:</p>
           <ul v-show="errors && errors.length">
             <li v-for="error of errors">
               {{error.message}}
             </li>
           </ul>
+          <hr />
         </div>
 
-        <hr />
-
         <!-- online setup -->
-        <div v-show="setuppath == 'online'" id="wifisetup">
-          <h3 class="center">Setup wifi</h3>
-          <p class="font70">Your kit will post data online every minute</p>
+        <div id="wifisetup">
+          <p class="font70">If you don't have a Token, get one at http://onboarding.smartcitizen.me</p>
           <form method="post" action="/">
             <div class="field-group">
+              <label>Token</label>
+              <input name="token" type="text" maxlength="6" v-model='usertoken' minlength="6">
+            </div>
+             <div class="field-group">
               <label>SSID (Network name)</label>
               <select v-model="selectedwifi" name="ssid" type="text" length=64>
                 <!-- Here goes the Access point list -->
@@ -50,58 +47,62 @@
                 <option v-for="x in sortedWifi" :key="x.rssi" :value="x.ssid">{{x.ssid}} ({{x.rssi}}, {{x.ch}})</option>
               </select>
             </div>
-            <button class="btn" type="button" v-on:click="axiosFetch('aplist')">Refresh Wifi list</button>
+            <button class="btn"  id="refreshbtn" type="button" v-on:click="axiosFetch('aplist')">Refresh Wifi list</button>
             <div class="field-group">
               <label>Password</label>
               <input name="password" type="text" v-model='wifipass' length=64>
             </div>
-            <div class="field-group">
-              <label>Token</label>
-              <input name="token" type="text" maxlength="6" v-model='usertoken' minlength="6">
-            </div>
-            <button class="btn" type="button" id="connect" v-on:click="axiosGet('set','online')">Connect</button>
+           <button class="btn" type="button" id="connect" v-on:click="axiosGet('set','online')">Connect</button>
+
+           <!-- advanced -->
+           <hr />
+           <button type="button"  id="advancedbtn" class="btn " v-bind:class="{ 'btn-blue': advanced}" v-on:click="showAdvanced()">Advanced</button>
+           <div v-show="advanced" id="advanced" class="">
+
+             <div class="font70" v-if="apiresponse">
+               <p>API Response:</p>
+               <table>
+                 <tr v-for="value, index in apiresponse">
+                   <td><b>{{index}}</b></td>
+                   <td>{{value}}</td>
+                 </tr>
+               </table>
+             </div>
+             <div class="font70">
+               <p>Kit info:</p>
+               <ul v-show="debuginfo">
+                 <li v-for="value, index in debuginfo"><b>{{index}}</b>: {{value}}</li>
+               </ul>
+               <button class="btn" v-on:click="axiosFetch('status')">Refresh /status</button>
+             </div>
+             <hr />
+
+             <div>
+               <label for="readint">Reading interval seconds: {{readinginterval}}</label>
+               <input type="range" name="readint" id="" value="60" v-model="readinginterval" max="1000" />
+             </div>
+             <h3 class="center">SD CARD</h3>
+             <div>
+               <input type="checkbox" name="usesdcard" id="sdlog" value="" v-model="sdlog" />
+               <label for="sdlog"> Log to SD Card : {{sdlog}}</label>
+             </div>
+
+             <p class="font70">Your kit will be offline and save data to the SD CARD.</p>
+             <div v-show="browsertime != devicetime" id="timesync">
+               <p class="text-right font70">Browser time: {{ browsertime }}</p>
+               <p class="text-right font70">Device time: {{ devicetime }}</p>
+               <p class="text-right font70">Diff: {{ browsertime - devicetime }}</p>
+             </div>
+
+             <p class="font70">When you click this button the device will go offline and start working. </p>
+             <p class="font70">(You will loose connection to the device)</p>
+             <button class="btn" type="button" v-on:click="axiosGet('set', 'synctime')">Start logging on SD Card</button>
+
+           </div> <!-- /advanced -->
+
+           <hr />
           </form>
-
-          <!-- advanced -->
-          <hr />
-          <button v-bind:class="{ 'btn-blue': advanced}" class="btn " v-on:click="showAdvanced()">Advanced</button>
-          <div v-show="advanced" id="advanced" class="">
-            <div class="font70" v-if="apiresponse">
-              <p>API Response:</p>
-              <table>
-                <tr v-for="value, index in apiresponse">
-                  <td><b>{{index}}</b></td>
-                  <td>{{value}}</td>
-                </tr>
-              </table>
-            </div>
-            <div class="font70">
-              <p>Debug info:</p>
-              <button class="btn" v-on:click="axiosFetch('status')">Refresh /status</button>
-              <ul v-show="debuginfo">
-                <li v-for="value, index in debuginfo"><b>{{index}}</b>: {{value}}</li>
-              </ul>
-            </div>
-            <hr />
-          </div> <!-- /advanced -->
-
-        </div> <!-- end network setup -->
-
-        <!-- offline setup -->
-        <div v-show="setuppath == 'offline'" id="offline">
-          <h3 class="center">SD CARD</h3>
-          <p class="font70">Your kit will be offline and save data to the SD CARD.</p>
-
-          <div v-show="browsertime != devicetime" id="timesync">
-            <p class="text-right font70">Browser time: {{ browsertime }}</p>
-            <p class="text-right font70">Device time: {{ devicetime }}</p>
-            <p class="text-right font70">Diff: {{ browsertime - devicetime }}</p>
-          </div>
-
-          <p class="font70">When you click this button the device will go offline and start working. </p>
-          <p class="font70">(You will loose connection to the device)</p>
-          <button class="btn" type="button" v-on:click="axiosGet('set', 'synctime')">Start logging on SD Card</button>
-        </div>
+        </div> <!-- end #wifisetup -->
 
       </div><!-- /content -->
     </div><!-- container -->

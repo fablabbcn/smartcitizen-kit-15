@@ -10,7 +10,9 @@ var app = new Vue({
     debuginfo: [],
     devicetime: 0,
     errors: [],
+    readinginterval: 60,
     setuppath: 'online',
+    sdlog: true,
     usertoken: '',
     wifiname: '',
     wifipass: '',
@@ -50,6 +52,7 @@ var app = new Vue({
         this.theUrl = 'http://localhost:3000/';
       }
       console.log('Using: ' + this.theUrl);
+      this.notification = 'Using: ' + this.theUrl;
     },
     selectPath: function(path){
       this.setuppath = path;

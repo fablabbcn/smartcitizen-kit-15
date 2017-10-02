@@ -90,7 +90,7 @@ input[type=text]:focus {
   text-align: center;
 }
 .content{
-  padding: 20px 5px;
+  padding: 10px 5px;
 }
 .font70{
   font-size: 70%;
@@ -136,3 +136,22 @@ input[type=text]:focus {
   line-height: 24px;
   display: inline;
 }
+
+#advanced{
+  background: #eee;
+}
+
+
+input[type=checkbox] {
+  width: 30px;
+  height: 30px;
+  -webkit-border-radius: 22px; -moz-border-radius: 22px; border-radius: 22px;
+  border: 1px solid #bbb;
+}
+
+
+input[type=range] {
+   width: 95%;
+}
+
+
