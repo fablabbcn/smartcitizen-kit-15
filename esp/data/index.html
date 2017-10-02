@@ -83,9 +83,6 @@
              <div id="Intervals">
                <h5>Intervals</h5>
                <div>
-                 <p>Estimated battery duration: {{ publishinterval * (readinginterval / 100) }} Hours</p>
-               </div>
-               <div>
                  <label for="pubint">Publish interval hours: {{publishinterval}}</label>
                  <input type="range" name="pubint" id="" v-model="publishinterval" max="100" />
                </div>
@@ -93,8 +90,12 @@
                  <label for="readint">Reading interval seconds: {{readinginterval}}</label>
                  <input type="range" name="readint" id="" value="60" v-model="readinginterval" max="1000" />
                </div>
+               <div>
+                 <p>Estimated battery duration: {{ Number(publishinterval * (readinginterval / 100)).toFixed(1) }} Hours</p>
+               </div>
              </div>
 
+             <hr />
              <div id="sdcard">
 
                <h5>SD CARD</h5>
@@ -114,9 +115,11 @@
                <hr />
                <p class="font70">Your kit will be offline and save data to the SD CARD.</p>
                <div v-show="browsertime != devicetime" id="timesync">
-                 <p class="text-right font70">Browser time: {{ browsertime }}</p>
-                 <p class="text-right font70">Device time: {{ devicetime }}</p>
-                 <p class="text-right font70">Diff: {{ browsertime - devicetime }}</p>
+                 <table>
+                   <tr><td>Browser time:</td><td>{{ browsertime }}</td></tr>
+                   <tr><td>Device time: </td><td>{{ devicetime }}</td></tr>
+                   <tr><td>Diff: </td><td>{{ browsertime - devicetime }}</td></tr>
+                 </table>
                </div>
 
                <p class="font70">When you click this button the device will go offline and start working. </p>
@@ -124,13 +127,16 @@
                <button class="btn" type="button" v-on:click="axiosGet('set', 'synctime')">Start logging on SD Card</button>
 
              </div> <!-- /sd card -->
+
              <div id="sensors">
                <h5>Sensors</h5>
-             </div>
+               <p>Sensor1 on/off</p>
+               <p>Sensor2 on/off</p>
+             </div><!-- /sensors -->
 
+             <button type="button"  id="advancedbtn2" class="btn " v-bind:class="{ 'btn-blue': advanced}" v-on:click="showAdvanced()">Exit Advanced</button>
            </div> <!-- /advanced -->
 
-           <hr />
           </form>
         </div> <!-- end #wifisetup -->
 
