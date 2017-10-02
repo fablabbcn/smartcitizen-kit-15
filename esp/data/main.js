@@ -10,6 +10,7 @@ var app = new Vue({
     debuginfo: [],
     devicetime: 0,
     errors: [],
+    publishinterval: 2,
     readinginterval: 60,
     setuppath: 'online',
     sdlog: true,

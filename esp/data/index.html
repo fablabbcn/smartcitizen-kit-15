@@ -73,10 +73,16 @@
                <ul v-show="debuginfo">
                  <li v-for="value, index in debuginfo"><b>{{index}}</b>: {{value}}</li>
                </ul>
-               <button class="btn" v-on:click="axiosFetch('status')">Refresh /status</button>
+               <button class="btn" type="button" v-on:click="axiosFetch('status')">Refresh /status</button>
              </div>
              <hr />
-
+             <div>
+               <p>Estimated battery duration: {{ publishinterval * readinginterval }} Hours</p>
+             </div>
+             <div>
+               <label for="pubint">Publish interval hours: {{publishinterval}}</label>
+               <input type="range" name="pubint" id="" v-model="publishinterval" max="100" />
+             </div>
              <div>
                <label for="readint">Reading interval seconds: {{readinginterval}}</label>
                <input type="range" name="readint" id="" value="60" v-model="readinginterval" max="1000" />
