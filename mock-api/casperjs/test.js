@@ -37,7 +37,8 @@ casper.test.begin("Find elements on our local page", 4, function(test) {
 
   casper.then(function(){
 
-      //console.log("Page Title " + document.location.href)
+      casper.echo("---- Page Title " + document.location.href)
+      casper.echo("---- url: " + url)
       //console.log(document.querySelector('form'))
       //casper.waitUntilVisible('.school_nav.content-panel');
       //this.captureSelector('captures/schools-nav-open.png', '.school_nav.content-panel');
