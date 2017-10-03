@@ -37,7 +37,7 @@ var app = new Vue({
   mounted: function() {
     // When the app is mounted
     this.selectApiUrl();
-    console.log(' Vue.js mounted, fetching data at startup');
+    console.log('Vue.js mounted, fetching data at startup');
     setTimeout (() => this.axiosFetch('aplist'), 100);
     setTimeout (() => this.axiosFetch('status'), 300);
   },

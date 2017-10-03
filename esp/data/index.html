@@ -83,10 +83,12 @@
              <div id="Intervals">
                <h5>Intervals</h5>
                <div>
+                 <p class="font70">How often should the kit go online to publish the data?</p>
                  <label for="pubint">Publish interval hours: {{publishinterval}}</label>
                  <input type="range" name="pubint" id="" v-model="publishinterval" max="100" />
                </div>
                <div>
+                 <p class="font70">How often should the kit poll the sensors?</p>
                  <label for="readint">Reading interval seconds: {{readinginterval}}</label>
                  <input type="range" name="readint" id="" value="60" v-model="readinginterval" max="1000" />
                </div>
