@@ -153,5 +153,12 @@ input[type=checkbox] {
 input[type=range] {
    width: 95%;
 }
+.check-sensor{
+  clear:both;
+  margin-bottom:30px;
+}
+.check-sensor input{
+  float:right;
+}
 
 

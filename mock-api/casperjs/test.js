@@ -60,7 +60,7 @@ casper.test.begin("Find elements on our local page", 5, function(test) {
 
       casper.click('#connect');
       //casper.wait(3000)
-      //casper.capture('xx.png');
+      casper.capture('xx.png');
     });
 
     //this.debugPage();
