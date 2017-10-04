@@ -19,11 +19,11 @@ var app = new Vue({
     sensor3: false,
     sensor4: false,
     setuppath: 'online',
-    sdlog: true,
+    sdlog: false,
     usertoken: '',
     wifiname: '',
     wifipass: '',
-    wifisync: false,
+    wifisync: true,
     wifis: {
       "nets": [
       {

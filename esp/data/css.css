@@ -85,6 +85,12 @@ input[type=text]:focus {
   background-color: #38cef3;
   color: white;
 }
+.btn-red{
+  background-color: rgb(244,67,54);
+}
+.color-red{
+  color: rgb(244,67,54);
+}
 
 .center{
   text-align: center;
@@ -138,7 +144,6 @@ input[type=text]:focus {
 }
 
 #advanced{
-  background: #eee;
 }
 
 
