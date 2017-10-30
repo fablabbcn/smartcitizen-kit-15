@@ -14,11 +14,19 @@
 
       <div class="topnav sticky ">
         <div class="bg-blue">
-          <a href="#" v-on:click="jsGet('status')">
+
+          <p class="text-center">SCK 2.0 Setup</p>
+
+          <a href="/">
             <img id="toplogo" src="images/sck.png">
           </a>
-          <p>SCK 2.0</p>
-          <p class="text-right">i</p>
+
+          <div id="topinfo">
+            <a class="text-right" v-on:click='gotoPage(6)'>
+              <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" style="enable-background:new 0 0 100 100;" xml:space="preserve"><g><g><g><path d="M53.1,73h-7.2c-1.1,0-1.9-0.9-1.9-1.9V44h11v27.1C55,72.1,54.1,73,53.1,73z"/></g></g></g><g><g><g><path d="M55,39H44v-9.1c0-1.1,0.9-1.9,1.9-1.9h7.2c1.1,0,1.9,0.9,1.9,1.9V39z"/></g></g></g><g><path d="M50,96C24.6,96,4,75.4,4,50S24.6,4,50,4s46,20.6,46,46S75.4,96,50,96z M50,12c-21,0-38,17-38,38s17,38,38,38s38-17,38-38   S71,12,50,12z"/></g></svg>
+            </a>
+          </div>
+
         </div>
 
         <div id="toast-wrapper"></div>
@@ -26,62 +34,152 @@
 
       <div class="content">
 
-        <div id="page1" v-show='page[1]'>
-          <div class="text-center">
-            1 - Home
-          </div>
+        <div v-show='page[0].visible'>
+          <h1 class="text-cyan">WELCOME TO SMART CITIZEN KIT CONFIGURATION</h1>
+          <p>Is this your first time here?</p>
+          <p>Remember before you start you need to visit <span class="text-cyan">onboarding.smartcitizen.me</span> to obtain a Device Key</p>
+
+          <p>or go to <span class='text-cyan'>
+            <a v-on:click='gotoPage(5)'>SD Card mode</a></span>
+          </p>
+          <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
         </div>
 
-        <div id="page2" v-show='page[2]'>
-          <div class="text-center">
-            2 - Token
+        <div v-show='page[1].visible'>
+          <h4>Device key</h4>
+
+          <div class="field-group">
+            <label>Token</label>
+            <input name="token" type="text" maxlength="6" v-model='usertoken' minlength="6" placeholder="6 letters">
           </div>
+          <p v-show='!usertokenCheck'>
+          {{ 6 - usertoken.length }} letters missing.
+          </p>
+          <button class="btn " v-bind:class="{ 'bg-cyan': usertokenCheck }" type="button" :disabled=!usertokenCheck v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
+
         </div>
 
-        <div id="page3" v-show='page[3]'>
-          <div class="text-center">
-            3 - Wifi
+        <div v-show='page[2].visible'>
+          <h4>WiFi connection</h4>
+          <div class="field-group">
+            <label>SSID (Network name)</label>
+            <select v-model="selectedWifi" name="ssid" id="ssid" type="text" length=64>
+              <!-- Here goes the Access point list -->
+              <option disabled value="">Select your wifi ({{wifis["nets"].length}})</option>
+              <option v-for="x in sortedWifi" :key="x.rssi" :value="x.ssid">{{x.ssid}} ({{x.rssi}}, {{x.ch}})</option>
+            </select>
           </div>
+          <div class="field-group">
+            <label>Password</label>
+            <input name="password" type="text" v-model='wifipass' length=64 placeholder="Your wifi password">
+          </div>
+          <button class="btn bg-cyan" type="button" id="connect" v-on:click="jsPost('set','connect')">Connect</button>
+
+          <button class="btn" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
+
         </div>
 
-        <div id="page4" v-show='page[4]'>
-          <div class="text-center">
-            4 - Connecting
-          </div>
+        <div v-show='page[3].visible'>
+          <h4>Trying to connect..</h4>
+
+          <p>Your kit is now trying to connect to the online platform, and this website has no connection to the kit anymore.</p>
+          <p>Check the light on your Kit:</p>
+          <ul>
+            <li><span style="color:green">GREEN</span>: Everything is fine, your Kit is online.</li>
+            <li><span style="color:red">RED</span>: Some problem happened, push the button on your Kit and join the SCK WiFi again.</li>
+          </ul>
+          <button class="btn bg-grey" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
         </div>
 
-        <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>Next</button>
+        <div v-show='page[4].visible'>
+          <h4 style="text-cyan">Your kit status</h4>
+
+          <table>
+            <tr>
+              <td>Mode</td>
+              <td>Network</td>
+            </tr>
+            <tr>
+              <td>Wifi</td>
+              <td>Connection lost</td>
+            </tr>
+            <tr>
+              <td>Battery</td>
+              <td>85%</td>
+            </tr>
+            <tr>
+              <td>Published</td>
+              <td>20 min ago</td>
+            </tr>
+          </table>
+          <p>If you want to run a full setup again, press the button on your Kit for 15 seconds and reconnect, and refresh this page.</p>
+
+          <button class="btn bg-cyan" type="button" v-on:click='gotoPage(2)'>Edit Wifi</button>
+          <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
+        </div>
+
+
+        <div v-show='page[5].visible'>
+          <h4>SD Card</h4>
+          <p>Your Kit can store the data on a microSD card that later you can read with your computer.</p>
+          <p>This is useful when no WiFi is available at your location.</p>
+          <p>You will need to insert a valid microSD card and click the button.</p>
+          <table>
+            <tr>
+              <td>SD CARD</td>
+              <td>Insert a card</td>
+            </tr>
+            <tr>
+              <td>TIME SYNC</td>
+              <td>Ready</td>
+            </tr>
+          </table>
+          <button class="btn bg-cyan" type="button" v-on:click="jsPost('set', 'synctime')">START LOGGING</button>
+          <p>You will be disconnected and the Kit will start recording data.</p>
+          <button class="btn" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
+        </div>
+
+        <div v-show='page[6].visible'>
+          <h4>Debug info</h4>
+          <div id="id-logging">
+            <hr />
+            <p>Logging:</p>
+            <ul v-show="logging && logging.length">
+              <li v-for="x in logging" class="font70">
+                {{x}}
+              </li>
+            </ul>
+          </div>
+
+          <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
+        </div>
+
+        <div v-show='page[7].visible'>
+          <h4>Empty page</h4>
+          <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
+        </div>
+
+
+
+        <br />
+        <br />
+
+        <div class="text-center text-grey font80">
+          {{ version }}
+          <hr />
+          {{ currentPage }} - {{ page[currentPage].footer }}
+        </div>
+
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
 
         <!-- online setup -->
         <div id="wifisetup">
-          <p class="font70">If you don't have a Token, get one at http://onboarding.smartcitizen.me</p>
-          <form method="post" action="/">
-            <div class="field-group">
-              <label>Token</label>
-              <input name="token" type="text" maxlength="6" v-model='usertoken' minlength="6" placeholder="6 letters">
-            </div>
-            <h5>Network Settings</h5>
-            <div class="field-group">
-              <label>SSID (Network name)</label>
-              <select v-model="selectedWifi" name="ssid" id="ssid" type="text" length=64>
-                <!-- Here goes the Access point list -->
-                <option disabled value="">Select your wifi ({{wifis["nets"].length}})</option>
-                <option v-for="x in sortedWifi" :key="x.rssi" :value="x.ssid">{{x.ssid}} ({{x.rssi}}, {{x.ch}})</option>
-              </select>
-            </div>
-            <button class="btn" id="refreshbtn" type="button" v-on:click="jsGet('aplist')">Refresh Wifi list</button>
-            <div class="field-group">
-              <label>Password</label>
-              <input name="password" type="text" v-model='wifipass' length=64 placeholder="Your wifi password">
-            </div>
-            <button class="btn" type="button" id="connect" v-on:click="jsPost('set','connect')">Connect</button>
-
             <!-- advanced -->
-            <hr />
-            <label for="label-advanced">
-              <input type="checkbox" name="" id="label-advanced" value="" v-model="showAdvanced"/>
-              Show advanced
-            </label>
 
             <div v-show="showAdvanced" id="advanced" class="mt20">
               <p v-show="development">Development mode</p>
@@ -196,16 +294,6 @@
                   </label>
                 </div>
               </div><!-- /sensors -->
-
-              <div id="id-logging">
-                <hr />
-                <p>Logging:</p>
-                <ul v-show="logging && logging.length">
-                  <li v-for="x in logging" class="font70">
-                    {{x}}
-                  </li>
-                </ul>
-              </div>
 
             </div> <!-- /advanced -->
 
