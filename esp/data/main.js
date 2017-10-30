@@ -9,13 +9,17 @@ var app = new Vue({
     logging: [],
     intervals: false,
     kitinfo: false,
-    currentPage: 1,
-    page: {
-      1: true,
-      2: false,
-      3: false,
-      4: false,
-    },
+    currentPage: 0,
+    page: [
+       {'visible': true,  'footer':'HOME',          'button': 'Start'},
+       {'visible': false, 'footer':'REGISTER Key',  'button': 'Next'},
+       {'visible': false, 'footer':'REGISTER WiFi', 'button': 'Next?'},
+       {'visible': false, 'footer':'Connecting',    'button': 'Next?'},
+       {'visible': false, 'footer':'Connecting',    'button': 'Next?'},
+       {'visible': false, 'footer':'SD card',       'button': 'Next?'},
+       {'visible': false, 'footer':'Debug info',    'button': 'Next?'},
+       {'visible': false, 'footer':'Empty',         'button': 'End?'},
+    ],
     publishinterval: 2,
     readinginterval: 60,
     selectedWifi: '',
@@ -29,6 +33,7 @@ var app = new Vue({
     showSdCard: false,
     sdlog: false,
     usertoken: '',
+    version: 'SCK 2.0 / SAM V0.0.2 / ESP V0.0.2',
     wifiname: '',
     wifipass: '',
     wifisync: true,
@@ -82,7 +87,7 @@ var app = new Vue({
       }
 
       console.log('Using API : ' + this.theApi);
-      this.notify('Using API', 3000);
+      this.notify('Using API', 1000);
     },
     httpGet: function(theUrl, callback) {
       var xmlHttp = new XMLHttpRequest();
@@ -101,10 +106,10 @@ var app = new Vue({
       this.httpGet(this.theApi + path, function(res){
         if (path === 'aplist') {
           that.wifis = JSON.parse(res);
-          that.notify('Getting wifi list...', 3000, 'bg-cyan');
+          that.notify('Getting wifi list...', 1000, 'bg-cyan');
         }
         if (path === 'status'){
-          that.notify('Getting status', 2000);
+          that.notify('Getting status', 1000);
           that.debuginfo = JSON.parse(res);
         }
 
@@ -126,9 +131,10 @@ var app = new Vue({
             '&token=' + that.usertoken +
             '&epoch=' + that.browsertime,
             function(res){
-              console.log(res);
-              that.notify('Response: ' + res.test, 5000);
+              console.log('Kit response: ' + res);
             });
+        // After we try to connect, we go to the next page.
+        this.gotoPage();
       }
 
       if (purpose == 'synctime'){
@@ -141,16 +147,28 @@ var app = new Vue({
 
     },
 
-    gotoPage: function(){
-      // Get page
-      // disable page
-      // enable next page
-      if (this.currentPage === 4) {
+    gotoPage: function(num){
+
+      // Find last page so we wont go to far.
+      if (this.currentPage === (this.page.length - 1)) {
+        console.log('Last page!')
         return;
       }
-      this.page[this.currentPage] = false;
-      this.currentPage += 1;
-      this.page[this.currentPage] = true;
+
+      console.log(this.currentPage + ' / ' + this.page.length);
+
+      // Hide current page
+      this.page[this.currentPage].visible = false;
+
+      // Find which page to show next
+      if (num) {
+        this.currentPage = num;
+      }else{
+        this.currentPage += 1;
+      }
+      // Show it
+      this.page[this.currentPage].visible = true;
+
     },
 
     notify: function(msg, duration, className){
@@ -181,6 +199,9 @@ var app = new Vue({
         return a.rssi - b.rssi;
       });
       return this.wifis.nets.reverse();
+    },
+    usertokenCheck: function(){
+      return this.usertoken.length === 6;
     }
   }
 });
