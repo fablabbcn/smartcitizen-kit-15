@@ -39,10 +39,10 @@
           <p>Is this your first time here?</p>
           <p>Remember before you start you need to visit <span class="text-cyan">onboarding.smartcitizen.me</span> to obtain a Device Key</p>
 
+          <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
           <p>or go to <span class='text-cyan'>
             <a v-on:click='gotoPage(5)'>SD Card mode</a></span>
           </p>
-          <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
         </div>
 
         <div v-show='page[1].visible'>
@@ -88,7 +88,7 @@
             <li><span style="color:green">GREEN</span>: Everything is fine, your Kit is online.</li>
             <li><span style="color:red">RED</span>: Some problem happened, push the button on your Kit and join the SCK WiFi again.</li>
           </ul>
-          <button class="btn bg-grey" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
+          <button class="btn" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
         </div>
 
         <div v-show='page[4].visible'>
@@ -115,7 +115,7 @@
           <p>If you want to run a full setup again, press the button on your Kit for 15 seconds and reconnect, and refresh this page.</p>
 
           <button class="btn bg-cyan" type="button" v-on:click='gotoPage(2)'>Edit Wifi</button>
-          <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
+          <button class="btn" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
         </div>
 
 
@@ -151,12 +151,12 @@
             </ul>
           </div>
 
-          <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
+          0
+          <button class="btn " type="button" v-on:click='gotoPage("0")'>Back to the beginning</button>
         </div>
 
         <div v-show='page[7].visible'>
           <h4>Empty page</h4>
-          <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>{{this.page[this.currentPage].button}}</button>
         </div>
 
 

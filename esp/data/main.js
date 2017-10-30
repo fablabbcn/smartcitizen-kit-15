@@ -50,8 +50,8 @@ var app = new Vue({
     }
   },
   mounted: function () {
-    var el = document.getElementById('loading')
-      el.parentNode.removeChild(el);
+    var el = document.getElementById('loading');
+    el.parentNode.removeChild(el);
     // When the app is mounted
     this.selectApiUrl();
     var that = this;
@@ -59,7 +59,7 @@ var app = new Vue({
 
     setTimeout(function() {
       that.jsGet('aplist');
-    }, 1500);
+    }, 500);
 
     // This checks if connection to the kit has been lost, every 5 sec
     this.every5sec();
@@ -67,8 +67,8 @@ var app = new Vue({
   methods: {
     every5sec: function () {
       var that = this;
-      //console.log('I should check /status');
 
+      // TODO: should we check status every 5 sec?
       setTimeout(function(){
         return that.every5sec();
       }, 5000);
