@@ -22,7 +22,7 @@
           </a>
 
           <div id="topinfo">
-            <a class="text-right" v-on:click='gotoPage(6)'>
+            <a v-on:click='gotoPage(6)'>
               <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" x="0px" y="0px" viewBox="0 0 100 125" style="enable-background:new 0 0 100 100;" xml:space="preserve"><g><g><g><path d="M53.1,73h-7.2c-1.1,0-1.9-0.9-1.9-1.9V44h11v27.1C55,72.1,54.1,73,53.1,73z"/></g></g></g><g><g><g><path d="M55,39H44v-9.1c0-1.1,0.9-1.9,1.9-1.9h7.2c1.1,0,1.9,0.9,1.9,1.9V39z"/></g></g></g><g><path d="M50,96C24.6,96,4,75.4,4,50S24.6,4,50,4s46,20.6,46,46S75.4,96,50,96z M50,12c-21,0-38,17-38,38s17,38,38,38s38-17,38-38   S71,12,50,12z"/></g></svg>
             </a>
           </div>
@@ -41,11 +41,11 @@
         </div>
 
         <div v-show='page[0].visible'>
-          <h1 class="text-cyan">WELCOME TO SMART CITIZEN KIT CONFIGURATION</h1>
+          <h1 class="text-cyan text-center">WELCOME TO SMART CITIZEN KIT CONFIGURATION</h1>
           <p>Is this your first time here?</p>
           <p>Remember before you start you need to visit <span class="text-cyan">onboarding.smartcitizen.me</span> to obtain a Device Key</p>
 
-          <button class="btn bg-cyan" type="button" v-on:click='gotoPage()'>Start</button>
+          <button class="btn bg-cyan" id="start" type="button" v-on:click='gotoPage()'>Start</button>
           <p>or go to <span class='text-cyan'>
             <a v-on:click='gotoPage(5)'>SD Card mode</a></span>
           </p>
@@ -54,20 +54,20 @@
         <div v-show='page[1].visible'>
           <h4>Device key</h4>
 
-          <div class="field-group">
+          <div class="field-token">
             <label>Token</label>
             <input name="token" type="text" maxlength="6" v-model='usertoken' minlength="6" placeholder="6 letters">
           </div>
           <p v-show='!usertokenCheck'>
           {{ 6 - usertoken.length }} letters missing.
           </p>
-          <button class="btn " v-bind:class="{ 'bg-cyan': usertokenCheck }" type="button" :disabled=!usertokenCheck v-on:click='gotoPage()'>Next</button>
+          <button class="btn next" v-bind:class="{ 'bg-cyan': usertokenCheck }" type="button" :disabled=!usertokenCheck v-on:click='gotoPage()'>Next</button>
 
         </div>
 
         <div v-show='page[2].visible'>
           <h4>WiFi connection</h4>
-          <div class="field-group">
+          <div class="field-wifi">
             <label>SSID (Network name)</label>
             <select v-model="selectedWifi" name="ssid" id="ssid" type="text" length=64>
               <!-- Here goes the Access point list -->
