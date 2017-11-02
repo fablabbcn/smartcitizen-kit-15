@@ -29,6 +29,7 @@ var app = new Vue({
     sensor3: false,
     sensor4: false,
     showAdvanced: false,
+    showExperimental: false,
     showInterval: false,
     showSdCard: false,
     sdlog: false,
@@ -62,7 +63,7 @@ var app = new Vue({
     }, 500);
 
     // This checks if connection to the kit has been lost, every 5 sec
-    this.every5sec();
+    //this.every5sec();
   },
   methods: {
     every5sec: function () {
@@ -149,9 +150,9 @@ var app = new Vue({
 
     gotoPage: function(num){
 
-      // Find last page so we wont go to far.
-      if (this.currentPage === (this.page.length - 1)) {
-        console.log('Last page!')
+      // Find last page so we wont go to far, when clicking 'Next'
+      if (!num && this.currentPage === (this.page.length - 1)) {
+        console.log('Last page: ' + this.currentPage)
         return;
       }
 
@@ -164,8 +165,9 @@ var app = new Vue({
       if (num) {
         this.currentPage = num;
       }else{
-        this.currentPage += 1;
+        this.currentPage = parseInt(this.currentPage + 1);
       }
+
       // Show it
       this.page[this.currentPage].visible = true;
 
