@@ -65,6 +65,11 @@ input[type=checkbox] {
 input[type=range] {
    width: 95%;
 }
+
+svg {
+  fill: #fff;
+}
+
 td{
   padding:10px;
 }
@@ -152,9 +157,14 @@ td{
 #topinfo{
   position:absolute;
   top:10px;
-  right:5px;
+  right:10px;
   height:30px;
   width:30px;
+}
+#topbackbtn{
+  position:absolute;
+  top:0px;
+  width:57px;
 }
 
 .sticky {

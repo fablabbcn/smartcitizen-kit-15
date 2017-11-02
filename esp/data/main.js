@@ -11,14 +11,14 @@ var app = new Vue({
     kitinfo: false,
     currentPage: 0,
     page: [
-       {'visible': true,  'footer':'HOME',          'button': 'Start'},
-       {'visible': false, 'footer':'REGISTER Key',  'button': 'Next'},
-       {'visible': false, 'footer':'REGISTER WiFi', 'button': 'Next?'},
-       {'visible': false, 'footer':'Connecting',    'button': 'Next?'},
-       {'visible': false, 'footer':'Connecting',    'button': 'Next?'},
-       {'visible': false, 'footer':'SD card',       'button': 'Next?'},
-       {'visible': false, 'footer':'Debug info',    'button': 'Next?'},
-       {'visible': false, 'footer':'Empty',         'button': 'End?'},
+       {'visible': true,  'footer':'HOME',          'back': false },
+       {'visible': false, 'footer':'REGISTER Key',  'back': true },
+       {'visible': false, 'footer':'REGISTER WiFi', 'back': true },
+       {'visible': false, 'footer':'Connecting',    'back': false },
+       {'visible': false, 'footer':'Connecting',    'back': true },
+       {'visible': false, 'footer':'SD card',       'back': true },
+       {'visible': false, 'footer':'Debug info',    'back': true },
+       {'visible': false, 'footer':'Empty',         'back': true },
     ],
     publishinterval: 2,
     readinginterval: 60,
@@ -56,7 +56,6 @@ var app = new Vue({
     // When the app is mounted
     this.selectApiUrl();
     var that = this;
-    console.log('Vue.js mounted, fetching data at startup');
 
     setTimeout(function() {
       that.jsGet('aplist');
@@ -87,7 +86,7 @@ var app = new Vue({
         this.theApi = window.location.href;
       }
 
-      console.log('Using API : ' + this.theApi);
+      //console.log('Using API : ' + this.theApi);
       this.notify('Using API', 1000);
     },
     httpGet: function(theUrl, callback) {
@@ -152,18 +151,18 @@ var app = new Vue({
 
       // Find last page so we wont go to far, when clicking 'Next'
       if (!num && this.currentPage === (this.page.length - 1)) {
-        console.log('Last page: ' + this.currentPage)
+        //console.log('Last page: ' + this.currentPage)
         return;
       }
 
-      console.log(this.currentPage + ' / ' + this.page.length);
+      //console.log(this.currentPage + ' / ' + this.page.length);
 
       // Hide current page
       this.page[this.currentPage].visible = false;
 
       // Find which page to show next
-      if (num) {
-        this.currentPage = num;
+      if ( typeof num !== 'undefined') {
+        this.currentPage = parseInt(num);
       }else{
         this.currentPage = parseInt(this.currentPage + 1);
       }
