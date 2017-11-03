@@ -57,21 +57,20 @@ var app = new Vue({
     this.selectApiUrl();
     var that = this;
 
-    setTimeout(function() {
-      that.jsGet('aplist');
-    }, 500);
+    that.jsGet('aplist');
 
-    // This checks if connection to the kit has been lost, every 5 sec
-    //this.every5sec();
+    // This checks if connection to the kit has been lost, every X sec
+    this.periodic(9000);
   },
   methods: {
-    every5sec: function () {
+    periodic: function (ms) {
       var that = this;
 
       // TODO: should we check status every 5 sec?
       setTimeout(function(){
-        return that.every5sec();
-      }, 5000);
+        that.jsGet('status');
+        return that.periodic(ms);
+      }, ms);
     },
     selectApiUrl: function () {
       // If we are running this from the kit,
@@ -91,11 +90,15 @@ var app = new Vue({
     },
     httpGet: function(theUrl, callback) {
       var xmlHttp = new XMLHttpRequest();
+      var that = this;
 
       xmlHttp.onreadystatechange =  function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
           callback(xmlHttp.responseText);
         }
+      }
+      xmlHttp.onerror = function(e){
+        that.notify('Cannot access API', 5000, 'bg-red');
       }
       xmlHttp.open( "GET", theUrl, true ); // false for synchronous request, true = async
       xmlHttp.send( null );
@@ -109,7 +112,8 @@ var app = new Vue({
           that.notify('Getting wifi list...', 1000, 'bg-cyan');
         }
         if (path === 'status'){
-          that.notify('Getting status', 1000);
+          //that.notify('Getting status', 1000);
+          console.log('Getting /status');
           that.debuginfo = JSON.parse(res);
         }
 
@@ -172,7 +176,7 @@ var app = new Vue({
 
     },
 
-    notify: function(msg, duration, className){
+    notify: function(msg, duration = 1000, className){
 
       //All events should also go to the logging section at the bottom in the advanced section
       this.logging.push(msg)

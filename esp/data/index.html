@@ -105,15 +105,15 @@
           <table>
             <tr>
               <td>Mode</td>
-              <td>Network</td>
+              <td>{{ debuginfo.net }}</td>
             </tr>
             <tr>
               <td>Wifi</td>
-              <td>Connection lost</td>
+              <td>{{ debuginfo.wifi }}</td>
             </tr>
             <tr>
               <td>Battery</td>
-              <td>85%</td>
+              <td>{{ debuginfo.battPercent }}</td>
             </tr>
             <tr>
               <td>Published</td>
@@ -134,11 +134,11 @@
           <table>
             <tr>
               <td>SD CARD</td>
-              <td>Insert a card</td>
+              <td>{{ debuginfo.sdcard }}</td>
             </tr>
             <tr>
               <td>TIME SYNC</td>
-              <td>Ready</td>
+              <td>{{ debuginfo.time }}</td>
             </tr>
           </table>
           <button class="btn bg-cyan" type="button" v-on:click="jsPost('set', 'synctime')">START LOGGING</button>
