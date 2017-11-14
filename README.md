@@ -1,6 +1,9 @@
+**NOTICE!**
+
 **This is a legacy version 1.5**
 
 **Find the new version 2+ here:**
+
 https://github.com/fablabbcn/smartcitizen-kit-20
 
 
