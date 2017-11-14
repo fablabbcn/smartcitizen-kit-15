@@ -1,9 +1,11 @@
-# SmartCitizenKit
-Developer version of Smart Citizen Kit 2.0 Firmware
+**This is a legacy version 1.5**
 
-Find the new version here:
-
+**Find the new version 2+ here:**
 https://github.com/fablabbcn/smartcitizen-kit-20
+
+
+# SmartCitizenKit 1.5
+Developer version of Smart Citizen Kit 1.5 Firmware
 
 You can see this repos current (master branch) state of the mobile UI setup here:
 
