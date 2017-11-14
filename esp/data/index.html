@@ -117,7 +117,7 @@
             </tr>
             <tr>
               <td>Published</td>
-              <td>20 min ago</td>
+              <td>{{ debuginfo.last_published }}</td>
             </tr>
           </table>
           <p>If you want to run a full setup again, press the button on your Kit for 15 seconds and reconnect, and refresh this page.</p>
@@ -160,7 +160,7 @@
 
           <div id="id-logging">
             <hr />
-            <p>Logging:</p>
+            <p>Log:</p>
             <ul v-show="logging && logging.length">
               <li v-for="x in logging" class="font70">
                 {{x}}
