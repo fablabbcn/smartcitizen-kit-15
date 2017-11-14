@@ -157,6 +157,7 @@ var app = new Vue({
     },
 
     gotoPage: function(num){
+
       // Find last page so we wont go to far, when clicking 'Next'
       if (!num && this.currentPage === (this.page.length - 1)) {
         //console.log('Last page: ' + this.currentPage)
