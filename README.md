@@ -1,9 +1,18 @@
-# SmartCitizenKit
+**NOTICE!**
+
+**This is a legacy version 1.5**
+
+**Find the new version 2+ here:**
+
+https://github.com/fablabbcn/smartcitizen-kit-20
+
+
+# SmartCitizenKit 1.5
 Developer version of Smart Citizen Kit 1.5 Firmware
 
-You can see the current (master branch) state of the mobile UI setup here:
+You can see this repos current (master branch) state of the mobile UI setup here:
 
-https://fablabbcn.github.io/smartcitizen-kit-15/esp/data/
+https://fablabbcn.github.io/smartcitizen-kit-20/esp/data/
 
 ## Development
 
