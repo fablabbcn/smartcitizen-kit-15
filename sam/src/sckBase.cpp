@@ -1781,11 +1781,23 @@ void SckBase::sckIn(String strIn) {
 			// prepare string for matching
 			strIn.toLowerCase();
 
-			// fin out wich sensor is
+			// find out wich sensor is
 			SensorType wichSensor = getSensorFromString(strIn);
+			OneSensor *thisSensor = &sensors[wichSensor];
 
 			// Failed to found your sensor
 			if (wichSensor < SENSOR_COUNT) {
+				
+				// Check if the sensor is busy (and ping the sensor to continue working) for now only AUX_BOARDS
+				if (thisSensor->location == BOARD_AUX) {
+					thisSensor->busy = auxBoards.getBusyState(wichSensor);
+
+					if (thisSensor->busy){
+						sckOut(String(thisSensor->title) + ": busy... Try again later!!");
+						break;
+					}
+				}
+
 				
 				// Get reading
 				if (getReading(wichSensor)) {
