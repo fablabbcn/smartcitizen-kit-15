@@ -4,6 +4,11 @@
 #include "Adafruit_SHT31.h"
 #include <MCP342X.h>
 
+// AlphaDeltaTester
+#ifdef deltaTest 
+#include <AlphaDeltaTester.h>
+#endif
+
 struct Resistor {
 	byte address;
 	byte channel;
@@ -66,6 +71,12 @@ class AlphaDelta {
 		uint8_t getPGAgain(MCP342X adc);
 		float getElectrodeGain(Electrode wichElectrode);
 		double getElectrode(Electrode wichElectrode);
+
+		#ifdef deltaTest
+		testerAlphaDelta tester;
+		void runTester(uint8_t wichSlot);
+		void setTesterCurrent(int16_t wichCurrent, uint8_t wichSlot);
+		#endif
 
 	private:
 };

@@ -7,6 +7,7 @@
 #include <Adafruit_INA219.h>
 
 // AlphaDelta libs
+#define deltaTest 			// Uncomment this line to enable AlphaDelta tester board support
 #include <AlphaDelta.h>
 
 // Groove_OLED libs

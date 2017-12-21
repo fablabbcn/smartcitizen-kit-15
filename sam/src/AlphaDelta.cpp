@@ -67,3 +67,90 @@ double AlphaDelta::getElectrode(Electrode wichElectrode) {
 
 	return (result * 0.015625) / getPGAgain(wichElectrode.adc);
 }
+
+#ifdef deltaTest
+void AlphaDelta::runTester(uint8_t wichSlot) {
+
+	Electrode wichElectrode_W;
+	Electrode wichElectrode_A;
+
+	switch(wichSlot) {
+		case 1: { 
+			wichElectrode_W = Slot1.electrode_W;
+			wichElectrode_A = Slot1.electrode_A;
+			break;
+		} case 2: { 
+			wichElectrode_W = Slot2.electrode_W;
+			wichElectrode_A = Slot2.electrode_A;
+			break;
+		} case 3: { 
+			wichElectrode_W = Slot3.electrode_W;
+			wichElectrode_A = Slot3.electrode_A;
+			break;
+		}
+		default: break;
+	}
+
+	// Print headers
+	SerialUSB.println("testW,readW,testA,readA");
+
+	// Output from -1440 to +1400 nA
+	for (int16_t i=-1400; i<1400; i++) {
+  		tester.setCurrent(tester.electrode_W, i);
+  		SerialUSB.print(tester.getCurrent(tester.electrode_W));
+  		SerialUSB.print(",");
+  		SerialUSB.print(getElectrode(wichElectrode_W));
+  		SerialUSB.print(",");
+  		tester.setCurrent(tester.electrode_A, i);
+  		SerialUSB.print(tester.getCurrent(tester.electrode_A));
+  		SerialUSB.print(",");
+  		SerialUSB.println(getElectrode(wichElectrode_A));
+  		
+  	}
+}
+
+void AlphaDelta::setTesterCurrent(int16_t wichCurrent, uint8_t wichSlot) {
+
+	Electrode wichElectrode_W;
+	Electrode wichElectrode_A;
+
+	switch(wichSlot) {
+		case 1: { 
+			wichElectrode_W = Slot1.electrode_W;
+			wichElectrode_A = Slot1.electrode_A;
+			break;
+		} case 2: { 
+			wichElectrode_W = Slot2.electrode_W;
+			wichElectrode_A = Slot2.electrode_A;
+			break;
+		} case 3: { 
+			wichElectrode_W = Slot3.electrode_W;
+			wichElectrode_A = Slot3.electrode_A;
+			break;
+		}
+		default: break;
+	}
+
+	SerialUSB.print("Setting test current to: ");
+	SerialUSB.println(wichCurrent);
+
+	tester.setCurrent(tester.electrode_W, wichCurrent);
+	tester.setCurrent(tester.electrode_A, wichCurrent);
+
+	SerialUSB.print("Tester Electrode W: ");
+	SerialUSB.println(tester.getCurrent(tester.electrode_W));
+	SerialUSB.print("Alphadelta ");
+	SerialUSB.print(wichSlot);
+	SerialUSB.print("W: ");
+	SerialUSB.println(getElectrode(wichElectrode_W));
+
+	SerialUSB.print("Tester Electrode A: ");
+	SerialUSB.println(tester.getCurrent(tester.electrode_A));
+	SerialUSB.print("Alphadelta ");
+	SerialUSB.print(wichSlot);
+	SerialUSB.print("A: ");
+	SerialUSB.println(getElectrode(wichElectrode_A));
+	
+}
+#endif
+
