@@ -82,3 +82,13 @@ Edit tests under `mock-api/casperjs/test`
 ####  TODO / ideas:
 
 * Should we move the frontend to /mock-api, and create a process which compiles it + concatinates and puts the 'dist' in esp/data?
+
+## Credits
+
+From Jan 2016 to March 2017 this work has received funding from the European Union's Horizon 2020 research and innovation program under the grant agreement No. 688620 
+
+From April 2016 onwards this work has received funding from the European Union's Horizon 2020 research and innovation program under the grant agreement No. 688620 
+
+[![DOI](https://zenodo.org/badge/100483553.svg)](https://zenodo.org/badge/latestdoi/100483553)
+
+
