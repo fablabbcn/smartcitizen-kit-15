@@ -9,6 +9,7 @@ Atlas				atlasPH = Atlas(SENSOR_ATLAS_PH);
 Atlas				atlasEC = Atlas(SENSOR_ATLAS_EC);
 Atlas				atlasDO = Atlas(SENSOR_ATLAS_DO);
 Moisture 			moistureChirp;
+Groove_SHT31 		groove_SHT31;
 
 // Eeprom flash emulation to store I2C address
 // FlashStorage(eepromAuxI2Caddress, Configuration);
@@ -49,6 +50,8 @@ bool AuxBoards::begin(SensorType wichSensor) {
 		case SENSOR_CHIRP_TEMPERATURE:
 		case SENSOR_CHIRP_LIGHT:
 		case SENSOR_CHIRP_MOISTURE:				return moistureChirp.begin(); break;
+		case SENSOR_GROOVE_TEMP_SHT31: 			
+		case SENSOR_GROOVE_HUM_SHT31: 			return groove_SHT31.begin(); break;
 		default: break;
 	}
 
@@ -80,6 +83,8 @@ float AuxBoards::getReading(SensorType wichSensor) {
 		case SENSOR_CHIRP_MOISTURE:			return moistureChirp.getReading(moistureChirp.CHIRP_MOISTURE); break;
 		case SENSOR_CHIRP_TEMPERATURE:		return moistureChirp.getReading(moistureChirp.CHIRP_TEMPERATURE); break;
 		case SENSOR_CHIRP_LIGHT:			return moistureChirp.getReading(moistureChirp.CHIRP_LIGHT); break;
+		case SENSOR_GROOVE_TEMP_SHT31: 		if (groove_SHT31.update()) return groove_SHT31.temperature; break;
+		case SENSOR_GROOVE_HUM_SHT31: 		if (groove_SHT31.update()) return groove_SHT31.humidity; break;
 		default: break;
 	}
 
@@ -715,6 +720,125 @@ void Moisture::sleep() {
 
 	chirp.sleep();
 }
+
+bool Groove_SHT31::begin() {
+
+	Wire.begin();
+
+	if (!I2Cdetect(deviceAddress)) return false;
+	
+	// Send reset command
+	sendComm(SOFT_RESET);
+
+	update();
+
+	return true;
+}
+
+bool Groove_SHT31::update() {
+
+	SerialUSB.println("entered");
+	// SerialUSB.println(millis());
+
+	// If last update was less than 2 sec ago dont do it again
+	// if (millis() - lastUpdate < 2000 && millis() > 2000) return true;
+
+	uint8_t readbuffer[6];
+	sendComm(SINGLE_SHOT_HIGH_REP);
+  	
+  	Wire.requestFrom(deviceAddress, (uint8_t)6);
+
+  	// Wait for answer (datasheet says 15ms is the max)
+  	uint32_t started = millis();
+  	while(Wire.available() != 6) {
+  		if (millis() - started > timeout) {
+  			SerialUSB.println("TimeOUT!!!"); 
+  			return false;
+  		}
+   	}
+
+  	// Read response
+	for (uint8_t i=0; i<6; i++) {
+		readbuffer[i] = Wire.read();
+		SerialUSB.println(readbuffer[i]);
+	}
+
+	uint16_t ST, SRH;
+	ST = readbuffer[0];
+	ST <<= 8;
+	ST |= readbuffer[1];
+
+	SerialUSB.println("1");
+
+	// Check Temperature crc
+	if (readbuffer[2] != crc8(readbuffer, 2)) {
+		SerialUSB.println("CRC ERROR on temp!!!"); 
+		return false;
+	}
+
+	SerialUSB.println("2");
+
+	SRH = readbuffer[3];
+	SRH <<= 8;
+	SRH |= readbuffer[4];
+
+	// check Humidity crc
+	if (readbuffer[5] != crc8(readbuffer+3, 2)) {
+		SerialUSB.println("CRC ERROR on hum!!!"); 
+		return false;
+	}
+
+	SerialUSB.println("3");
+
+	double temp = ST;
+	temp *= 175;
+	temp /= 0xffff;
+	temp = -45 + temp;
+	temperature = (float)temp;
+
+	double shum = SRH;
+	shum *= 100;
+	shum /= 0xFFFF;
+	humidity = (float)shum;
+
+	lastUpdate = millis();
+
+	SerialUSB.println("paso");
+
+	return true;
+}
+
+void Groove_SHT31::sendComm(uint16_t comm) {
+  Wire.beginTransmission(deviceAddress);
+  Wire.write(comm >> 8);
+  Wire.write(comm & 0xFF);
+  Wire.endTransmission();  
+}
+
+uint8_t Groove_SHT31::crc8(const uint8_t *data, int len) {
+
+ /* CRC-8 formula from page 14 of SHT spec pdf
+ *
+ * Test data 0xBE, 0xEF should yield 0x92
+ *
+ * Initialization data 0xFF
+ * Polynomial 0x31 (x8 + x5 +x4 +1)
+ * Final XOR 0x00
+ */
+	const uint8_t POLYNOMIAL(0x31);
+	uint8_t crc(0xFF);
+
+	for ( int j = len; j; --j ) {
+		crc ^= *data++;
+		for ( int i = 8; i; --i ) {
+			crc = ( crc & 0x80 )
+			? (crc << 1) ^ POLYNOMIAL
+			: (crc << 1);
+		}
+	}
+	return crc;
+}
+
 
 void writeI2C(byte deviceaddress, byte instruction, byte data ) {
   Wire.beginTransmission(deviceaddress);
