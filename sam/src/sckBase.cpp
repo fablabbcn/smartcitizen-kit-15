@@ -1964,6 +1964,26 @@ void SckBase::sckIn(String strIn) {
 			}
 			break;
 
+		} case EXTCOM_I2C_DETECT: {
+
+			uint8_t nDevices = 0;
+			for(uint8_t address = 1; address < 127; address++ ) {
+				Wire.beginTransmission(address);
+				uint8_t error = Wire.endTransmission();
+
+				if (error == 0) {
+					sprintf(outBuff, "I2C device found at address 0x%02x!!", address);
+					sckOut();
+					nDevices++;
+				} else if (error==4) {
+					sprintf(outBuff, "Unknow error at address 0x%02x!!", address);
+					sckOut();
+				}
+			}
+
+			sprintf(outBuff, "Found %u devices", nDevices);
+			sckOut();
+
 		} case EXTCOM_U8G_PRINT: {
 
 			auxBoards.print(strIn);

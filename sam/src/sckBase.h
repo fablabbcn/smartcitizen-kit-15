@@ -306,6 +306,7 @@ public:
 		EXTCOM_DISABLE_SENSOR,
 		EXTCOM_SET_INTERVAL_SENSOR,
 		EXTCOM_CONTROL_SENSOR,
+		EXTCOM_I2C_DETECT,
 
 		// Print String to u8g2_oled screen
 		EXTCOM_U8G_PRINT,			// @params: String to be printed
@@ -395,6 +396,7 @@ public:
 	"disable",				// EXTCOM_DISABLE_SENSOR, 	@params wichSensor
 	"interval",				// EXTCOM_SET_INTERVAL_SENSOR,	@params [seconds]
 	"control",				// EXTCOM_CONTROL_SENSOR, 	@params wichSensor wichCommand
+	"i2c detect",			// EXTCOM_I2C_DETECT,
 
 	// U8g_OLED commands
 	"u8g print",			// EXTCOM_U8G_PRINT,		@params: String to be printed
