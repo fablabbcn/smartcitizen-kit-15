@@ -104,12 +104,10 @@ uint8_t AlphaDelta::writeByte(uint8_t dataAddress, uint8_t data){
 uint8_t AlphaDelta::readByte(uint8_t dataAddress){
 	Wire.beginTransmission(eepromAddress);
 	Wire.write(dataAddress);
-
 	if (Wire.endTransmission(false)) return 0;
 	if(!Wire.requestFrom(eepromAddress, 1)) return 0;
 	return Wire.read();
-}	
-
+}
 
 #ifdef deltaTest
 void AlphaDelta::runTester(uint8_t wichSlot) {

@@ -21,7 +21,7 @@ bool I2Cdetect(byte address) {
 }
 
 bool AuxBoards::begin(OneSensor* wichSensor) {
-	
+
 	switch (wichSensor->type) {
 
 		case SENSOR_ALPHADELTA_SLOT_1A:
@@ -37,7 +37,7 @@ bool AuxBoards::begin(OneSensor* wichSensor) {
 		case SENSOR_INA219_SHUNT: 			
 		case SENSOR_INA219_CURRENT: 		
 		case SENSOR_INA219_LOADVOLT: 			return ina219.begin(); break;
-		case SENSOR_GROOVE_OLED: 				wichSensor->interval =2; return groove_OLED.begin(); break;
+		case SENSOR_GROOVE_OLED: 				wichSensor->interval = 2; return groove_OLED.begin(); break;
 		case SENSOR_WATER_TEMP_DS18B20:			return waterTemp_DS18B20.begin(); break;
 		case SENSOR_ATLAS_PH:					return atlasPH.begin();
 		case SENSOR_ATLAS_EC:
@@ -91,23 +91,23 @@ float AuxBoards::getReading(OneSensor* wichSensor) {
 bool AuxBoards::getBusyState(OneSensor* wichSensor) {
 	
 	switch(wichSensor->type) {
-		case SENSOR_GROOVE_OLED:		return true; break;
-		case SENSOR_ATLAS_PH: 			return atlasPH.getBusyState(); break;
+		case SENSOR_GROOVE_OLED:	return true; break;
+		case SENSOR_ATLAS_PH: 		return atlasPH.getBusyState(); break;
 		case SENSOR_ATLAS_EC:
-		case SENSOR_ATLAS_EC_SG: 		return atlasEC.getBusyState(); break;
+		case SENSOR_ATLAS_EC_SG: 	return atlasEC.getBusyState(); break;
 		case SENSOR_ATLAS_DO:
-		case SENSOR_ATLAS_DO_SAT: 		return atlasDO.getBusyState(); break;
+		case SENSOR_ATLAS_DO_SAT: 	return atlasDO.getBusyState(); break;
 		case SENSOR_CHIRP_MOISTURE:		return moistureChirp.getBusyState(moistureChirp.CHIRP_MOISTURE); break;
 		case SENSOR_CHIRP_TEMPERATURE:	return moistureChirp.getBusyState(moistureChirp.CHIRP_TEMPERATURE); break;
-		case SENSOR_CHIRP_LIGHT:		return moistureChirp.getBusyState(moistureChirp.CHIRP_LIGHT); break;
+		case SENSOR_CHIRP_LIGHT: 	return moistureChirp.getBusyState(moistureChirp.CHIRP_LIGHT); break;
 		default: return false; break;
 	}
 }
 
 String AuxBoards::control(OneSensor* wichSensor, String command) {
-	
+
 	switch(wichSensor->type) {
-		case SENSOR_ALPHADELTA_SLOT_1A: 
+		case SENSOR_ALPHADELTA_SLOT_1A:
 		case SENSOR_ALPHADELTA_SLOT_1W:
 		case SENSOR_ALPHADELTA_SLOT_2A:
 		case SENSOR_ALPHADELTA_SLOT_2W:
@@ -215,8 +215,7 @@ String AuxBoards::control(OneSensor* wichSensor, String command) {
 			}
 			break;
 
-		} 
-		case SENSOR_CHIRP_LIGHT:
+		} case SENSOR_CHIRP_LIGHT:
 		case SENSOR_CHIRP_TEMPERATURE:
 		case SENSOR_CHIRP_MOISTURE: {
 

@@ -145,14 +145,14 @@ void SckBase::setup() {
 	// Detect and enable auxiliary boards
 	for (uint8_t i=0; i<SENSOR_COUNT; i++) {
 
-		OneSensor* wichSensor = &sensors[static_cast<SensorType>(i)];
+		OneSensor *wichSensor = &sensors[static_cast<SensorType>(i)];
 
 		// Only try to find auxiliary sensors
 		if (wichSensor->location == BOARD_AUX) {
 
 			sprintf(outBuff, "Detecting: %s... ", wichSensor->title);
 			sckOut(PRIO_MED, false);
-			
+
 			if (auxBoards.begin(wichSensor)) {
 
 				if (!wichSensor->enabled) {
@@ -236,7 +236,7 @@ void SckBase::update() {
 							uint32_t receivedInterval = lightResults.lines[4].toInt();
 							if (receivedInterval > minimal_publish_interval && receivedInterval < max_publish_interval) {
 								config.publishInterval = receivedInterval;
-								sckOut(String F("New reading interval: ") + String(config.publishInterval));	
+								sckOut(String F("New reading interval: ") + String(config.publishInterval));
 							}
 						}
 					}
@@ -341,7 +341,7 @@ void SckBase::loadConfig() {
 	Configuration savedConf = eepromConfig.read();
 
 	if (savedConf.valid) {
-		
+
 		config.publishInterval = savedConf.publishInterval;
 		config.persistentMode = savedConf.persistentMode;
 		config.mode = savedConf.mode;
@@ -482,9 +482,9 @@ bool SckBase::loadSDconfig() {
 
 					// Find out wich sensor is
 					OneSensor *wichSensor = getSensorFromString(sensorString);
-					
+
 					if (wichSensor->type < SENSOR_COUNT) {
-						
+
 						uint32_t newInterval = lineBuff.toInt();
 
 						// Sensor disabled
@@ -498,7 +498,7 @@ bool SckBase::loadSDconfig() {
 
 						// New reading interval
 						} else if (newInterval >= minimal_sensor_reading_interval && newInterval <= max_sensor_reading_interval) {
-							
+
 							// Enable sensor if it was disabled
 							if (!wichSensor->enabled) {
 								sprintf(outBuff, "config.txt: %s enabled", wichSensor->title);
@@ -780,7 +780,7 @@ void SckBase::changeMode(SCKmodes newMode) {
 }
 void SckBase::errorMode() {
 
-	// Clear timer for updating sensors 
+	// Clear timer for updating sensors
 	timerClear(ACTION_UPDATE_SENSORS);
 
 	// Try to recover error every n milliseconds
@@ -1045,7 +1045,7 @@ void SckBase::ESPprocessMsg() {
 			tpass.toCharArray(config.pass, 64);
 			String ttoken = jsonConf["to"];
 			ttoken.toCharArray(config.token, 64);
-					
+
 			sckOut(F("Configuration updated:"));
 			sprintf(outBuff, "Publish Interval: %lu\r\nWifi: %s - %s\r\nToken: %s", config.publishInterval, config.ssid, config.pass, config.token);
 			sckOut();
@@ -1291,12 +1291,12 @@ void SckBase::processStatus() {
 
 				sckOut(F("NTP sync ERROR!!"));
 				if (config.mode != MODE_SETUP) {
-					if (!onTime) led.update(config.mode, 1);	
+					if (!onTime) led.update(config.mode, 1);
 				}
 				break;
 
 			} case ESP_TIME_UPDATED_EVENT: {
-				
+
 				// Time sync
 				sckOut(F("Asking time to ESP..."));
 				msgBuff.com = ESP_GET_TIME_COM;
@@ -1374,7 +1374,7 @@ void SckBase::processStatus() {
 				ESPqueueMsg(false, false);
 				break;
 			} default: break;
-		} 
+		}
 	}
 
 	// Make a copy of status
@@ -1569,7 +1569,7 @@ void SckBase::sckIn(String strIn) {
 				setESPtoken();
 			}
 			break;
-		
+
 		} case EXTCOM_CLEAR_TOKEN: {
 
 			clearToken();
@@ -1755,7 +1755,7 @@ void SckBase::sckIn(String strIn) {
 					sckOut(ISOtimeBuff);
 				}
 			} else sckOut(F("Time NOT synced since last reset!!!"), PRIO_HIGH);
-			
+
 			break;
 
 		} case EXTCOM_SYNC_HTTP_TIME: {
@@ -1928,7 +1928,7 @@ void SckBase::sckIn(String strIn) {
 			OneSensor *wichSensor = getSensorFromString(strIn);
 
 			if (wichSensor->type < SENSOR_COUNT) {
-			
+
 				if (strIn.length() < 1) {
 					sckOut(F("No command received!! please try again..."));
 					break;
@@ -1940,7 +1940,7 @@ void SckBase::sckIn(String strIn) {
 					String titleCompare = wichSensor->title;
 					titleCompare.toLowerCase();
 					strIn = cleanInput(titleCompare, strIn);
-					
+
 					// Print sensor title
 					sckOut(String(wichSensor->title) + ": " + strIn);
 
@@ -2108,7 +2108,7 @@ OneSensor* SckBase::getSensorFromString(String strIn) {
 /* Text outputs
  *
  *	@params strOut 		Text output
- 	@params priority	Level of priority of the message: 
+ 	@params priority	Level of priority of the message:
  							PRIO_LOW - only showed in OUT_VERBOSE
  							PRIO_MED (default) - showed in VERBOSE and OUT_NORMAL
 							PRIO_HIGH - showed in all modes (even in OUT_SILENT)
@@ -2183,8 +2183,8 @@ void SckBase::epoch2iso(uint32_t toConvert, char* isoTime) {
 	time_t tc = toConvert;
     struct tm* tmp = gmtime(&tc);
 
-    sprintf(isoTime, "20%02d-%02d-%02dT%02d:%02d:%02dZ", 
-    	tmp->tm_year - 100, 
+    sprintf(isoTime, "20%02d-%02d-%02dT%02d:%02d:%02dZ",
+    	tmp->tm_year - 100,
     	tmp->tm_mon + 1,
     	tmp->tm_mday,
 		tmp->tm_hour,
@@ -2208,7 +2208,7 @@ void SckBase::enableSensor(OneSensor* wichSensor) {
 	sprintf(outBuff, "Enabling %s", wichSensor->title);
 	sckOut();
 
-	// Enable sensor 
+	// Enable sensor
 	wichSensor->enabled = true;
 
 	// Set the next reading to be after the rest of the sensors
@@ -2264,11 +2264,12 @@ void SckBase::updateSensors() {
 
 			OneSensor *wichSensor = &sensors[static_cast<SensorType>(i)];
 			if (wichSensor->enabled) {
-				
+
 				uint32_t elapsed = rtc.getEpoch() - wichSensor->lastReadingTime;
 				if (elapsed >= wichSensor->interval) {
 					// Time to read sensor!!
 					led.brightnessFactor = 1;
+					led.update(config.mode, 0);
 					if (getReading(wichSensor)) {
 						RAMstore(wichSensor);
 						sprintf(outBuff, " (RAM) + %s: %.2f %s", wichSensor->title, wichSensor->reading, wichSensor->unit);
@@ -2305,7 +2306,7 @@ bool SckBase::getReading(OneSensor* wichSensor) {
 	uint32_t startedTime = rtc.getEpoch();
 
 	switch (wichSensor->location) {
-		
+
 		case BOARD_BASE: {
 			// If we are reading sensors from this board
 			float tempReading = 0;
@@ -2329,7 +2330,7 @@ bool SckBase::getReading(OneSensor* wichSensor) {
 			if (wichSensor->type == SENSOR_GROOVE_OLED) {
 
 				SensorType displaySensorType = static_cast<SensorType>(sensorDisplayIndex);
-				OneSensor* displaySensor = &sensors[displaySensorType];
+				OneSensor *displaySensor = &sensors[displaySensorType];
 
 				while (!displaySensor->enabled) {
 					sensorDisplayIndex ++;
@@ -2359,7 +2360,7 @@ bool SckBase::getReading(OneSensor* wichSensor) {
 				wichSensor->reading = auxBoards.getReading(wichSensor);
 				wichSensor->valid = true;
 			}
-			
+
 			break;
 		} default: {
 			;
@@ -2375,7 +2376,7 @@ bool SckBase::getReading(OneSensor* wichSensor) {
 	return wichSensor->valid;
 }
 bool SckBase::RAMstore(OneSensor* wichSensor) {
-	
+
 	// If RAM space reserved for readings is full return false
 	if (RAMreadingsIndex >= ram_max_readings) return false;
 
@@ -2438,7 +2439,7 @@ void SckBase::publish() {
 
 		// If there is a publish running
 		if (publishRuning) {
-			
+
 			// Give up on this publish try and reset to try to clear errors
 			if (rtc.getEpoch() - publishStarted > publish_timeout) {
 	 			sckOut("Publish is taking too much time...\n Saving to SD card and resetting!!!");
@@ -2462,7 +2463,7 @@ void SckBase::publish() {
 			ESPpublish();
 
 		}
-		
+
 	} else if (config.mode == MODE_SD) {
 
 		publishStarted = rtc.getEpoch();
@@ -2503,7 +2504,7 @@ bool SckBase::publishToSD() {
 
 			// We have to write sensors in the same order as header
 			for (uint8_t sensorIndex=0; sensorIndex<SENSOR_COUNT; sensorIndex++) {
-				
+
 				SensorType wichSensor = static_cast<SensorType>(sensorIndex);
 
 				if (sensors[wichSensor].enabled) {
@@ -2532,7 +2533,7 @@ bool SckBase::publishToSD() {
 		}
 		// Close file
 		publishFile.close();
-		
+
 		// Restart the sd card index
 		sdIndex = -1;
 
@@ -2554,7 +2555,7 @@ bool SckBase::publishToSD() {
 	return false;
 }
 bool SckBase::ESPpublish()  {
-	
+
 	sckOut("Publishing to platform...");
 
 	// Get last readings group from RAM
@@ -2563,7 +2564,7 @@ bool SckBase::ESPpublish()  {
 	// Prepare json for sending
 	StaticJsonBuffer<240> jsonBuffer;
 	JsonObject& jsonSensors = jsonBuffer.createObject();
-	
+
 	// Epoch time of the grouped readings
 	jsonSensors["t"] = groupBuffer.time;
 
@@ -2630,7 +2631,7 @@ bool SckBase::sdLogADC(){
 		debugLogFile.print(onUSB);
 		debugLogFile.print(",");
 		debugLogFile.print(charging);
-		
+
 		debugLogFile.close();
 		sckOut("debug file written!!!");
 
@@ -2663,7 +2664,7 @@ void SckBase::buttonEvent() {
 	} else {
 
 		butLastEvent = millis();
-		
+
 		timerClear(ACTION_LONG_PRESS);
 		timerClear(ACTION_VERY_LONG_PRESS);
 
@@ -2713,17 +2714,17 @@ void SckBase::longPress() {
 
 	// Make sure we havent released button without noticed it
 	if (!digitalRead(PIN_BUTTON)) {
-	
+
 		sckOut(String F("Button long press: ") + String(millis() - butLastEvent), PRIO_MED);
 		changeMode(MODE_OFF);
-	
+
 	} else buttonEvent();
 }
 void SckBase::veryLongPress() {
 
 	// Make sure we havent released button without noticed it
 	if (!digitalRead(PIN_BUTTON)) {
-	
+
 		sckOut(String F("Button very long press: ") + String(millis() - butLastEvent), PRIO_MED);
 		factoryReset();
 
@@ -2778,7 +2779,7 @@ bool SckBase::openPublishFile(bool writeHeader) {
 
 						// Write headers
 						if (writeHeader) {
-							
+
 							sckOut("Writing headers to sdcard file.");
 
 							// TimeStamp
@@ -2790,13 +2791,13 @@ bool SckBase::openPublishFile(bool writeHeader) {
 								if (sensors[wichSensor].enabled) {
 									// Sensor titles
 									publishFile.print(sensors[wichSensor].title);
-									
+
 									// If there are units cofigured
 									if (String(sensors[wichSensor].unit).length() > 0) {
 										publishFile.print("-");
-										publishFile.print(sensors[wichSensor].unit);	
+										publishFile.print(sensors[wichSensor].unit);
 									}
-									if (wichSensor < SENSOR_COUNT) publishFile.print(",");	
+									if (wichSensor < SENSOR_COUNT) publishFile.print(",");
 								}
 							}
 							publishFile.println("");
@@ -2809,7 +2810,7 @@ bool SckBase::openPublishFile(bool writeHeader) {
 
 				// If file dont open or too big try next
 				publishFileName = String F("POST") + leadingZeros(String(fi), 3) + F(".CSV");
-				
+
 			}
 		}
 	}
@@ -2825,7 +2826,7 @@ bool SckBase::openLogFile() {
 
 		// Open file
 		logFile = sd.open(charLogFileName, FILE_WRITE);
-			
+
 		if (logFile) {
 			// If file is already on size limit
 			if (logFile.size() > FileSizeLimit) {
@@ -2955,7 +2956,7 @@ void SckBase::updatePower() {
 		onUSB = true;
 
 		// Check if we are chanrging the battery
-		if (getVoltage(CHG_CHAN) < 3.0) { 
+		if (getVoltage(CHG_CHAN) < 3.0) {
 			if (!charging) sckOut("Charging battery!");
 			charging = true;
 		} else charging = false;					// In this case battery should be full or not conected
@@ -2966,7 +2967,7 @@ void SckBase::updatePower() {
 			led.charging = false;
 			led.finishedCharging = true;
 		} else {
-			led.charging = true; 
+			led.charging = true;
 			led.finishedCharging = false;
 		}
 
@@ -2997,7 +2998,7 @@ void SckBase::updatePower() {
 
 		if (tmpBattPercent < lowBattLimit) led.lowBatt = true;
 		if (tmpBattPercent < lowBattEmergencySleep) {
-			
+
 			// If battery is extremely low go to sleep to keep RTC time and wakeup every minute to check if we are connected
 
 			while (getVoltage(USB_CHAN) < 3.0) {
@@ -3019,7 +3020,7 @@ void SckBase::updatePower() {
 
 		// Enter sleep mode
 		} else if (	(closestAction > minSleepPeriod) && 						// Still some time before next action
-					(rtc.getEpoch() - userLastAction > 20) && 					// At least 10 seconds after the las user action (button)
+					(rtc.getEpoch() - userLastAction > 20) && 					// At least 10 seconds after the last user action (button)
 					(config.mode == MODE_SD || config.mode == MODE_NET) && 		// Only in network an sdcard modes
 					!publishRuning) {											// If we are not publishing
 
@@ -3068,28 +3069,27 @@ void SckBase::goToSleep() {
 	digitalWrite(1, LOW);
 
 	// Put ADC to sleep
-	byte payload = B00000000;						
+	byte payload = B00000000;
 	for (int i=0; i<4; ++i)	{
 		Wire.beginTransmission(0x48);
 		Wire.write(payload + i);
 		Wire.endTransmission();
 		delay(4);
 	}
-	
-	// MICS heaters saving
 
+	// MICS heaters saving
 	uint32_t nextReadingCO = sensors[SENSOR_CO].lastReadingTime + sensors[SENSOR_CO].interval;
 	if (sensors[SENSOR_CO].enabled && (nextReadingCO - rtc.getEpoch() < urban.CO_PREHEATING_TIME)) {		// If next reading is in less than preheating_time turn it on
-		urban.gasOn(SENSOR_CO);
+		if (!urban.gasCOheaterState) urban.gasOn(SENSOR_CO);
 	} else {
-		urban.gasOff(SENSOR_CO);
+		if (urban.gasCOheaterState) urban.gasOff(SENSOR_CO);
 	}
 
 	uint32_t nextReadingNO2 = sensors[SENSOR_NO2].lastReadingTime + sensors[SENSOR_NO2].interval;
 	if (sensors[SENSOR_NO2].enabled && (nextReadingNO2 - rtc.getEpoch() < urban.NO2_PREHEATING_TIME)) {		// If next reading is in less than 10 minutes turn it on
-		urban.gasOn(SENSOR_NO2);
+		if (!urban.gasNO2heaterState) urban.gasOn(SENSOR_NO2);
 	} else {
-		urban.gasOff(SENSOR_NO2);
+		if (urban.gasNO2heaterState) urban.gasOff(SENSOR_NO2);
 	}
 
 	// Power Suply in low power mode
@@ -3123,8 +3123,8 @@ void SckBase::softReset() {
 // 	---------------------
 //
 bool SckBase::urbanBoardDetected() {
-	
-	// Test if digital POT responds 
+
+	// Test if digital POT responds
 	float originalValue = readResistor(6);
 	writeResistor(6, 1200.0);
 	float compareValue = readResistor(6);
@@ -3216,7 +3216,7 @@ void Led::bridge() {
 void Led::tick() {
 
 	if(pulseMode == PULSE_SOFT) {
-		
+
 		// Soft pulse
 		ledRGBcolor = *(currentPulse + colorIndex);
 		if (dir) {
@@ -3290,7 +3290,7 @@ void Led::setRGBColor(RGBcolor myColor) {
 		pinMode(PIN_LED_RED, OUTPUT);
 		digitalWrite(PIN_LED_RED, HIGH);
 	} else analogWrite(PIN_LED_RED, 255 - myColor.r);
-	
+
 	if (myColor.g == 0) {
 		pinMode(PIN_LED_GREEN, OUTPUT);
 		digitalWrite(PIN_LED_GREEN, HIGH);
@@ -3329,14 +3329,14 @@ void Led::setHSIColor(float h, float s, float i) {
 }
 void Led::off() {
 	disableTimer5();
-	
+
 	ledRGBcolor = offRGB;
 	pulseMode = PULSE_STATIC;
 
 	pinMode(PIN_LED_RED, OUTPUT);
 	pinMode(PIN_LED_GREEN, OUTPUT);
 	pinMode(PIN_LED_BLUE, OUTPUT);
-	
+
 	digitalWrite(PIN_LED_RED, HIGH);
 	digitalWrite(PIN_LED_GREEN, HIGH);
 	digitalWrite(PIN_LED_BLUE, HIGH);
@@ -3352,7 +3352,7 @@ bool SckBase::timerRun() {
 	for (uint8_t i=0; i<timerSlots; i++) {
 		if (timers[i].action != ACTION_NULL) {
 			if (millis() - timers[i].started > timers[i].interval) {
-				
+
 				// Check for action to execute
 				switch(timers[i].action) {
 					case ACTION_CLEAR_ESP_BOOTING:{
@@ -3373,7 +3373,7 @@ bool SckBase::timerRun() {
 							if (!digitalRead(POWER_WIFI)) getStatus();
 						}
 						break;
-					
+
 					} case ACTION_LONG_PRESS: {
 						longPress();
 						break;
@@ -3410,7 +3410,7 @@ bool SckBase::timerRun() {
 								timerClear(ACTION_RECOVER_ERROR);
 								changeMode(MODE_SD);
 							}
-						
+
 						} else if (config.persistentMode == MODE_NET) {
 
 							if (digitalRead(POWER_WIFI)) ESPcontrol(ESP_ON);
@@ -3431,13 +3431,13 @@ bool SckBase::timerRun() {
 						break;
 
 					} case ACTION_SAVE_SD_CONFIG: {
-						
+
 						// How much time for next publish...
 						uint32_t timeToNextPublish = rtc.getEpoch() - lastPublishTime;
 
 						// If there is no message on queue and publish time is at least 5 seconds away
 						if (BUS_queueCount == 0 && timeToNextPublish > 5 && !triggerHello) {
-							
+
 							// Save sd config (esp off)
 							saveSDconfig();
 
@@ -3523,8 +3523,8 @@ void SckBase::timerClearTasks(bool clearAll) {
 	for (uint8_t i=0; i<timerSlots; i++) {
 
 		if ((timers[i].action != ACTION_LONG_PRESS &&
-			timers[i].action != ACTION_VERY_LONG_PRESS && 
-			timers[i].action != ACTION_GET_ESP_STATUS && 
+			timers[i].action != ACTION_VERY_LONG_PRESS &&
+			timers[i].action != ACTION_GET_ESP_STATUS &&
 			timers[i].action != ACTION_RECOVER_ERROR &&
 			timers[i].action != ACTION_SAVE_SD_CONFIG) || clearAll) {
 
@@ -3607,7 +3607,7 @@ byte SckBase::readI2C(int deviceaddress, byte address) {
   if (Wire.available() != 1) return 0x00;
   byte data = Wire.read();
   return data;
-}  
+}
 
 
 // 	-------------------------
@@ -3621,10 +3621,10 @@ String leadingZeros(String original, int decimalNumber) {
 	return original;
 }
 uint8_t countMatchedWords(String baseString, String input) {
-	
+
 	uint8_t foundedCount = 0;
 	String word;
-	
+
 	while (input.length() > 0) {
 
 		// Get next word
@@ -3664,7 +3664,7 @@ String cleanInput(String toRemove, String original) {
 
 		if (toRemove.indexOf(wordNoSpaces) > -1) original.replace(word, "");
 		else finished = true;
-			
+
 		checking.replace(word, "");
 	}
 	return original;

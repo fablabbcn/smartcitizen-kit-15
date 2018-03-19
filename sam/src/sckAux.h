@@ -45,13 +45,15 @@ class AuxBoards {
 			0x41,		// SENSOR_INA219_CURRENT,
 			0x41,		// SENSOR_INA219_LOADVOLT,
 			0x18,		// SENSOR_WATER_TEMP_DS18B20,
-			0x3c,		// SENSOR_GROOVE_OLED,
 			0x63,		// SENSOR_ATLAS_PH,
 			0x64,		// SENSOR_ATLAS_EC,
 			0x64,		// SENSOR_ATLAS_EC_SG,
 			0x61,		// SENSOR_ATLAS_DO,
 			0x61,		// SENSOR_ATLAS_DO_SAT,
 			0x20 		// SENSOR_MOISTURE_CHIRP
+			0x44,		// SENSOR_GROOVE_TEMP_SHT31,
+			0x44,		// SENSOR_GROOVE_HUM_SHT31,
+			0x3c		// SENSOR_GROOVE_OLED,
 		};
 
 		bool begin(OneSensor* wichSensor);
@@ -305,29 +307,29 @@ class Atlas {
 };
 
 class Moisture {
-private:
+	private:
 
-	// TODO save this in flash so we can change the address and remember it.
-	byte deviceAddress = 0x20;
-	I2CSoilMoistureSensor chirp = I2CSoilMoistureSensor(0x20);
-	bool alreadyStarted = false;
-	bool measuringLight = false;
-	uint32_t lightStarted;
+		// TODO save this in flash so we can change the address and remember it.
+		byte deviceAddress = 0x20;
+		I2CSoilMoistureSensor chirp = I2CSoilMoistureSensor(0x20);
+		bool alreadyStarted = false;
+		bool measuringLight = false;
+		uint32_t lightStarted;
 
-public:
+	public:
 
-	enum typeOfReading { CHIRP_MOISTURE, CHIRP_TEMPERATURE, CHIRP_LIGHT };
+		enum typeOfReading { CHIRP_MOISTURE, CHIRP_TEMPERATURE, CHIRP_LIGHT };
 
-	bool begin();
-	float getReading(typeOfReading wichReading);
-	bool getBusyState(typeOfReading wichReading);
-	bool changeAddress(byte newAddress);
-	uint8_t getVersion(); 
-	
-	// TODO 
-	// * Measure sensor consumption 
-	// * Send sensor to sleep between readings (needs FIX, it hangs)
-	void sleep();
+		bool begin();
+		float getReading(typeOfReading wichReading);
+		bool getBusyState(typeOfReading wichReading);
+		bool changeAddress(byte newAddress);
+		uint8_t getVersion(); 
+		
+		// TODO 
+		// * Measure sensor consumption 
+		// * Send sensor to sleep between readings (needs FIX, it hangs)
+		void sleep();
 };
 
 class Groove_SHT31 {

@@ -82,6 +82,8 @@ class AlphaDelta {
 		#endif
 
 	private:
+
 		// EEPROM 24AA025
 		const byte eepromAddress = 0x61;
+
 };

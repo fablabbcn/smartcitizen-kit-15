@@ -462,7 +462,7 @@ public:
 	ESPstatus espStatus;
 	ESPstatus prevEspStatus;
 	float statusPoolingInterval = 500;		// ESP status pooling interval in ms
-	const uint32_t ESP_FLASH_SPEED = 115200;
+	const uint32_t ESP_FLASH_SPEED = 921600;
 
 	// Time
 	bool setTime(String epoch);
