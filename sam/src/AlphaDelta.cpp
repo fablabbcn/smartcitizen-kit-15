@@ -74,6 +74,43 @@ double AlphaDelta::getElectrode(Electrode wichElectrode) {
 	return (result * 0.015625) / getPGAgain(wichElectrode.adc);
 }
 
+uint32_t AlphaDelta::getUID() {
+
+	uint8_t byteNum = 4;
+	uint8_t UIDBytes[byteNum];
+
+	Wire.beginTransmission(eepromAddress);
+	Wire.write(0xFC);
+	if (Wire.requestFrom(eepromAddress, byteNum) != byteNum) return 0;
+	for(uint8_t pos=0; pos<byteNum; pos++) {
+		UIDBytes[pos] = Wire.read();
+	}
+
+	uint32_t UID = 0;
+	for (uint8_t pos=0; pos<4; pos++){
+		UID <<= 8;
+		UID |= UIDBytes[pos];
+	}
+	return UID;
+}
+
+uint8_t AlphaDelta::writeByte(uint8_t dataAddress, uint8_t data){
+	Wire.beginTransmission(eepromAddress);
+	Wire.write(dataAddress);
+	Wire.write(data);
+	return Wire.endTransmission();
+}
+
+uint8_t AlphaDelta::readByte(uint8_t dataAddress){
+	Wire.beginTransmission(eepromAddress);
+	Wire.write(dataAddress);
+
+	if (Wire.endTransmission(false)) return 0;
+	if(!Wire.requestFrom(eepromAddress, 1)) return 0;
+	return Wire.read();
+}	
+
+
 #ifdef deltaTest
 void AlphaDelta::runTester(uint8_t wichSlot) {
 

@@ -71,6 +71,9 @@ class AlphaDelta {
 		uint8_t getPGAgain(MCP342X adc);
 		float getElectrodeGain(Electrode wichElectrode);
 		double getElectrode(Electrode wichElectrode);
+		uint32_t getUID();
+		uint8_t writeByte(uint8_t dataAddress, uint8_t data);
+		uint8_t readByte(uint8_t dataAddress);
 
 		#ifdef deltaTest
 		testerAlphaDelta tester;
@@ -79,4 +82,6 @@ class AlphaDelta {
 		#endif
 
 	private:
+		// EEPROM 24AA025
+		const byte eepromAddress = 0x61;
 };
