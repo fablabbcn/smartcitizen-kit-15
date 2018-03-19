@@ -134,9 +134,14 @@ String AuxBoards::control(OneSensor* wichSensor, String command) {
 				alphaDelta.setPot(wichElectrode, wichValue);
 				return String F("Setting pot to: ") + String(wichValue) + F(" Ohms\n\rActual value: ") + String(alphaDelta.getPot(wichElectrode)) + F(" Ohms");
 
-			} else if (command.startsWith("help")) {
-				return F("Available commands for this sensor:\n\r* set pot ");
+			} else if (command.startsWith("get uid")) {
+			
+				return String F("Eeprom UID: ") + String(alphaDelta.getUID());
 
+			} else if (command.startsWith("help")) {
+			
+				return F("Available commands for this sensor:\n\r* set pot \n\r* get UID");
+			
 			#ifdef deltaTest
 			} else if (command.startsWith("test")) {
 
