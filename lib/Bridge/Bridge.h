@@ -212,7 +212,6 @@ enum SCKmodes {
 	MODE_SD,
 	MODE_FLASH,
 	MODE_OFF,
-	MODE_SHELL,
 	MODE_COUNT
 };
 const uint32_t minimal_publish_interval = 60;

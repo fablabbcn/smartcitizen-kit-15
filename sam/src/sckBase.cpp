@@ -186,7 +186,7 @@ void SckBase::update() {
 		if (SerialUSB.available()) Serial1.write(SerialUSB.read());
 		if (Serial1.available()) SerialUSB.write(Serial1.read());
 	
-	} else if (config.mode != MODE_SHELL) {
+	} else {
 
 		// update ESP communications
 		if (!digitalRead(POWER_WIFI)) ESPbusUpdate();
@@ -711,16 +711,6 @@ void SckBase::changeMode(SCKmodes newMode) {
 		} case MODE_FLASH: {
 			changeOutputLevel(OUT_SILENT);
 			ESPcontrol(ESP_FLASH);
-			publishRuning = false;
-			break;
-		} case MODE_SHELL: {
-			ESPcontrol(ESP_OFF);
-			for (uint8_t i=0; i<timerSlots; i++) {
-				timers[i].action = ACTION_NULL;
-				timers[i].interval = 0;
-				timers[i].started = 0;
-				timers[i].periodic = false;
-			}
 			publishRuning = false;
 			break;
 		} case MODE_OFF: {
@@ -3179,9 +3169,6 @@ void Led::update(SCKmodes newMode, uint8_t newPulseMode) {
 			ledRGBcolor = offRGB;
 			pulseMode = PULSE_STATIC;
 			break;
-		} case MODE_SHELL: {
-			ledRGBcolor = altBlueRGB;
-			pulseMode = PULSE_STATIC;
 		} default: {
 			;
 		}
