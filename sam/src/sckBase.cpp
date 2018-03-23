@@ -197,9 +197,6 @@ void SckBase::update() {
 		// Check Serial ports inputs
 		inputUpdate();
 
-		// Power Management
-		updatePower();
-
 		//----------------------------------------
 		// 	MODE_SETUP
 		//----------------------------------------
@@ -243,6 +240,12 @@ void SckBase::update() {
 					saveConfig();
 				}
 			}
+		} else {
+
+			// This actions may interfere with readlight, so they are only runned outside setup mode
+			// Power Management
+			updatePower();
+
 		}
 	}
 }
