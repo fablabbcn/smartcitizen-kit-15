@@ -35,6 +35,8 @@ enum SensorType {
 	SENSOR_NO2_LOAD_RESISTANCE,
 
 	// I2C Auxiliary Sensors
+	SENSOR_I2C_EXPANDER_TCA9548A,
+
 	SENSOR_ALPHADELTA_SLOT_1A,
 	SENSOR_ALPHADELTA_SLOT_1W,
 	SENSOR_ALPHADELTA_SLOT_2A,
@@ -67,6 +69,11 @@ enum SensorType {
 
 	// Actuators (This is temp)
 	SENSOR_GROOVE_OLED,
+
+	// Put one here for each muxed sensor
+	// SENSOR_MUX01A,
+	// SENSOR_MUX01B,
+	// SENSOR_MUX02,
 
 	SENSOR_COUNT	
 };
@@ -107,8 +114,9 @@ public:
 	uint32_t interval;
 	bool enabled;
 	bool busy;
+	int8_t muxPort;			// Tens + 0x70 is expander board address and units is the port (ej. 05 is address 0x70 and port 5) (ej. 47 is address 0x74 and port 7 )
 
-	OneSensor(SensorLocation nLocation, SensorType nType, const char *nTitle, uint8_t nId=0, bool nEnabled=false, bool nControllable=false, const char *nUnit="") {
+	OneSensor(SensorLocation nLocation, SensorType nType, const char *nTitle, uint8_t nId=0, bool nEnabled=false, bool nControllable=false, const char *nUnit="", int8_t nMuxPort=-1) {
 		type = nType;
 		title = nTitle;
 		unit = nUnit;
@@ -121,6 +129,7 @@ public:
 		interval = default_sensor_reading_interval;
 		enabled = nEnabled;
 		busy = false;
+		muxPort = nMuxPort;
 	}
 };
 
@@ -154,6 +163,10 @@ public:
 		OneSensor {	BOARD_URBAN, 		SENSOR_NO2_LOAD_RESISTANCE, 		"Nitrogen dioxide load resistance",		0,		false,		false,			"Ohms"},
 
 		// I2C Auxiliary Sensors
+		
+		// I2C Expander TCA9548A
+		OneSensor {	BOARD_AUX, 			SENSOR_I2C_EXPANDER_TCA9548A,		"I2C Expander", 						0,		false,		false,			},
+
 		// Alphasense Delta board (3 Gas sensor Slots, + SHT31 Temp-Humidity)
 		OneSensor {	BOARD_AUX, 			SENSOR_ALPHADELTA_SLOT_1A,			"AlphaDelta 1A",						0,		false,		true,			},
 		OneSensor {	BOARD_AUX, 			SENSOR_ALPHADELTA_SLOT_1W,			"AlphaDelta 1W",						0,		false,		true,			},
@@ -198,6 +211,12 @@ public:
 
 		//-----------------------
 		// Add New Sensor Here!!!
+
+		// Muxed Sensors
+		// Example of two Groove SHT31 (temperature and humidity) connected to a multiplexer on ports 0 and 1
+		// OneSensor {	BOARD_AUX, 			SENSOR_MUX01A, 						"MUX01 Temperature SHT31", 				0,		true,		false,			"C",	01},
+		// OneSensor {	BOARD_AUX, 			SENSOR_MUX01B,						"MUX01 Humidity SHT31", 				0,		true,		false,			"%",	01},
+		// OneSensor {	BOARD_AUX, 			SENSOR_MUX02, 						"MUX02 Other sensor", 					0,		true,		false,			"C",	02},
 
 	};
 

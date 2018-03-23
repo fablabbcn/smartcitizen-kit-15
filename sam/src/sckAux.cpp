@@ -5,6 +5,7 @@ GrooveI2C_ADC		grooveI2C_ADC;
 INA219				ina219;
 Groove_OLED			groove_OLED;
 WaterTemp_DS18B20 	waterTemp_DS18B20;
+I2Cexp_TCA9548A 	i2Cexpander;
 Atlas				atlasPH = Atlas(SENSOR_ATLAS_PH);
 Atlas				atlasEC = Atlas(SENSOR_ATLAS_EC);
 Atlas				atlasDO = Atlas(SENSOR_ATLAS_DO);
@@ -22,8 +23,14 @@ bool I2Cdetect(byte address) {
 
 bool AuxBoards::begin(OneSensor* wichSensor) {
 
+	if (i2Cexpander.detected) {
+		if (wichSensor->muxPort >= 0) i2Cexpander.selectPort(wichSensor->muxPort);
+		else i2Cexpander.disable();
+	}
+
 	switch (wichSensor->type) {
 
+		case SENSOR_I2C_EXPANDER_TCA9548A:		i2Cexpander.begin(); return false; break;
 		case SENSOR_ALPHADELTA_SLOT_1A:
 		case SENSOR_ALPHADELTA_SLOT_1W:
 		case SENSOR_ALPHADELTA_SLOT_2A:
@@ -57,6 +64,13 @@ bool AuxBoards::begin(OneSensor* wichSensor) {
 
 float AuxBoards::getReading(OneSensor* wichSensor) {
 	
+	if (i2Cexpander.detected) {
+		if (wichSensor->muxPort >= 0) {
+			if (!i2Cexpander.selectPort(wichSensor->muxPort)) return -9998;
+		}
+		else i2Cexpander.disable();
+	}
+
 	switch (wichSensor->type) {
 		case SENSOR_ALPHADELTA_SLOT_1A:	 	return alphaDelta.getElectrode(alphaDelta.Slot1.electrode_A); break;
 		case SENSOR_ALPHADELTA_SLOT_1W: 	return alphaDelta.getElectrode(alphaDelta.Slot1.electrode_W); break;
@@ -89,6 +103,11 @@ float AuxBoards::getReading(OneSensor* wichSensor) {
 }
 
 bool AuxBoards::getBusyState(OneSensor* wichSensor) {
+
+	if (i2Cexpander.detected) {
+		if (wichSensor->muxPort >= 0) i2Cexpander.selectPort(wichSensor->muxPort);
+		else i2Cexpander.disable();
+	}
 	
 	switch(wichSensor->type) {
 		case SENSOR_GROOVE_OLED:	return true; break;
@@ -105,6 +124,11 @@ bool AuxBoards::getBusyState(OneSensor* wichSensor) {
 }
 
 String AuxBoards::control(OneSensor* wichSensor, String command) {
+
+	if (i2Cexpander.detected) {
+		if (wichSensor->muxPort >= 0) i2Cexpander.selectPort(wichSensor->muxPort);
+		else i2Cexpander.disable();
+	}
 
 	switch(wichSensor->type) {
 		case SENSOR_ALPHADELTA_SLOT_1A:
@@ -603,18 +627,18 @@ bool Atlas::sendCommand(char* command) {
 
 bool Atlas::tempCompensation() {
 
-		String stringData;
-		char data[10];
+	String stringData;
+	char data[10];
 
-		float temperature = waterTemp_DS18B20.getReading();
+	float temperature = waterTemp_DS18B20.getReading();
 
-		if (temperature == 0) return false;
+	if (temperature == 0) return false;
 
-		sprintf(data,"T,%.2f",temperature);
+	sprintf(data,"T,%.2f",temperature);
 
-		if (sendCommand(data)) return true;
+	if (sendCommand(data)) return true;
 
-		return false;
+	return false;
 }
 
 uint8_t Atlas::getResponse() {
@@ -739,12 +763,6 @@ bool Groove_SHT31::begin() {
 
 bool Groove_SHT31::update() {
 
-	SerialUSB.println("entered");
-	// SerialUSB.println(millis());
-
-	// If last update was less than 2 sec ago dont do it again
-	// if (millis() - lastUpdate < 2000 && millis() > 2000) return true;
-
 	uint8_t readbuffer[6];
 	sendComm(SINGLE_SHOT_HIGH_REP);
   	
@@ -753,16 +771,12 @@ bool Groove_SHT31::update() {
   	// Wait for answer (datasheet says 15ms is the max)
   	uint32_t started = millis();
   	while(Wire.available() != 6) {
-  		if (millis() - started > timeout) {
-  			SerialUSB.println("TimeOUT!!!"); 
-  			return false;
-  		}
+  		if (millis() - started > timeout) return false;
    	}
 
   	// Read response
 	for (uint8_t i=0; i<6; i++) {
 		readbuffer[i] = Wire.read();
-		SerialUSB.println(readbuffer[i]);
 	}
 
 	uint16_t ST, SRH;
@@ -770,27 +784,15 @@ bool Groove_SHT31::update() {
 	ST <<= 8;
 	ST |= readbuffer[1];
 
-	SerialUSB.println("1");
-
 	// Check Temperature crc
-	if (readbuffer[2] != crc8(readbuffer, 2)) {
-		SerialUSB.println("CRC ERROR on temp!!!"); 
-		return false;
-	}
-
-	SerialUSB.println("2");
+	if (readbuffer[2] != crc8(readbuffer, 2)) return false;
 
 	SRH = readbuffer[3];
 	SRH <<= 8;
 	SRH |= readbuffer[4];
 
 	// check Humidity crc
-	if (readbuffer[5] != crc8(readbuffer+3, 2)) {
-		SerialUSB.println("CRC ERROR on hum!!!"); 
-		return false;
-	}
-
-	SerialUSB.println("3");
+	if (readbuffer[5] != crc8(readbuffer+3, 2)) return false;
 
 	double temp = ST;
 	temp *= 175;
@@ -804,8 +806,6 @@ bool Groove_SHT31::update() {
 	humidity = (float)shum;
 
 	lastUpdate = millis();
-
-	SerialUSB.println("paso");
 
 	return true;
 }
@@ -839,6 +839,45 @@ uint8_t Groove_SHT31::crc8(const uint8_t *data, int len) {
 		}
 	}
 	return crc;
+}
+
+bool I2Cexp_TCA9548A::begin() {
+
+	for (uint8_t i=0; i<7; i++) {
+		if (I2Cdetect(devices[i].address)) {
+			devices[i].present = 1;
+			detected = true;
+		} 
+	}
+	return detected;
+}
+
+bool I2Cexp_TCA9548A::selectPort(uint8_t wichMuxPort) {
+
+	uint8_t wichDevice = wichMuxPort / 10;
+	uint8_t wichPort = wichMuxPort % 10;
+
+	if (!devices[wichDevice].present) return false;
+	if (wichPort > 7) return false;
+
+	Wire.beginTransmission(devices[wichDevice].address);
+	Wire.write(1 << wichPort);
+	uint8_t response = Wire.endTransmission();
+	if (response != 0) return false;
+
+	return true;
+}
+
+bool I2Cexp_TCA9548A::disable() {
+
+	for (uint8_t i=0; i<7; i++) {
+		if (devices[i].present) {
+			Wire.beginTransmission(devices[i].address);
+			Wire.write(0);
+			Wire.endTransmission();
+		}
+	}
+	return true;
 }
 
 
