@@ -273,21 +273,6 @@ bool SckESP::processMsg() {
 	 		stopWebserver();
 	 		break;
 
-	 	} case ESP_DEEP_SLEEP_COM: {
-
-	 		ESP.deepSleep(0);			// Microseconds
-	 		break;
-
-	 	} case ESP_GET_APCOUNT_COM: {
-	 		
-	 		scanAP();
-			String sn = String(netNumber);
-			clearParam();
-			sn.toCharArray(msgOut.param, 240);
-			msgOut.com = ESP_GET_APCOUNT_COM;
-	 		SAMsendMsg();
-	 		break;
-
 	 	} case ESP_GET_APLIST_COM: {
 	 		msgOut.com = ESP_GET_APLIST_COM;
 	 		
@@ -323,24 +308,6 @@ bool SckESP::processMsg() {
 			msgOut.com = ESP_GET_TIME_COM;
 			SAMsendMsg();
 	 		break;
-
-		} case ESP_SET_TIME_COM: {
-
-			String tepoch = msgIn.param;
-			uint32_t iepoch = tepoch.toInt();
-			const unsigned long DEFAULT_TIME = 1357041600; // Jan 1 2013
-
-			if (iepoch >= DEFAULT_TIME) { 
-
-				setTime(iepoch);
-       			espStatus.time = ESP_TIME_UPDATED_EVENT;
-       			debugOUT(F("Time updated from SAM!!!"));
-
-       			msgOut.com = ESP_SET_TIME_COM;
-       			SAMsendMsg();
-			}
-			break;
-
 
 		} case ESP_SYNC_HTTP_TIME_COM: {
 

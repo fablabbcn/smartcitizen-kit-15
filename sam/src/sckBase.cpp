@@ -1022,10 +1022,6 @@ void SckBase::ESPprocessMsg() {
 			saveConfig();
 			break;
 
-		} case ESP_GET_APCOUNT_COM: {
-
-			break;
-
 		} case ESP_GET_VERSION_COM: {
 
 			StaticJsonBuffer<240> jsonBuffer;
@@ -1090,18 +1086,7 @@ void SckBase::ESPprocessMsg() {
 			sckOut(String F("ESP free heap: ") + String(msgIn.param));
 			break;
 
-		} //case ESP_WEB_CONFIG_SUCCESS: {
-
-			// sckOut(F("Configuration changed via WebServer!!!"));
-			// led.configOK();
-		 // 	readLightEnabled = false;
-		 // 	readLight.reset();
-
-		 // 	//MQTT Hellow for Onboarding process
-			// triggerHello = true;
-			// break;
-
-		//}
+		}
 	}
 
 	// Clear msg
@@ -1417,13 +1402,6 @@ void SckBase::sckIn(String strIn) {
 			ESPqueueMsg(false);
 			break;
 
-		} case EXTCOM_ESP_SLEEP: {
-
-			sckOut(F("Sleeping ESP..."), PRIO_HIGH);
-			msgBuff.com = ESP_DEEP_SLEEP_COM;
-			ESPqueueMsg(false);
-			break;
-
 		} case EXTCOM_ESP_WAKEUP: {
 
 			digitalWrite(CH_PD, LOW);
@@ -1704,14 +1682,6 @@ void SckBase::sckIn(String strIn) {
 			break;
 
 		// Time configuration
-		} case EXTCOM_SET_TIME: {
-			setTime(strIn);
-
-			strncpy(msgBuff.param, strIn.c_str(), 64);
-			msgBuff.com = ESP_SET_TIME_COM;
-			ESPqueueMsg(true, true);
-			break;
-
 		} case EXTCOM_GET_TIME: {
 			if (ISOtime()) {
 				if (strIn.equals("epoch")) {

@@ -7,46 +7,40 @@
 enum EspCommand {
 	ESP_NULL,					// 0
 	//							------ Events
-	ESP_FACTORY_RESET_EVENT,	// 1
-	ESP_DEBUG_EVENT,			// 2
+	ESP_DEBUG_EVENT,			// 1
 	// 							------ Configuration
-	ESP_WIFI_CONNECT_COM,		// 3
-	ESP_WIFI_DISCONNECT_COM,	// 4
-	ESP_GET_WIFI_COM,			// 5 @params uint8_t (the index of the network to retrieve)
-	ESP_SET_WIFI_COM,			// 6 @params String ssid, String password
-	ESP_CLEAR_WIFI_COM,			// 7 @params uint8_t index (the index of the network to be cleared)
-	ESP_GET_NET_INFO_COM,		// 8
-	ESP_SET_TOKEN_COM,			// 9 @params String Token
-	ESP_CLEAR_TOKEN_COM,		// 10
-	ESP_GET_TOKEN_COM,			// 11
-	ESP_SET_CONF_COM,			// 12 @params struct Configuration
+	ESP_WIFI_CONNECT_COM,		// 2
+	ESP_GET_WIFI_COM,			// 3 @params uint8_t (the index of the network to retrieve)
+	ESP_SET_WIFI_COM,			// 4 @params String ssid, String password
+	ESP_CLEAR_WIFI_COM,			// 5 @params uint8_t index (the index of the network to be cleared)
+	ESP_GET_NET_INFO_COM,		// 6
+	ESP_SET_TOKEN_COM,			// 7 @params String Token
+	ESP_CLEAR_TOKEN_COM,		// 8
+	ESP_GET_TOKEN_COM,			// 9
 								// @return bool: true if configuration saved, false otherwise
-	ESP_GET_CONF_COM,			// 13 @return struct Configuration
+	ESP_GET_CONF_COM,			// 10 @return struct Configuration
 	//					 		------ Control
-	ESP_START_AP_COM,			// 14
-	ESP_STOP_AP_COM,			// 15
-	ESP_START_WEB_COM,			// 16
-	ESP_STOP_WEB_COM,			// 17
-	ESP_DEEP_SLEEP_COM,			// 18
-	ESP_GET_VERSION_COM,		// 19
-	ESP_CONSOLE_COM,			// 20
-	ESP_MQTT_CONSOLE_COM,		// 21
-	ESP_CONSOLE_PUBLISH,		// 22
+	ESP_START_AP_COM,			// 11
+	ESP_STOP_AP_COM,			// 12
+	ESP_START_WEB_COM,			// 13
+	ESP_STOP_WEB_COM,			// 14
+	ESP_GET_VERSION_COM,		// 15
+	ESP_CONSOLE_COM,			// 16
+	ESP_MQTT_CONSOLE_COM,		// 17
+	ESP_CONSOLE_PUBLISH,		// 18
 	//					 		------ Get data
-	ESP_GET_APCOUNT_COM,		// 23
-	ESP_GET_APLIST_COM,			// 24 @return String apList (json formatted)
-	ESP_GET_TIME_COM,			// 25 @return String: epoch time
-	ESP_SET_TIME_COM,			// 26
-	ESP_SYNC_HTTP_TIME_COM,		// 27
-	ESP_MQTT_HELLOW_COM,		// 28
-	ESP_MQTT_PUBLISH_COM,		// 29
-	ESP_MQTT_SUBSCRIBE_COM,		// 30
-	ESP_MQTT_UNSUBSCRIBE_COM,	// 31
-	ESP_MQTT_CLEAR_STATUS,		// 32
-	ESP_GET_FREE_HEAP_COM,		// 33
+	ESP_GET_APLIST_COM,			// 19 @return String apList (json formatted)
+	ESP_GET_TIME_COM,			// 20 @return String: epoch time
+	ESP_SYNC_HTTP_TIME_COM,		// 21
+	ESP_MQTT_HELLOW_COM,		// 22
+	ESP_MQTT_PUBLISH_COM,		// 23
+	ESP_MQTT_SUBSCRIBE_COM,		// 24
+	ESP_MQTT_UNSUBSCRIBE_COM,	// 25
+	ESP_MQTT_CLEAR_STATUS,		// 26
+	ESP_GET_FREE_HEAP_COM,		// 27
 
 	//					 		------ State
-	ESP_GET_STATUS_COM,			// 34 @return struct espStatus:
+	ESP_GET_STATUS_COM,			// 28 @return struct espStatus:
 								//		-- wifi: ESP_WIFI_CONNECTED_EVENT, ESP_WIFI_ERROR_EVENT, ESP_WIFI_ERROR_PASS_EVENT, ESP_WIFI_ERROR_AP_EVENT, ESP_WIFI_NOT_CONFIGURED
 								//		-- net:	ESP_PING_OK, ESP_PING_ERROR
 								//		-- mqtt: ESP_MQTT_HELLO_OK, ESP_MQTT_PUBLISH_OK, ESP_MQTT_ERROR_EVENT
@@ -55,12 +49,10 @@ enum EspCommand {
 								//		-- web: ESP_WEB_ON, ESP_WEB_OFF
 								//		-- token: ESP_TOKEN_OK, ESP_TOKEN_ERROR
 								//		-- conf: ESP_CONF_NOT_CHANGED, ESP_CONF_CHANGED, ESP_CONF_WIFI_UPDATED, ESP_CONF_TOKEN_UPDATED
-	ESP_WEB_CONFIG_SUCCESS,		// 35 Something has changed succsesfully via web server
-	ESP_GET_LAST_EVENT_COM,		// 36 @return espEvents
 
-	ESP_SERIAL_DEBUG_TOGGLE,	// 37 Toggle serial debug output
-	ESP_LED_OFF,				// 38 Turn off both leds
-	ESP_LED_ON					// 39 Turn on both leds
+	ESP_SERIAL_DEBUG_TOGGLE,	// 29 Toggle serial debug output
+	ESP_LED_OFF,				// 30 Turn off both leds
+	ESP_LED_ON					// 31 Turn on both leds
 }; 
 
 
