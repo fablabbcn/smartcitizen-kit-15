@@ -14,7 +14,6 @@
 #include <Sensors.h>
 #include "sckAux.h"
 #include "ReadLight.h"
-#include "ReadSound.h"
 #include "sckUrban.h"
 #include "Constants.h"
 
@@ -528,11 +527,6 @@ public:
 	ReadLight readLight;
 	dataLight lightResults;
 	bool readLightEnabled = false;
-
-	// SoundRead
-	ReadSound readSound;
-	dataSound soundResults;
-	bool readSoundEnabled = false;
 
 	// Serial buffers
 	String serialBuff;

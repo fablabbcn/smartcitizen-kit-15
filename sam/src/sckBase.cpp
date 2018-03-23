@@ -249,9 +249,6 @@ void SckBase::update() {
 					if (digitalRead(POWER_WIFI)) ESPcontrol(ESP_ON);
 					saveConfig();
 				}
-			} else if (readSoundEnabled) {
-				readSound.read();
-				sckOut(String(readSound.out));
 			}
 		}
 	}
