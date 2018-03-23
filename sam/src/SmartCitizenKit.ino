@@ -22,13 +22,7 @@ void setup() {
 
 }
 
-uint32_t publish_timer = millis();
-
 void loop() {
-
-	// delay(10);
-	// base.getReading(SENSOR_INA219_CURRENT);
-	// base.sckOut(String(base.sensors[SENSOR_INA219_CURRENT].reading));
 
 	base.update();
 }

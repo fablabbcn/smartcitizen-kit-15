@@ -180,19 +180,12 @@ void SckBase::setup() {
 }
 void SckBase::update() {
 
-	// Flash and bridge modes
-	if (config.mode == MODE_FLASH || config.mode == MODE_BRIDGE){
+	// Flash mode
+	if (config.mode == MODE_FLASH){
 
-		// IT seems that this sometimes causes errors in data transmission to ESP
-		// if (SerialUSB.available()) {
-		// 	char buff = SerialUSB.read();
-		// 	serialBuff += buff;
-		// 	if (serialBuff.length() > 4) serialBuff.remove(0);
-		// 	if (serialBuff.startsWith("Bye")) softReset();
-		// 	Serial1.write(buff);
-		// }
 		if (SerialUSB.available()) Serial1.write(SerialUSB.read());
 		if (Serial1.available()) SerialUSB.write(Serial1.read());
+	
 	} else if (config.mode != MODE_SHELL) {
 
 		// update ESP communications
@@ -678,10 +671,6 @@ void SckBase::changeMode(SCKmodes newMode) {
 	// Stop searching for light signals (only do it on setup mode)
 	readLightEnabled = false;
 
-	// Configure things depending on new mode
-	// Restore previous output level
-	if (config.mode == MODE_BRIDGE) changeOutputLevel(prevOutputLevel);
-
 	// Actions for each mode
 	switch(newMode) {
 		case MODE_SETUP: {
@@ -717,12 +706,6 @@ void SckBase::changeMode(SCKmodes newMode) {
 
 			timerSet(ACTION_UPDATE_SENSORS, 500, true);
 			sckOut(String F("Publishing every ") + String(config.publishInterval) + " seconds");
-			break;
-
-		} case MODE_BRIDGE: {
-			ESPcontrol(ESP_ON);
-			changeOutputLevel(OUT_SILENT);
-			publishRuning = false;
 			break;
 
 		} case MODE_FLASH: {
@@ -815,7 +798,7 @@ void SckBase::inputUpdate() {
 void SckBase::ESPcontrol(ESPcontrols controlCommand) {
 	switch(controlCommand){
 		case ESP_OFF:
-			if (!digitalRead(POWER_WIFI) && config.mode != MODE_BRIDGE) {
+			if (!digitalRead(POWER_WIFI)) {
 				closeFiles();
 				sprintf(outBuff, "Turning off ESP: on for %.2f seconds", (millis() - espLastOn)/1000);
 				sckOut();
@@ -3190,10 +3173,6 @@ void Led::update(SCKmodes newMode, uint8_t newPulseMode) {
 			break;
 		} case MODE_FLASH: {
 			ledRGBcolor = lightBlueRGB;
-			pulseMode = PULSE_STATIC;
-			break;
-		} case MODE_BRIDGE: {
-			ledRGBcolor = lightGreenRGB;
 			pulseMode = PULSE_STATIC;
 			break;
 		} case MODE_OFF: {

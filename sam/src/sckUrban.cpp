@@ -173,24 +173,23 @@ void SckUrban::gainChange(uint8_t value) {
 
 float SckUrban::getsound() {
 
-		return ((float)(analogRead(S4)) + 1) / RESOLUTION_ANALOG * VCC;
+	return ((float)(analogRead(S4)) + 1) / RESOLUTION_ANALOG * VCC;
 }
 
 void SckUrban::writeResistorRaw(byte resistor, int value) {
 
-	 if (value>255) value = 0;
-	 else if (value<0) value = 255;
+	if (value>255) value = 0;
+	else if (value<0) value = 255;
 
-	 byte POT = POT1;
-	 byte ADDR = resistor;
+	byte POT = POT1;
+	byte ADDR = resistor;
 
-	 if ((resistor==6)||(resistor==7))
-		 {
-			 POT = POT4;
-			 ADDR = resistor - 6;
-		 }
-	 writeI2C(POT, 16, 192);        // select WR (volatile) registers in POT
-	 writeI2C(POT, ADDR, value);
+	if ((resistor==6)||(resistor==7)) {
+		POT = POT4;
+		ADDR = resistor - 6;
+	}
+	writeI2C(POT, 16, 192);        // select WR (volatile) registers in POT
+	writeI2C(POT, ADDR, value);
 }
 
 void SckUrban::writeI2C(byte deviceaddress, byte address, byte data ) {

@@ -99,25 +99,3 @@ public:
 
 private:
 };
-
-
-
-/*
-NOTAS
-
--- Por I2C tenemos:
-	* El potenciometro digital
-	* Humidity
-	* Temperature
-	* UV
-	* Light
-
--- Por pines analogicos
-	* CO Sensor
-	* NO Sensor
-	* CO Current
-	* NO Current
-	* Sound Sensor
-
-*/
-

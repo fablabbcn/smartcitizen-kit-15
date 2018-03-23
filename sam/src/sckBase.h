@@ -236,7 +236,6 @@ public:
 		"network",		// modeTitles[MODE_NET]
 		"sdcard",		// modeTitles[MODE_SD]
 		"esp flash",	// modeTitles[MODE_FLASH]
-		"esp bridge",	// modeTitles[MODE_BRIDGE]
 		"off"			// modeTitles[MODE_OFF]
 	};
 
