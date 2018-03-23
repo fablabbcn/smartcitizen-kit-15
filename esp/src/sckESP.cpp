@@ -913,9 +913,6 @@ void SckESP::webStatus() {
 	// Wifi status
 	json += "\"wifi\":\"" + String(espStatus.eventTitle[espStatus.wifi]) + "\",";
 
-	// Net status
-	json += "\"net\":\"" + String(espStatus.eventTitle[espStatus.net]) + "\",";
-
 	// MQTT status
 	json += "\"mqtt\":\"" + String(espStatus.eventTitle[espStatus.mqtt]) + "\",";
 

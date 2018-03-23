@@ -1183,11 +1183,6 @@ void SckBase::processStatus() {
 		}
 	}
 
-	// Net status has changed
-	if (espStatus.net != prevEspStatus.net) {
-
-	}
-
 	// Mqtt status has changed
 	if (espStatus.mqtt != prevEspStatus.mqtt) {
 

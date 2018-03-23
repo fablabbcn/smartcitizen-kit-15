@@ -76,10 +76,6 @@ enum espStatusEvents {
 	ESP_WIFI_ERROR_AP_EVENT,
 	ESP_WIFI_NOT_CONFIGURED,
 
-	// -- net:	ESP_PING_OK, ESP_PING_ERROR
-	ESP_PING_OK_EVENT,
-	ESP_PING_ERROR_EVENT,
-
 	// -- mqtt: ESP_MQTT_HELLO_OK, ESP_MQTT_PUBLISH_OK, ESP_MQTT_ERROR_EVENT, ESP_MQTT_CONFIG_SUB_EVENT, ESP_MQTT_CONFIG_UNSUB_EVENT,
 	ESP_MQTT_HELLO_OK_EVENT,
 	ESP_MQTT_PUBLISH_OK_EVENT,
@@ -115,7 +111,6 @@ enum espStatusEvents {
 enum espStatusTypes {
 	
 	ESP_STATUS_WIFI,
-	ESP_STATUS_NET,
 	ESP_STATUS_MQTT,
 	ESP_STATUS_TIME,
 	ESP_STATUS_AP,
@@ -133,7 +128,6 @@ struct ESPstatus {
 
 	// Alias for access each status value
 	espStatusEvents& wifi 	= value[ESP_STATUS_WIFI];
-	espStatusEvents& net 	= value[ESP_STATUS_NET];
 	espStatusEvents& mqtt 	= value[ESP_STATUS_MQTT];
 	espStatusEvents& time 	= value[ESP_STATUS_TIME];
 	espStatusEvents& ap 	= value[ESP_STATUS_AP];
@@ -144,7 +138,6 @@ struct ESPstatus {
 
 	const char *name[ESP_STATUS_TYPES_COUNT] = {
 		"wifi",
-		"net",
 		"mqtt",
 		"time",
 		"ap",
@@ -164,10 +157,6 @@ struct ESPstatus {
 		"password error",
 		"ap not found",
 		"not configured",
-
-		// -- net:	ESP_PING_OK, ESP_PING_ERROR
-		"ok",
-		"error",
 
 		// -- mqtt: ESP_MQTT_HELLO_OK, ESP_MQTT_PUBLISH_OK, ESP_MQTT_ERROR_EVENT, ESP_MQTT_CONFIG_SUB_EVENT, ESP_MQTT_CONFIG_UNSUB_EVENT,
 		"hello ok",
