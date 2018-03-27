@@ -300,13 +300,7 @@ bool SckESP::processMsg() {
 				setSyncInterval(300);
 			}
 
-			// Send time
-			debugOUT(F("Sending time to SAM..."));
-			String epochSTR = String(now());
-			clearParam();
-			epochSTR.toCharArray(msgOut.param, 240);
-			msgOut.com = ESP_GET_TIME_COM;
-			SAMsendMsg();
+			sendTimeToSAM();
 	 		break;
 
 		} case ESP_SYNC_HTTP_TIME_COM: {
@@ -1297,6 +1291,8 @@ time_t SckESP::getNtpTime() {
       espStatus.time = ESP_TIME_UPDATED_EVENT;
       debugOUT(F("Time updated!!!"));
 
+      sendTimeToSAM();
+
       return secsSince1900 - 2208988800UL;
     }
   }
@@ -1421,7 +1417,15 @@ bool SckESP::getHttpTime() {
 	espStatus.time = ESP_TIME_FAIL_EVENT;
 	return false;
 }
-
+void SckESP::sendTimeToSAM() {
+	// Send time
+	debugOUT(F("Sending time to SAM..."));
+	String epochSTR = String(now());
+	clearParam();
+	epochSTR.toCharArray(msgOut.param, 240);
+	msgOut.com = ESP_GET_TIME_COM;
+	SAMsendMsg();
+}
 
 // 	------------
 // 	|	Leds   |
