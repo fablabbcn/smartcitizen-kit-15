@@ -220,11 +220,9 @@ public:
 	void factoryReset();
 
 	// Flags
-	bool onWifi();
 	bool hostNameSet = false;
 	bool helloPublished = false;
-	bool onTime = false;
-
+	
 	// Modes
 	void changeMode(SCKmodes newMode);
 	void errorMode();
@@ -469,6 +467,7 @@ public:
 	bool ISOtime();
 	char ISOtimeBuff[20];
 	void epoch2iso(uint32_t epochTime, char* isoTime);
+	// bool onTime = false;
 
 	// Button
 	void buttonEvent();
@@ -541,6 +540,10 @@ public:
 	bool urbanPresent = false;
 
 private:
+
+	bool onTime = false;
+	bool onWifi = false;
+	bool waitingWifi = false;
 };
 
 // Utility functions

@@ -801,7 +801,7 @@ void SckBase::ESPcontrol(ESPcontrols controlCommand) {
 				digitalWrite(POWER_WIFI, HIGH);		// Turn off ESP
 				digitalWrite(GPIO0, LOW);
 				espTotalOnTime += millis() - espLastOn;
-
+				onWifi = false;
 				// Clears ESP status values
 				for (uint8_t i=0; i<ESP_STATUS_TYPES_COUNT; i++) espStatus.value[i] = ESP_NULL_EVENT;
 			}
@@ -931,6 +931,30 @@ void SckBase::ESPprocessMsg() {
 		case ESP_GET_STATUS_COM: {
 			processStatus();
 			break;
+		} case ESP_WIFI_CONNECTED: {
+
+			sckOut("Connected to wifi!!!");
+			onWifi = true;
+
+			// Send MQTT Hello
+			if (triggerHello) {
+				sckOut(F("Sending MQTT Hello..."));
+				msgBuff.com = ESP_MQTT_HELLOW_COM;
+				ESPqueueMsg(false, true);
+			}
+
+			// Forced Time sync
+			if (!onTime || rtc.getYear() < 18) {
+				sckOut(F("OUT OF TIME, Asking time to ESP..."));
+				msgBuff.com = ESP_GET_TIME_COM;
+				ESPqueueMsg(false, true);
+			}
+
+			// Feedback
+			if (config.mode != MODE_SETUP) led.update(config.mode, 0);
+
+			break;
+
 		} case ESP_DEBUG_EVENT: {
 
 			sckOut(String F("ESP > ") + String(msgIn.param));
@@ -1120,23 +1144,27 @@ void SckBase::processStatus() {
 
 		switch (espStatus.wifi) {
 			case ESP_WIFI_CONNECTED_EVENT: {
-				sckOut(F("Conected to wifi!!"));
 
-				// Feedback
-				if (config.mode != MODE_SETUP) led.update(config.mode, 0);
+				if (!onWifi) {
+					onWifi = true;
+					sckOut(F("Conected to wifi!!"));
 
-				// Send MQTT Hello
-				if (triggerHello) {
-					sckOut(F("Sending MQTT Hello..."));
-					msgBuff.com = ESP_MQTT_HELLOW_COM;
-					ESPqueueMsg(false, true);
-				}
+					// Feedback
+					if (config.mode != MODE_SETUP) led.update(config.mode, 0);
 
-				// Forced Time sync
-				if (!rtc.isConfigured() || rtc.getYear() < 17) {
-					sckOut(F("OUT OF TIME, Asking time to ESP..."));
-					msgBuff.com = ESP_GET_TIME_COM;
-					ESPqueueMsg(false, true);
+					// Send MQTT Hello
+					if (triggerHello) {
+						sckOut(F("Sending MQTT Hello..."));
+						msgBuff.com = ESP_MQTT_HELLOW_COM;
+						ESPqueueMsg(false, true);
+					}
+
+					// Forced Time sync
+					if (!onTime || rtc.getYear() < 18) {
+						sckOut(F("OUT OF TIME, Asking time to ESP..."));
+						msgBuff.com = ESP_GET_TIME_COM;
+						ESPqueueMsg(false, true);
+					}
 				}
 				break;
 
@@ -1197,12 +1225,15 @@ void SckBase::processStatus() {
 				RAMreadingsIndex = RAMreadingsIndex - RAMgroups[RAMgroupIndex].numberOfReadings;
 				RAMgroupIndex = RAMgroupIndex - 1;
 
-				// Check for more readings pending to be published
-				if (RAMgroupIndex >= 0) {
-					publishRuning = false;
-					publish();
-				}
+				publishRuning = false;
 
+				// Check for more readings pending to be published
+				if (RAMgroupIndex >= 0) timerSet(ACTION_PUBLISH, 500);
+				else {
+					waitingWifi = false;
+					ESPcontrol(ESP_OFF);
+				}
+				
 				// If we finish network publish start with sdcard (Can't do it at the same time because of the SPI bug)
 				else publishToSD();
 
