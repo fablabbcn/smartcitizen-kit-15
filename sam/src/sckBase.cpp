@@ -2619,6 +2619,8 @@ bool SckBase::sdLogADC(){
 //
 void SckBase::buttonEvent() {
 
+	if (config.mode == MODE_OFF) wakeUp();
+
 	userLastAction = rtc.getEpoch();
 
 	if (!digitalRead(PIN_BUTTON)) {
@@ -2640,13 +2642,6 @@ void SckBase::buttonEvent() {
 		timerClear(ACTION_VERY_LONG_PRESS);
 
 		buttonUp();
-	}
-
-	if (onUSB && !USBDeviceAttached) {
-		USBDevice.init();
-		USBDevice.attach();
-		USBDeviceAttached = true;
-		prompt();
 	}
 }
 void SckBase::buttonDown() {
@@ -2915,15 +2910,11 @@ void SckBase::updatePower() {
 
 	if (millis() % 500 != 0) return;
 
-	if (getVoltage(USB_CHAN) > 3.0){
+	if (getVoltage(USB_CHAN) > 3.0) {
 
 		// USB is JUST connected
-		if (!onUSB) {
-			sckOut("USB connected!");
-			USBDevice.init();
-			USBDevice.attach();
-			USBDeviceAttached = true;
-		}
+		if (!onUSB) sckOut("USB connected!");
+
 		onUSB = true;
 
 		// Check if we are chanrging the battery
@@ -2945,11 +2936,8 @@ void SckBase::updatePower() {
 	} else {
 
 		// USB is not connected
-		if (onUSB) {
-			sckOut("USB disconnected!");
-			USBDevice.detach();
-			USBDeviceAttached = false;
-		}
+		if (onUSB) sckOut("USB disconnected!");
+
 		onUSB = false;
 
 		// There is no way of charging without USB
@@ -3002,8 +2990,10 @@ void SckBase::updatePower() {
 				sleepTime = minSleepPeriod * 1000;
 				goToSleep();
 
-				if (config.mode == MODE_NET) led.setRGBColor(led.blueRGB);
-				else if (config.mode == MODE_SD) led.setRGBColor(led.pinkRGB);
+				if (getVoltage(USB_CHAN) > 3.0) break;
+
+				if (config.persistentMode == MODE_NET) led.setRGBColor(led.blueRGB);
+				else if (config.persistentMode == MODE_SD) led.setRGBColor(led.pinkRGB);
 				delay(10);
 
 				NOW = rtc.getEpoch();
@@ -3075,6 +3065,12 @@ void SckBase::goToSleep() {
 	else LowPower.deepSleep();
 }
 void SckBase::wakeUp() {
+
+	// Connect USB
+	USBDevice.init();
+	USBDevice.attach();
+	USBDeviceAttached = true;
+
 	sckOut("Waked up!!!");
 	changeMode(config.persistentMode);
 }
