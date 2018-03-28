@@ -324,7 +324,7 @@ bool SckESP::processMsg() {
 			espStatus.mqtt = ESP_NULL_EVENT;
 			
 			// Parse input
-			StaticJsonBuffer<240> jsonBuffer;
+			StaticJsonBuffer<MQTTbufferSize> jsonBuffer;
 			JsonObject& jsonSensors = jsonBuffer.parseObject(msgIn.param);
 
 			// Iterate over all sensors

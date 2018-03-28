@@ -2538,7 +2538,7 @@ bool SckBase::ESPpublish()  {
 	RAMgetGroup(RAMgroupIndex);
 
 	// Prepare json for sending
-	StaticJsonBuffer<240> jsonBuffer;
+	StaticJsonBuffer<MQTTbufferSize> jsonBuffer;
 	JsonObject& jsonSensors = jsonBuffer.createObject();
 
 	// Epoch time of the grouped readings

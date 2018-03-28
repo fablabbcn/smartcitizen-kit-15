@@ -215,6 +215,8 @@ struct Configuration {
 	char token[8] = "null";
 };
 
+static const uint16_t MQTTbufferSize = 480;
+
 const String hardwareVer 	= "1.5";
 const String SAMversion	= "0.2.0";
 const String SAMbuildDate = String(__DATE__) + '-' + String(__TIME__);
