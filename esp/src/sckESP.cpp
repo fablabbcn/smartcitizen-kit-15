@@ -56,8 +56,6 @@ void SckESP::setup() {
 	readNetwork();
 	loadToken();
 
-	scanAP();
-
 	if (countSavedNetworks() <= 0) {
 		espStatus.wifi = ESP_WIFI_NOT_CONFIGURED;
 		ledBlink(ledRight, 100);
@@ -83,27 +81,14 @@ void SckESP::update() {
 		// WL_CONNECTED after successful connection is established
 		if (actualWIFIStatus == WL_CONNECTED) {
 			debugOUT(String F("Conected to wifi: ") + String(config.ssid) + " - " + String(config.pass));
+
+			msgOut.com = ESP_WIFI_CONNECTED;
+			clearParam();
+			SAMsendMsg();
+
 			espStatus.wifi = ESP_WIFI_CONNECTED_EVENT;
 			ledSet(ledRight, 1);
-			// setGoodNet();
-			stopAP();
 
-			startWebServer();	// CHECK if it doesnt mess with NTP
-
-			// mDNS
-			if (!MDNS.begin(hostname)) {
-				debugOUT(F("ERROR: mDNS service failed to start!!"));
-			} else {
-				debugOUT(F("mDNS service started!!"));
-				MDNS.addService("http", "tcp", 80);
-			}
-
-
-		// WL_DISCONNECTED if module is not configured in station mode
-		} else if (actualWIFIStatus == WL_DISCONNECTED) {
-
-			// tryConnection();
-		
 		// (NOT) WL_IDLE_STATUS when Wi-Fi is in process of changing between statuses
 		} else if (actualWIFIStatus != WL_IDLE_STATUS) {
 			
@@ -207,7 +192,6 @@ bool SckESP::processMsg() {
 			jsonIP["hn"] = hostname;
 			jsonIP["ip"] = tip;
 			jsonIP["mac"] = tmac;
-			// clearParam();
 			jsonIP.printTo(msgOut.param, 240);
 			SAMsendMsg();
 			break;
@@ -360,8 +344,11 @@ bool SckESP::processMsg() {
 				}
 			}
 
-			if (mqttPublish()) espStatus.mqtt = ESP_MQTT_PUBLISH_OK_EVENT;
-			else espStatus.mqtt = ESP_MQTT_ERROR_EVENT;
+			if (mqttPublish()) {
+				espStatus.mqtt = ESP_MQTT_PUBLISH_OK_EVENT;
+			} else {
+				espStatus.mqtt = ESP_MQTT_ERROR_EVENT;
+			}
 	 		break;
 
 	 	} case ESP_MQTT_SUBSCRIBE_COM: {
@@ -557,6 +544,8 @@ void SckESP::tryConnection() {
 //	-----------------------------
 //
 void SckESP::startAP(){
+
+	scanAP();
 
 	debugOUT(String F("Starting Ap with ssid: ") + String(hostname));
 
@@ -1395,6 +1384,7 @@ bool SckESP::getHttpTime() {
 					if (year() > 2010) {
 						debugOUT(F("Time updated!!!"));
 						espStatus.time = ESP_TIME_UPDATED_EVENT;
+						sendTimeToSAM();
 						return true;
 					} else {
 						debugOUT(F("Error in HTTP time reception!!!"));

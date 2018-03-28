@@ -118,13 +118,14 @@ void SckBase::setup() {
 	LowPower.attachInterruptWakeup(PIN_BUTTON, ISR_button, CHANGE);
 	LowPower.attachInterruptWakeup(RTC_ALARM_WAKEUP, ISR_alarm, CHANGE);
 
-	// Pause for a moment (for uploading firmware in case of problems)
-	delay(2000);
-
- 	// Peripheral setup
+	// Peripheral setup
  	rtc.begin();
  	if (rtc.isConfigured() && rtc.getYear() >= 17) onTime = true;
 	led.setup();
+
+	// Pause for a moment (for uploading firmware in case of problems)
+	delay(2000);
+
 	sdPresent();
 	urbanPresent = urbanBoardDetected();
 	if (urbanPresent) {
@@ -826,12 +827,10 @@ void SckBase::ESPcontrol(ESPcontrols controlCommand) {
 				sdPresent();
 				sckOut("Turning on ESP...");
 				SPI.end();						// Important for SCK-1.5.3 so the sdfat lib releases the SPI bus and the ESP can access his flash
-				delay(10);
 				digitalWrite(CH_PD, HIGH);
 				digitalWrite(GPIO0, HIGH);		// HIGH for normal mode
 				digitalWrite(POWER_WIFI, LOW); 	// Turn on ESP
 				espLastOn = millis();
-				delay(10);
 				timerSet(ACTION_CLEAR_ESP_BOOTING, 500);
 			}
 			break;
@@ -1364,11 +1363,6 @@ void SckBase::processStatus() {
 	// Make a copy of status
 	for (uint8_t i=0; i<ESP_STATUS_TYPES_COUNT; i++) prevEspStatus.value[i] = espStatus.value[i];
 }
-bool SckBase::onWifi() {
-
-	if (espStatus.wifi == ESP_WIFI_CONNECTED_EVENT) return true;
-	return false;
-}
 
 /* Process text inputs and executes commands
  *
@@ -1434,13 +1428,6 @@ void SckBase::sckIn(String strIn) {
 			sckOut(F("Asking ESP stop web server..."), PRIO_HIGH);
 			msgBuff.com = ESP_STOP_WEB_COM;
 			ESPqueueMsg(false);
-			break;
-
-		} case EXTCOM_ESP_WAKEUP: {
-
-			digitalWrite(CH_PD, LOW);
-			delay(10);
-			digitalWrite(CH_PD, HIGH);
 			break;
 
 		} case EXTCOM_GET_APLIST: {
@@ -3049,6 +3036,7 @@ void SckBase::goToSleep() {
 
 	// Turn off ESP
 	ESPcontrol(ESP_OFF);
+	onWifi = false;
 
 	// ESP control pins savings
 	digitalWrite(CH_PD, LOW);
@@ -3397,7 +3385,7 @@ bool SckBase::timerRun() {
 
 							if (digitalRead(POWER_WIFI)) ESPcontrol(ESP_ON);
 
-							if (onTime && onWifi() && tokenSet) {
+							if (onTime && onWifi && tokenSet) {
 								timerClear(ACTION_RECOVER_ERROR);
 								timerClear(ACTION_START_AP_MODE);
 								changeMode(MODE_NET);
@@ -3430,7 +3418,7 @@ bool SckBase::timerRun() {
 
 					} case ACTION_MQTT_SUBSCRIBE: {
 
-						if (onWifi()) mqttConfig(true);
+						if (onWifi) mqttConfig(true);
 						else timerSet(ACTION_MQTT_SUBSCRIBE, 1000);
 						break;
 
