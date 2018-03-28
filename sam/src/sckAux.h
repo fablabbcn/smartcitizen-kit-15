@@ -50,6 +50,7 @@ class AuxBoards {
 			0x64,		// SENSOR_ATLAS_EC_SG,
 			0x61,		// SENSOR_ATLAS_DO,
 			0x61,		// SENSOR_ATLAS_DO_SAT,
+			0x66,		// SENSOR_ATLAS_TEMPERATURE,
 			0x20, 		// SENSOR_MOISTURE_CHIRP
 			0x44,		// SENSOR_GROOVE_TEMP_SHT31,
 			0x44,		// SENSOR_GROOVE_HUM_SHT31,
@@ -239,6 +240,8 @@ class WaterTemp_DS18B20 {
 
 		uint8_t conf = 0x05;
 
+		bool detected = false;
+
 		/**
 		 * Start the transmission of data for the DS18B20 trough the DS2482_100 bridge
 		 */
@@ -259,6 +262,7 @@ class Atlas {
 		bool PH = false;
 		bool EC = false;
 		bool DO = false;
+		bool TEMP = false;
 		float newReading;
 		float newReadingB;
 		String atlasResponse;
@@ -292,6 +296,12 @@ class Atlas {
 					DO = true;
 					break;				
 
+				} case SENSOR_ATLAS_TEMPERATURE: {
+
+					deviceAddress = 0x66;
+					TEMP = true;
+					break;
+
 				} default: break;
 			}
 
@@ -310,6 +320,8 @@ class Atlas {
 		uint16_t longWait = 910; //ms
 		uint16_t mediumWait = 610; //ms
 		uint16_t shortWait = 310; //ms
+
+		bool detected = false;
 
 	private:
 };

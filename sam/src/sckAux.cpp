@@ -9,6 +9,7 @@ I2Cexp_TCA9548A 	i2Cexpander;
 Atlas				atlasPH = Atlas(SENSOR_ATLAS_PH);
 Atlas				atlasEC = Atlas(SENSOR_ATLAS_EC);
 Atlas				atlasDO = Atlas(SENSOR_ATLAS_DO);
+Atlas 				atlasTEMP = Atlas(SENSOR_ATLAS_TEMPERATURE);
 Moisture 			moistureChirp;
 Groove_SHT31 		groove_SHT31;
 
@@ -51,6 +52,7 @@ bool AuxBoards::begin(OneSensor* wichSensor) {
 		case SENSOR_ATLAS_EC_SG: 				return atlasEC.begin(); break;
 		case SENSOR_ATLAS_DO:
 		case SENSOR_ATLAS_DO_SAT: 				return atlasDO.begin(); break;
+		case SENSOR_ATLAS_TEMPERATURE:			return atlasTEMP.begin(); break;
 		case SENSOR_CHIRP_TEMPERATURE:
 		case SENSOR_CHIRP_LIGHT:
 		case SENSOR_CHIRP_MOISTURE:				return moistureChirp.begin(); break;
@@ -91,6 +93,7 @@ float AuxBoards::getReading(OneSensor* wichSensor) {
 		case SENSOR_ATLAS_EC_SG:			return atlasEC.newReadingB; break;
 		case SENSOR_ATLAS_DO:				return atlasDO.newReading; break;
 		case SENSOR_ATLAS_DO_SAT:			return atlasDO.newReadingB; break;
+		case SENSOR_ATLAS_TEMPERATURE:		return atlasTEMP.newReading; break;
 		case SENSOR_CHIRP_MOISTURE:			return moistureChirp.getReading(moistureChirp.CHIRP_MOISTURE); break;
 		case SENSOR_CHIRP_TEMPERATURE:		return moistureChirp.getReading(moistureChirp.CHIRP_TEMPERATURE); break;
 		case SENSOR_CHIRP_LIGHT:			return moistureChirp.getReading(moistureChirp.CHIRP_LIGHT); break;
@@ -110,15 +113,16 @@ bool AuxBoards::getBusyState(OneSensor* wichSensor) {
 	}
 	
 	switch(wichSensor->type) {
-		case SENSOR_GROOVE_OLED:	return true; break;
-		case SENSOR_ATLAS_PH: 		return atlasPH.getBusyState(); break;
+		case SENSOR_GROOVE_OLED:		return true; break;
+		case SENSOR_ATLAS_PH: 			return atlasPH.getBusyState(); break;
 		case SENSOR_ATLAS_EC:
-		case SENSOR_ATLAS_EC_SG: 	return atlasEC.getBusyState(); break;
+		case SENSOR_ATLAS_EC_SG: 		return atlasEC.getBusyState(); break;
 		case SENSOR_ATLAS_DO:
-		case SENSOR_ATLAS_DO_SAT: 	return atlasDO.getBusyState(); break;
+		case SENSOR_ATLAS_DO_SAT: 		return atlasDO.getBusyState(); break;
+		case SENSOR_ATLAS_TEMPERATURE:	return atlasTEMP.getBusyState(); break;
 		case SENSOR_CHIRP_MOISTURE:		return moistureChirp.getBusyState(moistureChirp.CHIRP_MOISTURE); break;
 		case SENSOR_CHIRP_TEMPERATURE:	return moistureChirp.getBusyState(moistureChirp.CHIRP_TEMPERATURE); break;
-		case SENSOR_CHIRP_LIGHT: 	return moistureChirp.getBusyState(moistureChirp.CHIRP_LIGHT); break;
+		case SENSOR_CHIRP_LIGHT: 		return moistureChirp.getBusyState(moistureChirp.CHIRP_LIGHT); break;
 		default: return false; break;
 	}
 }
@@ -434,6 +438,8 @@ bool WaterTemp_DS18B20::begin() {
 	DS_bridge.wireSkip();
 	DS_bridge.wireWriteByte(0x44);
 
+	detected = true;
+
 	return true;
 }
 
@@ -540,9 +546,17 @@ float Atlas::getReading() {
 
 bool Atlas::getBusyState() {
 
+
+
 	switch (state) {
 		
 		case REST: {
+
+			if (TEMP) {
+				state = TEMP_COMP_SENT;
+				break;
+			}
+
 			if (tempCompensation()) state = TEMP_COMP_SENT;
 			break;
 
@@ -553,7 +567,12 @@ bool Atlas::getBusyState() {
 			break;
 
 		} case ASKED_READING: {
-			if (millis() - lastCommandSent >= longWait) {
+
+			uint16_t customWait = longWait;
+
+			if (TEMP) customWait = mediumWait;
+
+			if (millis() - lastCommandSent >= customWait) {
 
 				uint8_t code = getResponse();
 
@@ -567,7 +586,7 @@ bool Atlas::getBusyState() {
 					// Reading OK
 					state = REST;
 
-					if (PH)	newReading = atlasResponse.toFloat();
+					if (PH || TEMP)	newReading = atlasResponse.toFloat();
 					if (EC || DO) {
 						String first = atlasResponse.substring(0, atlasResponse.indexOf(","));
 						String second = atlasResponse.substring(atlasResponse.indexOf(",")+1);
@@ -626,16 +645,24 @@ bool Atlas::sendCommand(char* command) {
 }
 
 bool Atlas::tempCompensation() {
-
+	
 	String stringData;
 	char data[10];
+	float temperature = 0;
 
-	float temperature = waterTemp_DS18B20.getReading();
+	if (waterTemp_DS18B20.detected) temperature = waterTemp_DS18B20.getReading();	
+	else if (atlasTEMP.detected) temperature = atlasTEMP.getReading();
+	else {
 
+		// No available sensor for temp compensation
+		// Still we want the readings
+		return true;
+	}
+
+	// Error on reading temperature
 	if (temperature == 0) return false;
 
 	sprintf(data,"T,%.2f",temperature);
-
 	if (sendCommand(data)) return true;
 
 	return false;
