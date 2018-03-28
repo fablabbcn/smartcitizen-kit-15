@@ -792,7 +792,7 @@ void SckBase::inputUpdate() {
 void SckBase::ESPcontrol(ESPcontrols controlCommand) {
 	switch(controlCommand){
 		case ESP_OFF:
-			if (!digitalRead(POWER_WIFI)) {
+			if (!digitalRead(POWER_WIFI) && !waitingWifi) {
 				closeFiles();
 				sprintf(outBuff, "Turning off ESP: on for %.2f seconds", (millis() - espLastOn)/1000);
 				sckOut();
@@ -812,6 +812,7 @@ void SckBase::ESPcontrol(ESPcontrols controlCommand) {
 			led.bridge();
 			disableTimer5();
 			sckOut("Putting ESP in flash mode...\r\nRemember to reboot ESP after flashing (esp reboot)!");
+			waitingWifi = false;
 			if (!digitalRead(POWER_WIFI)) ESPcontrol(ESP_OFF);
 			SerialUSB.begin(ESP_FLASH_SPEED);
 			Serial1.begin(ESP_FLASH_SPEED);
@@ -1232,10 +1233,6 @@ void SckBase::processStatus() {
 					waitingWifi = false;
 					ESPcontrol(ESP_OFF);
 				}
-				
-				// If we finish network publish start with sdcard (Can't do it at the same time because of the SPI bug)
-				else publishToSD();
-
 				break;
 
 			} case ESP_MQTT_HELLO_OK_EVENT: {
@@ -1250,12 +1247,7 @@ void SckBase::processStatus() {
 				if (config.mode == MODE_NET) led.update(config.mode, 2);
 				sckOut(F("ERROR: MQTT failed!!"));
 
-				// For now keep them in SD and wait for next publish...
-				publishToSD();
-				break;
-
-			} case ESP_NULL_EVENT: {
-				sckOut("MQTT status cleared!!!");
+				publishRuning = false;
 				break;
 
 			} default: break;
@@ -2226,6 +2218,23 @@ void SckBase::updateSensors() {
 		return;
 	}
 
+	// If we are waiting for wifi for too much time reset ESP
+	if (waitingWifi && millis() - espLastOn > 30000) {
+		waitingWifi = false;
+		ESPcontrol(ESP_OFF);
+	}
+
+	// Wait for publish to finish before taking readings
+	if (publishRuning) {
+
+		// If publish takes too much time reset ESP
+	 	if (rtc.getEpoch() - publishStarted > 15) {
+		 		sckOut("MQTT publish timeout!!!");
+		 		publishRuning = false;
+		 		ESPcontrol(ESP_OFF);
+		} else return;
+	}
+
 	if (config.mode == MODE_SD && !sdPresent()) {
 		errorMode();
 		return;
@@ -2413,31 +2422,13 @@ void SckBase::publish() {
 
 	if (config.mode == MODE_NET) {
 
-		// If there is a publish running
-		if (publishRuning) {
+		if (digitalRead(POWER_WIFI)) ESPcontrol(ESP_ON);
+		waitingWifi = true;
 
-			// Give up on this publish try and reset to try to clear errors
-			if (rtc.getEpoch() - publishStarted > publish_timeout) {
-	 			sckOut("Publish is taking too much time...\n Saving to SD card and resetting!!!");
-	 			publishToSD();
-				softReset();
-			}
-
-			// Check for Wifi
-			if (!onWifi()) {
-				sckOut("Waiting for wifi for publishing...", PRIO_LOW);
-				return;
-			}
-
-		} else {
-
-			// If ESP is OFF turn it on
-			if (digitalRead(POWER_WIFI)) ESPcontrol(ESP_ON);
-
+		if (!publishRuning && onWifi) {
 			publishStarted = rtc.getEpoch();
 			publishRuning = true;
 			ESPpublish();
-
 		}
 
 	} else if (config.mode == MODE_SD) {
@@ -2544,11 +2535,15 @@ bool SckBase::ESPpublish()  {
 	// Epoch time of the grouped readings
 	jsonSensors["t"] = groupBuffer.time;
 
+	uint8_t sentSensors = 0;
+
 	for (uint8_t sensorIndex=0; sensorIndex<SENSOR_COUNT; sensorIndex++) {
 
 		SensorType wichSensor = static_cast<SensorType>(sensorIndex);
 
 		if (sensors[wichSensor].enabled && sensors[wichSensor].id > 0) {
+
+			sentSensors++;
 
 			// Write data sensor by sensor
 			for (uint8_t ii=0; ii<groupBuffer.numberOfReadings; ii++) {
@@ -2564,10 +2559,10 @@ bool SckBase::ESPpublish()  {
 
 	char tmpTime[20];
 	epoch2iso(groupBuffer.time, tmpTime);
-	sprintf(outBuff, "%s: %i sensor readings on the go to platform...", tmpTime, groupBuffer.numberOfReadings);
+	sprintf(outBuff, "%s: %i sensor readings on the go to platform...", tmpTime, sentSensors);
 	sckOut();
 
-	jsonSensors.printTo(msgBuff.param, 240);
+	jsonSensors.printTo(msgBuff.param, MQTTbufferSize);
 	msgBuff.com = ESP_MQTT_PUBLISH_COM;
 	ESPqueueMsg(true, true);
 
@@ -2963,9 +2958,6 @@ void SckBase::updatePower() {
 		// Led feedback
 		led.charging = false;
 
-		// Make sure we are not wating power on ESP if it is not necessary
-		if (config.mode != MODE_SETUP && !publishRuning && !timerExists(ACTION_RECOVER_ERROR)) ESPcontrol(ESP_OFF);
-
 		//Turn off Serial leds
 		digitalWrite(SERIAL_TX_LED, HIGH);
 		digitalWrite(SERIAL_RX_LED, HIGH);
@@ -2998,7 +2990,7 @@ void SckBase::updatePower() {
 		} else if (	(closestAction > minSleepPeriod) && 						// Still some time before next action
 					(rtc.getEpoch() - userLastAction > 20) && 					// At least 10 seconds after the last user action (button)
 					(config.mode == MODE_SD || config.mode == MODE_NET) && 		// Only in network an sdcard modes
-					!publishRuning) {											// If we are not publishing
+					!publishRuning && !waitingWifi) {							// If we are not publishing or waiting for wifi to publish
 
 			uint32_t NOW = rtc.getEpoch();
 			uint32_t wakeupTime = NOW + closestAction - 1;					// Wakeup 1 second before next action
@@ -3326,7 +3318,6 @@ bool SckBase::timerRun() {
 				// Check for action to execute
 				switch(timers[i].action) {
 					case ACTION_CLEAR_ESP_BOOTING:{
-						sckOut(F("ESP ready!!!"));
 						timerSet(ACTION_GET_ESP_STATUS, statusPoolingInterval, true);
 						break;
 
@@ -3360,6 +3351,11 @@ bool SckBase::timerRun() {
 					} case ACTION_UPDATE_SENSORS: {
 
 						updateSensors();
+						break;
+
+					} case ACTION_PUBLISH: {
+
+						publish();
 						break;
 
 					} case ACTION_DEBUG_LOG: {

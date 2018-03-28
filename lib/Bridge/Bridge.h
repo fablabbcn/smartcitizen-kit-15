@@ -42,7 +42,6 @@ enum EspCommand {
 	//					 		------ State
 	ESP_GET_STATUS_COM,			// 28 @return struct espStatus:
 								//		-- wifi: ESP_WIFI_CONNECTED_EVENT, ESP_WIFI_ERROR_EVENT, ESP_WIFI_ERROR_PASS_EVENT, ESP_WIFI_ERROR_AP_EVENT, ESP_WIFI_NOT_CONFIGURED
-								//		-- net:	ESP_PING_OK, ESP_PING_ERROR
 								//		-- mqtt: ESP_MQTT_HELLO_OK, ESP_MQTT_PUBLISH_OK, ESP_MQTT_ERROR_EVENT
 								//		-- time: ESP_TIME_FAIL, ESP_TIME_UPDATED
 								//		-- ap: ESP_AP_ON, ESP_AP_OFF
@@ -52,7 +51,12 @@ enum EspCommand {
 
 	ESP_SERIAL_DEBUG_TOGGLE,	// 29 Toggle serial debug output
 	ESP_LED_OFF,				// 30 Turn off both leds
-	ESP_LED_ON					// 31 Turn on both leds
+	ESP_LED_ON,					// 31 Turn on both leds
+
+	// new simple communications
+	ESP_WIFI_CONNECTED,
+	MQTT_PUBLISH_SUCCESS,
+	MQTT_PUBLISH_FAIL
 }; 
 
 

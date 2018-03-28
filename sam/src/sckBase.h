@@ -150,7 +150,8 @@ public:
 		ACTION_SAVE_SD_CONFIG,				// 15
 		ACTION_MQTT_SUBSCRIBE,				// 16
 		ACTION_RETRY_READ_SENSOR,			// 17
-		ACTION_SLEEP						// 18
+		ACTION_SLEEP,						// 18
+		ACTION_PUBLISH 						// 19
 	};
 	struct OneTimer	{
 		TimerAction action = ACTION_NULL;
@@ -196,8 +197,8 @@ public:
 	uint32_t globalLastReading = 0;
 	bool publishRuning = false;
 	uint32_t publishStarted = 0;
-	uint8_t sensorDisplayIndex = 0;					// For LCD sensor display
-	static const uint8_t publish_timeout = 120;		// Time out for publish (in seconds)
+	uint8_t sensorDisplayIndex = 0;		// For LCD sensor display
+	uint8_t publish_timeout = 5;		// If there are this amount of publish failures in a row the reset.
 
 	// Configuration
 	bool triggerHello = false;
@@ -247,8 +248,6 @@ public:
 		EXTCOM_ESP_STOP_AP,
 		EXTCOM_ESP_START_WEB,
 		EXTCOM_ESP_STOP_WEB,
-		EXTCOM_ESP_SLEEP,
-		EXTCOM_ESP_WAKEUP,
 		EXTCOM_GET_APLIST,
 		EXTCOM_ESP_SERIAL_DEBUG_TOGGLE,
 		EXTCOM_ESP_LED_ON,
@@ -336,8 +335,6 @@ public:
 	"esp stop ap",			// 	EXTCOM_ESP_STOP_AP,
 	"esp start web",		// 	EXTCOM_ESP_START_WEB,
 	"esp stop web",			// 	EXTCOM_ESP_STOP_WEB,
-	"esp sleep",			// 	EXTCOM_ESP_SLEEP,
-	"esp wakeup",			// 	EXTCOM_ESP_WAKEUP,
 	"get aplist",			// 	EXTCOM_GET_APLIST,
 	"esp debug",			// 	EXTCOM_ESP_SERIAL_DEBUG_TOGGLE,
 	"esp led on",			// 	EXTCOM_ESP_LED_ON,
