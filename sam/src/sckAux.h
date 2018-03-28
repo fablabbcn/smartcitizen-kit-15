@@ -376,27 +376,27 @@ class Groove_SHT31 {
 };
 
 class I2Cexp_TCA9548A {
-private:
-	struct Devices {
-		byte address;
-		bool present;
-	};
-	Devices devices[8] = {
-		{0x70, 0},
-		{0x71, 0},
-		{0x72, 0},
-		{0x73, 0},
-		{0x74, 0},
-		{0x75, 0},
-		{0x76, 0},
-		{0x77, 0},
-	};
+	private:
+		struct Devices {
+			byte address;
+			bool present;
+		};
+		Devices devices[8] = {
+			{0x70, 0},
+			{0x71, 0},
+			{0x72, 0},
+			{0x73, 0},
+			{0x74, 0},
+			{0x75, 0},
+			{0x76, 0},
+			{0x77, 0},
+		};
 
-public:
-	bool detected = false;
-	bool begin();
-	bool selectPort(uint8_t wichMuxPort);
-	bool disable();
+	public:
+		bool detected = false;
+		bool begin();
+		bool selectPort(uint8_t wichMuxPort);
+		bool disable();
 };
 
 void writeI2C(byte deviceAddress, byte instruction, byte data);

@@ -80,8 +80,8 @@ enum SensorType {
 	SENSOR_COUNT	
 };
 
-const uint32_t minimal_sensor_reading_interval = 30;
-const uint32_t default_sensor_reading_interval = 30;
+const uint32_t minimal_sensor_reading_interval = 60;
+const uint32_t default_sensor_reading_interval = 60;
 const uint32_t max_sensor_reading_interval = 86400;		// One day
 
 // Structs for RAM storing
@@ -180,7 +180,7 @@ public:
 		OneSensor {	BOARD_AUX, 			SENSOR_ALPHADELTA_HUMIDITY, 		"AlphaDelta Humidity",					0,		false,		false,			"%"},
 	
 		// Groove I2C ADC
-		OneSensor { BOARD_AUX,			SENSOR_GROOVE_I2C_ADC,				"Groove ADC",							0,		false,		false,			"V"},
+		OneSensor { BOARD_AUX,			SENSOR_GROOVE_I2C_ADC,				"Groove ADC",							25,		false,		false,			"V"},
 
 		// Adafruit INA291 High Side DC Current Sensor
 		OneSensor { BOARD_AUX,			SENSOR_INA219_BUSVOLT,				"INA219 Bus voltage",					0,		false,		false,			"V"},
@@ -198,7 +198,7 @@ public:
 
 		// I2C Moisture Sensor (chirp)
 		// https://github.com/Miceuz/i2c-moisture-sensor
-		OneSensor { BOARD_AUX, 			SENSOR_CHIRP_MOISTURE,				"Soil Moisture",						0,		false,		true,			},
+		OneSensor { BOARD_AUX, 			SENSOR_CHIRP_MOISTURE,				"Soil Moisture",						50,		false,		true,			},
 		OneSensor { BOARD_AUX, 			SENSOR_CHIRP_TEMPERATURE,			"Soil Temperature",						0,		false,		true,			"C"},
 		OneSensor { BOARD_AUX, 			SENSOR_CHIRP_LIGHT,					"Soil Light",							0,		false,		true,			},
 
