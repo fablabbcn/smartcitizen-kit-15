@@ -1706,6 +1706,11 @@ void SckBase::sckIn(String strIn) {
 
 			break;
 
+		// Time configuration
+		} case EXTCOM_SET_TIME: {
+			setTime(strIn);
+			break;
+
 		} case EXTCOM_SYNC_HTTP_TIME: {
 			sckOut("Asking ESP for HTTP time sync...");
 			msgBuff.com = ESP_SYNC_HTTP_TIME_COM;

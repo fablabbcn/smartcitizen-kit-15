@@ -31,13 +31,13 @@ float SckUrban::getReading(OneSensor* wichSensor) {
 		case SENSOR_CO_HEAT_TIME: return gasHeatingTime(SENSOR_CO); break;
 		case SENSOR_CO_HEAT_CURRENT: return gasGetHeaterCurrent(SENSOR_CO); break;
 		case SENSOR_CO_HEAT_SUPPLY_VOLTAGE: return gasGetRegulatorVoltage(SENSOR_CO); break;
-		case SENSOR_CO_HEAT_DROP_VOLTAGE: return (SENSOR_CO); break;
+		case SENSOR_CO_HEAT_DROP_VOLTAGE: return gasGetDropVoltage(SENSOR_CO); break;
 		case SENSOR_CO_LOAD_RESISTANCE: return gasGetLoadResistance(SENSOR_CO); break;
 		case SENSOR_NO2: return gasRead(SENSOR_NO2); break;
 		case SENSOR_NO2_HEAT_TIME: return gasHeatingTime(SENSOR_NO2); break;
 		case SENSOR_NO2_HEAT_CURRENT: return gasGetHeaterCurrent(SENSOR_NO2); break;
 		case SENSOR_NO2_HEAT_SUPPLY_VOLTAGE: return gasGetRegulatorVoltage(SENSOR_NO2); break;
-		case SENSOR_NO2_HEAT_DROP_VOLTAGE: return (SENSOR_NO2); break;
+		case SENSOR_NO2_HEAT_DROP_VOLTAGE: return gasGetDropVoltage(SENSOR_NO2); break;
 		case SENSOR_NO2_LOAD_RESISTANCE: return gasGetLoadResistance(SENSOR_NO2); break;
 		default: break;
 	}
@@ -63,14 +63,14 @@ String SckUrban::control(OneSensor* wichSensor, String command) {
 			} else if (command.startsWith("set current")) {
 				command.replace("set current", "");
 				command.trim();
-				int wichValue = command.toInt();
+				float wichValue = command.toFloat();
 				gasHeat(wichSensor->type, wichValue);
 				return String F("Setting current to: ") + String(wichValue) + F(" mA\n\rActual value: ") + String(gasGetHeaterCurrent(wichSensor->type)) + F(" mA");
 
 			} else if (command.startsWith("set voltage")) {
 				command.replace("set voltage", "");
 				command.trim();
-				int wichValue = command.toInt();
+				int wichValue = command.toFloat();
 				gasSetRegulatorVoltage(wichSensor->type, wichValue);
 				return String F("Setting heater voltage to: ") + String(wichValue) + F(" mV\n\rActual value: ") + String(gasGetRegulatorVoltage(wichSensor->type)) + F(" mV");
 
@@ -339,7 +339,7 @@ void SckUrban::gasOff(SensorType wichSensor) {
 	}
 }
 
-void SckUrban::gasHeat(SensorType wichSensor, uint32_t wichCurrent) {
+void SckUrban::gasHeat(SensorType wichSensor, float wichCurrent) {
 
 	if (wichSensor == SENSOR_CO) {
 
