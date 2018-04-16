@@ -224,16 +224,16 @@ String AuxBoards::control(OneSensor* wichSensor, String command) {
 
 			// 	 Calibration command options:
 			// 		Atlas PH: (https://www.atlas-scientific.com/_files/_datasheets/_circuit/pH_EZO_datasheet.pdf) page 50
-			// 			* set cal,[mid,low,high] 7.00
-			// 			* set cal,clear
+			// 			* com cal,[mid,low,high] 7.00
+			// 			* com cal,clear
 			// 		Atlas EC: (https://www.atlas-scientific.com/_files/_datasheets/_circuit/EC_EZO_Datasheet.pdf) page 52
-			// 			* set cal,[dry,clear,84]
-			// 			* set cal,low,1413
-			// 			* set cal,high,12,880
+			// 			* com cal,[dry,clear,84]
+			// 			* com cal,low,1413
+			// 			* com cal,high,12880
 			// 		Atlas DO: (https://www.atlas-scientific.com/_files/_datasheets/_circuit/DO_EZO_Datasheet.pdf) page 50
-			// 			* set cal
-			// 			* set cal,0
-			// 			* set cal,clear
+			// 			* com cal
+			// 			* com cal,0
+			// 			* com cal,clear
 			if (command.startsWith("com")) {
 
 				command.replace("com", "");
