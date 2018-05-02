@@ -276,13 +276,19 @@ bool SckESP::processMsg() {
 
 	 	} case ESP_GET_TIME_COM: {
 
+			// ACK response
+			msgOut.com = ESP_GET_TIME_COM;
+			clearParam();
+			SAMsendMsg();
+
 			// Update time
 			if (espStatus.time != ESP_TIME_UPDATED_EVENT) {
 				debugOUT(F("Trying NTP Sync..."));
 				Udp.begin(8888);
 				setSyncProvider(ntpProvider);
 				setSyncInterval(300);
-			}
+			} else sendTimeToSAM(now());
+
 	 		break;
 
 		} case ESP_SYNC_HTTP_TIME_COM: {
@@ -1276,9 +1282,9 @@ time_t SckESP::getNtpTime() {
       secsSince1900 |= (unsigned long)packetBuffer[43];
       
       espStatus.time = ESP_TIME_UPDATED_EVENT;
-      debugOUT(F("Time updated!!!"));
+      debugOUT(String F("Time updated: ") + epoch2iso(secsSince1900 - 2208988800UL));
 
-      sendTimeToSAM();
+      sendTimeToSAM(secsSince1900 - 2208988800UL);
 
       return secsSince1900 - 2208988800UL;
     }
@@ -1380,9 +1386,9 @@ bool SckESP::getHttpTime() {
 					setTime(numbers[3], numbers[4], numbers[5], numbers[2], numbers[1], numbers[0]);
 
 					if (year() > 2010) {
-						debugOUT(F("Time updated!!!"));
+						debugOUT(F("Time updated via HTTP!!!"));
 						espStatus.time = ESP_TIME_UPDATED_EVENT;
-						sendTimeToSAM();
+						sendTimeToSAM(now());
 						return true;
 					} else {
 						debugOUT(F("Error in HTTP time reception!!!"));
@@ -1405,10 +1411,10 @@ bool SckESP::getHttpTime() {
 	espStatus.time = ESP_TIME_FAIL_EVENT;
 	return false;
 }
-void SckESP::sendTimeToSAM() {
+void SckESP::sendTimeToSAM(uint32_t wichTime) {
 	// Send time
 	debugOUT(F("Sending time to SAM..."));
-	String epochSTR = String(now());
+	String epochSTR = String(wichTime);
 	clearParam();
 	epochSTR.toCharArray(msgOut.param, 240);
 	msgOut.com = ESP_GET_TIME_COM;

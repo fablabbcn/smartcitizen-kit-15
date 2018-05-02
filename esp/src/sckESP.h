@@ -123,7 +123,7 @@ public:
 	String ISOtime();
 	String epoch2iso(uint32_t toConvert);
 	bool getHttpTime();
-	void sendTimeToSAM();
+	void sendTimeToSAM(uint32_t wichTime);
 	WiFiUDP Udp;
 	byte packetBuffer[48];
 	

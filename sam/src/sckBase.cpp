@@ -1092,7 +1092,7 @@ void SckBase::ESPprocessMsg() {
 
 		} case ESP_GET_TIME_COM: {
 			String epochSTR = String(msgIn.param);
-			setTime(epochSTR);
+			if (epochSTR.length() > 0) setTime(epochSTR);
 			break;
 
 		} case ESP_MQTT_PUBLISH_COM: {
