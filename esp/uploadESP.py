@@ -14,10 +14,10 @@ def before_upload(source, target, env):
 	if myPort:
 		print("Asking for upload bridge...")
 		myPort.write("")
-		time.sleep(1)
+		time.sleep(0.5)
 		myPort.write("set config mode esp flash\n")
 		myPort.close()
-		time.sleep(1)
+		time.sleep(2)
 	env.Replace(UPLOAD_PORT=portName)
 
 def after_upload(source, target, env):
@@ -25,11 +25,6 @@ def after_upload(source, target, env):
 	print "Please click the button or reset your kit..."
 	global portName
 	myPort = serial.Serial(portName)
-	if myPort:
-		print "Reseting your kit..."
-		for i in range(10):
-			myPort.write("Bye")
-		myPort.close()
 
 print "Current build targets", map(str, BUILD_TARGETS)
 

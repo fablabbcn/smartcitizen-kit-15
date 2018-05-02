@@ -283,8 +283,6 @@ bool SckESP::processMsg() {
 				setSyncProvider(ntpProvider);
 				setSyncInterval(300);
 			}
-
-			sendTimeToSAM();
 	 		break;
 
 		} case ESP_SYNC_HTTP_TIME_COM: {

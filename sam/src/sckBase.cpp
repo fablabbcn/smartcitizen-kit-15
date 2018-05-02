@@ -3403,7 +3403,7 @@ bool SckBase::timerRun() {
 						uint32_t timeToNextPublish = rtc.getEpoch() - lastPublishTime;
 
 						// If there is no message on queue and publish time is at least 5 seconds away
-						if (BUS_queueCount == 0 && timeToNextPublish > 5 && !triggerHello) {
+						if (BUS_queueCount == 0 && timeToNextPublish > 5 && !triggerHello && lastPublishTime != 0) {
 
 							// Save sd config (esp off)
 							saveSDconfig();
