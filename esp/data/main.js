@@ -34,7 +34,7 @@ var app = new Vue({
     showSdCard: false,
     sdlog: false,
     usertoken: '',
-    version: 'SCK 2.0 / SAM V0.0.2 / ESP V0.0.2',
+    version: 'SCK 1.5',
     wifiname: '',
     wifipass: '',
     wifisync: true,
@@ -130,7 +130,7 @@ var app = new Vue({
       this.browsertime = Math.floor(Date.now() / 1000);
       var that = this;
       // Available parameters:
-      // /set?ssid=value1&password=value2&token=value3&epoch=value
+      // /set?ssid=value1&password=value2&token=value3&&mode=network&epoch=value
 
       if (purpose == 'connect'){
         this.notify('Connecting online...', 2000);
@@ -138,6 +138,7 @@ var app = new Vue({
             '?ssid=' + that.selectedWifi +
             '&password=' + that.wifipass +
             '&token=' + that.usertoken +
+            '&mode=network' +
             '&epoch=' + that.browsertime,
             function(res){
               console.log('Kit response: ' + res);
@@ -148,7 +149,7 @@ var app = new Vue({
 
       if (purpose == 'synctime'){
         this.notify('Starting to log on SD CARD..', 2000);
-        this.httpGet(this.theApi +  path + '?epoch=' + this.browsertime, function(res){
+        this.httpGet(this.theApi +  path + '?epoch=' + this.browsertime + '&mode=sdcard', function(res){
           // TODO: What is the correct response.key from the kit?
           that.notify(JSON.parse(res).todo, 5000);
         });

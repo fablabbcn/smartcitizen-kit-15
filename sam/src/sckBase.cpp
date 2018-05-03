@@ -1049,21 +1049,39 @@ void SckBase::ESPprocessMsg() {
 			StaticJsonBuffer<240> jsonBuffer;
 			JsonObject& jsonConf = jsonBuffer.parseObject(msgIn.param);
 
-			String tmode = jsonConf["mo"];
-			sckOut(String("modo --> ") + tmode);
-			config.persistentMode = static_cast<SCKmodes>(tmode.toInt());
-			config.publishInterval 	= jsonConf["ri"];
-			String tssid = jsonConf["ss"];
-			tssid.toCharArray(config.ssid, 64);
-			String tpass = jsonConf["pa"];
-			tpass.toCharArray(config.pass, 64);
-			String ttoken = jsonConf["to"];
-			ttoken.toCharArray(config.token, 64);
+			if (jsonConf.containsKey("mo")) { 
+				String tmode = jsonConf["mo"];
+				sckOut(tmode);
+				config.persistentMode = static_cast<SCKmodes>(tmode.toInt());
+			}
+			if (jsonConf.containsKey("ri")) {
+				String pubInt = jsonConf["ri"];
+				config.publishInterval 	= pubInt.toInt();
+			}
+			if (jsonConf.containsKey("ss")) {
+				String tssid = jsonConf["ss"];
+				tssid.toCharArray(config.ssid, 64);
+				wifiSet = true;
+			}
+			if (jsonConf.containsKey("pa")) {
+				String tpass = jsonConf["pa"];
+				tpass.toCharArray(config.pass, 64);
+			}
+			if (jsonConf.containsKey("to")) {
+				String ttoken = jsonConf["to"];
+				ttoken.toCharArray(config.token, 8);
+				tokenSet = true;
+			}
+			if (jsonConf.containsKey("tm")) {
+				String timeToken = jsonConf["tm"];
+				if (timeToken.length() > 0) setTime(timeToken);
+			}
 
 			sckOut(F("Configuration updated:"));
-			sprintf(outBuff, "Publish Interval: %lu\r\nWifi: %s - %s\r\nToken: %s", config.publishInterval, config.ssid, config.pass, config.token);
+			sprintf(outBuff, "Mode: %s\r\nPublish Interval: %lu\r\nWifi: %s - %s\r\nToken: %s", modeTitles[config.persistentMode], config.publishInterval, config.ssid, config.pass, config.token);
 			sckOut();
 			saveConfig();
+			changeMode(config.persistentMode);
 			break;
 
 		} case ESP_GET_VERSION_COM: {

@@ -58,7 +58,7 @@ void SckESP::setup() {
 
 	if (countSavedNetworks() <= 0) {
 		espStatus.wifi = ESP_WIFI_NOT_CONFIGURED;
-		ledBlink(ledRight, 100);
+		ledBlink(ledRight, 70);
 		startAP();
 	} else {
 		tryConnection();
@@ -217,24 +217,6 @@ bool SckESP::processMsg() {
 			clearParam();
 			SAMsendMsg();
 
-			break;
-
-	 	} case ESP_GET_CONF_COM: {
-
-	 		msgOut.com = ESP_GET_CONF_COM;
-	 		
- 			StaticJsonBuffer<240> jsonBuffer;
-			JsonObject& jsonConf = jsonBuffer.createObject();
-			jsonConf["mo"] = config.persistentMode;
-			jsonConf["ri"] = config.publishInterval;
-			jsonConf["ss"] = config.ssid;
-			jsonConf["pa"] = config.pass;
-			jsonConf["to"] = config.token;
-
-			clearParam();
-			jsonConf.printTo(msgOut.param, 240);
-			SAMsendMsg();
-			espStatus.conf = ESP_CONF_NOT_CHANGED_EVENT;
 			break;
 
 	 	} case ESP_START_AP_COM: {
@@ -665,7 +647,6 @@ void SckESP::startWebServer() {
     SSDP.setModelName("1.5");
     SSDP.setModelURL("http://www.smartcitizen.me");
 	SSDP.begin();
-	
 }
 void SckESP::stopWebserver() {
 
@@ -675,6 +656,8 @@ void SckESP::stopWebserver() {
 void SckESP::webSet() {
 
 	debugOUT(F("Received web configuration request."));
+	StaticJsonBuffer<240> jsonBuffer;
+	JsonObject& jsonConf = jsonBuffer.createObject();
 
 	String json = "{";
 
@@ -695,9 +678,10 @@ void SckESP::webSet() {
 			tpass.toCharArray(config.pass, 64);
 
 			if (addNetwork()) {
-				espStatus.conf = ESP_CONF_CHANGED_EVENT;
 				json += "\"ssid\":\"true\",";
 				debugOUT(F("Wifi credentials updated from apmode web!!!"));
+				jsonConf["ss"] = config.ssid;
+				jsonConf["pa"] = config.pass;
 			}
 		} else {
 			debugOUT(F("Invalid Wifi credentials received from apmode web!!!"));
@@ -713,16 +697,16 @@ void SckESP::webSet() {
 		if (stringMode.equals("sdcard")) {
 
 			config.persistentMode = MODE_SD;
-			espStatus.conf = ESP_CONF_CHANGED_EVENT;
 			json += "\"mode\":\"true\",";
 			debugOUT(F("Mode set to sdcard from apmode web!!!"));
+			jsonConf["mo"] = (uint8_t)MODE_SD;
 
 		} else if (stringMode.equals("network")) {
 
 			config.persistentMode = MODE_NET;
-			espStatus.conf = ESP_CONF_CHANGED_EVENT;
 			json += "\"mode\":\"true\",";
 			debugOUT(F("Mode set to network from apmode web!!!"));
+			jsonConf["mo"] = (uint8_t)MODE_NET;
 
 		} else {
 
@@ -737,10 +721,11 @@ void SckESP::webSet() {
 		String stringToken = webServer.arg("token");
 		if (stringToken.length() == 6) {
 			stringToken.toCharArray(config.token, 8);
+			espStatus.token = ESP_TOKEN_OK;
 			saveToken();
-			espStatus.conf = ESP_CONF_CHANGED_EVENT;
 			json += "\"token\":\"true\",";
 			debugOUT(F("Token updated from apmode web!!!"));
+			jsonConf["to"] = config.token;
 		} else {
 			debugOUT(F("Invalid Token received from apmode web!!!"));
 			json += "\"token\":\"false\",";
@@ -758,15 +743,8 @@ void SckESP::webSet() {
 
 		if (iepoch >= DEFAULT_TIME) { 
        		setTime(iepoch);
-       		espStatus.conf = ESP_CONF_CHANGED_EVENT;
       		debugOUT(F("Time updated from apmode web!!!"));
-
-      		debugOUT(F("Sending time to SAM..."));
-			String epochSTR = String(now());
-			clearParam();
-			epochSTR.toCharArray(msgOut.param, 240);
-			msgOut.com = ESP_GET_TIME_COM;
-			SAMsendMsg();
+      		jsonConf["tm"] = String(now());
 
 			json += "\"time\":\"true\",";
 		} else {
@@ -786,10 +764,10 @@ void SckESP::webSet() {
 
 		if (intTinterval < max_publish_interval && intTinterval > minimal_publish_interval) {
 			
-			espStatus.conf = ESP_CONF_CHANGED_EVENT;
 			config.publishInterval = intTinterval;
 
 			debugOUT(F("Publish interval changed from apmode web!!!"));
+			jsonConf["ri"] = config.publishInterval;
 
 			json += "\"pubint\":\"true\"";
 
@@ -803,6 +781,14 @@ void SckESP::webSet() {
 	}
 	
 	json += "}";
+	
+	if (jsonConf.size() > 0) {
+		msgOut.com = ESP_GET_CONF_COM;
+		clearParam();
+		jsonConf.printTo(msgOut.param, 240);
+		SAMsendMsg();
+	}
+
 	webServer.send(200, "text/json", json);
 
 	if (WiFi.status() != WL_CONNECTED) tryConnection();
@@ -818,7 +804,7 @@ void SckESP::webStatus() {
 	json += "\"ssid\":\"" + String(config.ssid) + "\",";
 	json += "\"password\":\"" + String(config.pass) + "\",";
 
-	// Mode
+	// Mode TODO right now on ESP reboot we loose the config of the mode
 	if (config.persistentMode == MODE_SD) json += "\"mode\":\"sdcard\",";
 	else if (config.persistentMode == MODE_NET) json += "\"mode\":\"network\",";
 

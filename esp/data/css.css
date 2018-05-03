@@ -8,7 +8,7 @@ body {
   margin:0px;
   color: #434343;
   font-family: 'Helvetica Neue',Helvetica,Arial,sans-serif;
-  font-size: 22px;
+  font-size: 18px;
   line-height: 1.1;
 }
 .container {
@@ -81,7 +81,7 @@ td{
   border: 0px;
   border-radius: 30px;
   cursor: pointer;
-  font-size: 22px;
+  font-size: 20px;
   font-variant: normal;
   font-weight: 400;
   height: 2.5em;
