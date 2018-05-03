@@ -2859,6 +2859,9 @@ void SckBase::factoryReset() {
 	// Stop polling ESP
 	timerClear(ACTION_GET_ESP_STATUS);
 
+	// To avoid sleep mode to start
+	userLastAction = rtc.getEpoch();
+
 	// Clear wifi
 	sckOut("Clearing networks...");
 	strncpy(config.ssid, "", 64);
@@ -3433,7 +3436,7 @@ bool SckBase::timerRun() {
 						uint32_t timeToNextPublish = rtc.getEpoch() - lastPublishTime;
 
 						// If there is no message on queue and publish time is at least 5 seconds away
-						if (BUS_queueCount == 0 && timeToNextPublish > 5 && !triggerHello && lastPublishTime != 0) {
+						if (BUS_queueCount == 0 && timeToNextPublish > 5 && !triggerHello) {
 
 							// Save sd config (esp off)
 							saveSDconfig();
