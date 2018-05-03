@@ -2716,6 +2716,7 @@ void SckBase::buttonUp() {
 }
 void SckBase::longPress() {
 
+	timerClear(ACTION_LONG_PRESS);
 	// Make sure we havent released button without noticed it
 	if (!digitalRead(PIN_BUTTON)) {
 
