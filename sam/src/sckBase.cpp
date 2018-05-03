@@ -443,15 +443,21 @@ bool SckBase::loadSDconfig() {
 				} else if (lineBuff.startsWith("ssid:")) {
 					lineBuff.replace("ssid:", "");
 					if (lineBuff.length() > 0) {
-						lineBuff.toCharArray(config.ssid, 64);
-						wifiSet = true;
+						if (!lineBuff.equals(config.ssid)) {
+							lineBuff.toCharArray(config.ssid, 64);
+							wifiSet = true;
+							manualConfigDetected = true;
+						}
 					}
 
 				// Get wifi pass
 				} else if (lineBuff.startsWith("pass:")) {
 					lineBuff.replace("pass:", "");
 					if (lineBuff.length() > 0) {
-						lineBuff.toCharArray(config.pass, 64);
+						if (!lineBuff.equals(config.pass)) {
+							lineBuff.toCharArray(config.pass, 64);
+							manualConfigDetected = true;
+						}
 					}
 
 				// Get token
@@ -558,9 +564,6 @@ void SckBase::saveConfig(bool factory) {
 		eepromConfig.write(toSaveConfig);
 		sckOut("Saved configuration to eeprom!!!");
 
-		// Strange thigs we have to do to keep ESP alive and use sdcard config.txt
-		// A timer that will check for the right oportunity to save config to sdcard without disrupting too much
-		if (!timerExists(ACTION_SAVE_SD_CONFIG)) timerSet(ACTION_SAVE_SD_CONFIG, 400, true);
 
 	} else {
 
@@ -586,8 +589,11 @@ void SckBase::saveConfig(bool factory) {
 		// Save to eeprom
 		eepromConfig.write(toSaveConfig);
 		sckOut("Saved configuration to eeprom!!!");
-		saveSDconfig();
 	}
+
+	// Strange thigs we have to do to keep ESP alive and use sdcard config.txt
+	// A timer that will check for the right oportunity to save config to sdcard without disrupting too much
+	if (!timerExists(ACTION_SAVE_SD_CONFIG)) timerSet(ACTION_SAVE_SD_CONFIG, 400, true);
 }
 void SckBase::saveSDconfig() {
 
@@ -983,7 +989,12 @@ void SckBase::ESPprocessMsg() {
 
 		} case ESP_CLEAR_WIFI_COM: {
 
-			sckOut(F("Wifi networks deleted!!!"));
+			sckOut(F("ESP Wifi networks deleted!!!"));
+			break;
+
+		} case ESP_CLEAR_TOKEN_COM:{
+
+			sckOut(F("ESP token deleted!!!"));
 			break;
 
 		} case ESP_GET_WIFI_COM: {
@@ -2845,10 +2856,28 @@ void SckBase::closeFiles() {
 }
 void SckBase::factoryReset() {
 
-	clearWifi();
-	clearToken();
+	// Stop polling ESP
+	timerClear(ACTION_GET_ESP_STATUS);
+
+	// Clear wifi
+	sckOut("Clearing networks...");
+	strncpy(config.ssid, "", 64);
+	strncpy(config.pass, "", 64);
+	wifiSet = false;
+	msgBuff.com = ESP_CLEAR_WIFI_COM;
+	ESPqueueMsg(false, true);
+
+	// Clear token
+	sckOut(F("Clearing token..."));
+	strncpy(config.token, "null", 8);
+	tokenSet = false;
+	msgBuff.com = ESP_CLEAR_TOKEN_COM;
+	ESPqueueMsg(false, true);
+
 	saveConfig(true);
-	softReset();
+	saveSDconfig();
+
+	timerSet(ACTION_RESET, 2000);
 }
 
 
@@ -3083,6 +3112,7 @@ void SckBase::softReset() {
 
 	// Close files before resseting to avoid corruption
 	closeFiles();
+	sckOut("Bye!!");
 
  	NVIC_SystemReset();
 }

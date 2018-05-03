@@ -170,6 +170,7 @@ bool SckESP::processMsg() {
 			break;
 
 		} case ESP_CLEAR_WIFI_COM: {
+
 			debugOUT(F("Clearing network configuration..."));
 			clearNetworks();
 
@@ -208,13 +209,14 @@ bool SckESP::processMsg() {
 	 		break;
 
 	 	} case ESP_CLEAR_TOKEN_COM: {
+	 		debugOUT(F("Clearing token..."));
+	 		clearToken();
 
 	 		// ACK
 			msgOut.com = ESP_CLEAR_TOKEN_COM;
 			clearParam();
 			SAMsendMsg();
 
-			clearToken();
 			break;
 
 	 	} case ESP_GET_CONF_COM: {

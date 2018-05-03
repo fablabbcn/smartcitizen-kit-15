@@ -473,7 +473,7 @@ public:
 	void longPress();
 	void veryLongPress();
 	uint16_t longPressInterval = 4000;
-	uint16_t veryLongPressInterval = 11000;
+	uint16_t veryLongPressInterval = 9000;
 	uint32_t butLastEvent = 0;
 	
 	// SDcard
