@@ -127,13 +127,6 @@ void SckBase::setup() {
 	delay(2000);
 
 	sdPresent();
-	urbanPresent = urbanBoardDetected();
-	if (urbanPresent) {
-		readLightEnabled = true;
-		readLight.setup();
-		urban.setup();
-	}
-
 	// Output level
 	outputLevel = OUT_NORMAL;
 
@@ -142,6 +135,19 @@ void SckBase::setup() {
 
 	// Configuration
 	loadConfig();
+
+	// Urban board
+	urbanPresent = urbanBoardDetected();
+	if (urbanPresent) {
+		sckOut("Enabling urban board...");
+		readLightEnabled = true;
+		readLight.setup();
+		urban.setup();
+
+		// Turn on MICS heaters if they are enabled
+		if (sensors[SENSOR_CO].enabled) urban.gasOn(SENSOR_CO);
+		if (sensors[SENSOR_NO2].enabled) urban.gasOn(SENSOR_NO2);
+	}
 
 	// Detect and enable auxiliary boards
 	for (uint8_t i=0; i<SENSOR_COUNT; i++) {

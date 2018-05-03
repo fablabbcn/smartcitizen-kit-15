@@ -306,7 +306,6 @@ void SckUrban::gasOn(SensorType wichSensor) {
 		setPot(POT_CO_LOAD_RESISTOR, 100000);
 		
 		gasHeat(wichSensor, CO_HEATING_CURRENT);
-		// TODO do i need to correct current here???
 
 	} else if (wichSensor == SENSOR_NO2) {
 
@@ -603,7 +602,7 @@ uint32_t SckUrban::getPot(Resistor wichPot) {
 
 float SckUrban::average(uint8_t wichPin) {
 
-	uint32_t numReadings = 100;
+	uint8_t numReadings = 5;
 	long total = 0;
 	float average = 0;
 	for(uint32_t i=0; i<numReadings; i++) {
