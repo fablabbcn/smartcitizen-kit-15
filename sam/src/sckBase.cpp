@@ -2659,8 +2659,6 @@ bool SckBase::sdLogADC(){
 //
 void SckBase::buttonEvent() {
 
-	if (config.mode == MODE_OFF) wakeUp();
-
 	userLastAction = rtc.getEpoch();
 
 	if (!digitalRead(PIN_BUTTON)) {
@@ -2880,6 +2878,10 @@ void SckBase::closeFiles() {
 }
 void SckBase::factoryReset() {
 
+	ESPcontrol(ESP_ON);
+
+	delay(500);
+
 	// Stop polling ESP
 	timerClear(ACTION_GET_ESP_STATUS);
 
@@ -2894,6 +2896,8 @@ void SckBase::factoryReset() {
 	msgBuff.com = ESP_CLEAR_WIFI_COM;
 	ESPqueueMsg(false, true);
 
+	delay(1000);
+
 	// Clear token
 	sckOut(F("Clearing token..."));
 	strncpy(config.token, "null", 8);
@@ -2901,10 +2905,12 @@ void SckBase::factoryReset() {
 	msgBuff.com = ESP_CLEAR_TOKEN_COM;
 	ESPqueueMsg(false, true);
 
+	delay(1000);
+
 	saveConfig(true);
 	saveSDconfig();
 
-	timerSet(ACTION_RESET, 2000);
+	softReset();
 }
 
 
