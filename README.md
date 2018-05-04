@@ -7,7 +7,8 @@
 https://github.com/fablabbcn/smartcitizen-kit-20
 
 
-# SmartCitizenKit 1.5
+# SmartCitizenKit 1.5 [![Build Status](https://travis-ci.org/fablabbcn/smartcitizen-kit-15.svg?branch=master)](https://travis-ci.org/fablabbcn/smartcitizen-kit-15)
+
 Developer version of Smart Citizen Kit 1.5 Firmware
 
 You can see this repos current (master branch) state of the mobile UI setup here:
