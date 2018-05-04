@@ -183,7 +183,6 @@ void AlphaDelta::setTesterCurrent(int16_t wichCurrent, uint8_t wichSlot) {
 	SerialUSB.print(wichSlot);
 	SerialUSB.print("A: ");
 	SerialUSB.println(getElectrode(wichElectrode_A));
-	
 }
 #endif
 

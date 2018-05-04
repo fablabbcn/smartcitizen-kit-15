@@ -35,6 +35,8 @@ enum SensorType {
 	SENSOR_NO2_LOAD_RESISTANCE,
 
 	// I2C Auxiliary Sensors
+	SENSOR_I2C_EXPANDER_TCA9548A,
+
 	SENSOR_ALPHADELTA_SLOT_1A,
 	SENSOR_ALPHADELTA_SLOT_1W,
 	SENSOR_ALPHADELTA_SLOT_2A,
@@ -52,11 +54,13 @@ enum SensorType {
 	SENSOR_INA219_LOADVOLT,
 
 	SENSOR_WATER_TEMP_DS18B20,
+	SENSOR_ATLAS_TEMPERATURE,
 	SENSOR_ATLAS_PH,
 	SENSOR_ATLAS_EC,
 	SENSOR_ATLAS_EC_SG,
 	SENSOR_ATLAS_DO,
 	SENSOR_ATLAS_DO_SAT,
+	
 
 	SENSOR_CHIRP_MOISTURE,
 	SENSOR_CHIRP_TEMPERATURE,
@@ -68,11 +72,16 @@ enum SensorType {
 	// Actuators (This is temp)
 	SENSOR_GROOVE_OLED,
 
+	// Put one here for each muxed sensor
+	// SENSOR_MUX01A,
+	// SENSOR_MUX01B,
+	// SENSOR_MUX02,
+
 	SENSOR_COUNT	
 };
 
-const uint32_t minimal_sensor_reading_interval = 30;
-const uint32_t default_sensor_reading_interval = 30;
+const uint32_t minimal_sensor_reading_interval = 60;
+const uint32_t default_sensor_reading_interval = 60;
 const uint32_t max_sensor_reading_interval = 86400;		// One day
 
 // Structs for RAM storing
@@ -107,8 +116,9 @@ public:
 	uint32_t interval;
 	bool enabled;
 	bool busy;
+	int8_t muxPort;			// Tens + 0x70 is expander board address and units is the port (ej. 05 is address 0x70 and port 5) (ej. 47 is address 0x74 and port 7 )
 
-	OneSensor(SensorLocation nLocation, SensorType nType, const char *nTitle, uint8_t nId=0, bool nEnabled=false, bool nControllable=false, const char *nUnit="") {
+	OneSensor(SensorLocation nLocation, SensorType nType, const char *nTitle, uint8_t nId=0, bool nEnabled=false, bool nControllable=false, const char *nUnit="", int8_t nMuxPort=-1) {
 		type = nType;
 		title = nTitle;
 		unit = nUnit;
@@ -121,6 +131,7 @@ public:
 		interval = default_sensor_reading_interval;
 		enabled = nEnabled;
 		busy = false;
+		muxPort = nMuxPort;
 	}
 };
 
@@ -154,6 +165,10 @@ public:
 		OneSensor {	BOARD_URBAN, 		SENSOR_NO2_LOAD_RESISTANCE, 		"Nitrogen dioxide load resistance",		0,		false,		false,			"Ohms"},
 
 		// I2C Auxiliary Sensors
+		
+		// I2C Expander TCA9548A
+		OneSensor {	BOARD_AUX, 			SENSOR_I2C_EXPANDER_TCA9548A,		"I2C Expander", 						0,		false,		false,			},
+
 		// Alphasense Delta board (3 Gas sensor Slots, + SHT31 Temp-Humidity)
 		OneSensor {	BOARD_AUX, 			SENSOR_ALPHADELTA_SLOT_1A,			"AlphaDelta 1A",						0,		false,		true,			},
 		OneSensor {	BOARD_AUX, 			SENSOR_ALPHADELTA_SLOT_1W,			"AlphaDelta 1W",						0,		false,		true,			},
@@ -165,7 +180,7 @@ public:
 		OneSensor {	BOARD_AUX, 			SENSOR_ALPHADELTA_HUMIDITY, 		"AlphaDelta Humidity",					0,		false,		false,			"%"},
 	
 		// Groove I2C ADC
-		OneSensor { BOARD_AUX,			SENSOR_GROOVE_I2C_ADC,				"Groove ADC",							0,		false,		false,			"V"},
+		OneSensor { BOARD_AUX,			SENSOR_GROOVE_I2C_ADC,				"Groove ADC",							25,		false,		false,			"V"},
 
 		// Adafruit INA291 High Side DC Current Sensor
 		OneSensor { BOARD_AUX,			SENSOR_INA219_BUSVOLT,				"INA219 Bus voltage",					0,		false,		false,			"V"},
@@ -174,6 +189,7 @@ public:
 		OneSensor { BOARD_AUX,			SENSOR_INA219_LOADVOLT,				"INA219 Load voltage",					0,		false,		false,			"V"},
 
 		OneSensor { BOARD_AUX,			SENSOR_WATER_TEMP_DS18B20,			"DS18B20 Water temperature",			42,		false,		false,			"C"},
+		OneSensor { BOARD_AUX,			SENSOR_ATLAS_TEMPERATURE,			"Atlas Temperature",					51,		false,		false,			"C"},
 		OneSensor { BOARD_AUX,			SENSOR_ATLAS_PH,					"Atlas PH",								43,		false,		true,			"pH"},
 		OneSensor { BOARD_AUX,			SENSOR_ATLAS_EC,					"Atlas Conductivity",					45,		false,		true,			"uS/cm"},
 		OneSensor { BOARD_AUX,			SENSOR_ATLAS_EC_SG,					"Atlas Specific gravity",				46,		false,		true,			},
@@ -182,7 +198,7 @@ public:
 
 		// I2C Moisture Sensor (chirp)
 		// https://github.com/Miceuz/i2c-moisture-sensor
-		OneSensor { BOARD_AUX, 			SENSOR_CHIRP_MOISTURE,				"Soil Moisture",						0,		false,		true,			},
+		OneSensor { BOARD_AUX, 			SENSOR_CHIRP_MOISTURE,				"Soil Moisture",						50,		false,		true,			},
 		OneSensor { BOARD_AUX, 			SENSOR_CHIRP_TEMPERATURE,			"Soil Temperature",						0,		false,		true,			"C"},
 		OneSensor { BOARD_AUX, 			SENSOR_CHIRP_LIGHT,					"Soil Light",							0,		false,		true,			},
 
@@ -198,6 +214,12 @@ public:
 
 		//-----------------------
 		// Add New Sensor Here!!!
+
+		// Muxed Sensors
+		// Example of two Groove SHT31 (temperature and humidity) connected to a multiplexer on ports 0 and 1
+		// OneSensor {	BOARD_AUX, 			SENSOR_MUX01A, 						"MUX01 Temperature SHT31", 				0,		true,		false,			"C",	01},
+		// OneSensor {	BOARD_AUX, 			SENSOR_MUX01B,						"MUX01 Humidity SHT31", 				0,		true,		false,			"%",	01},
+		// OneSensor {	BOARD_AUX, 			SENSOR_MUX02, 						"MUX02 Other sensor", 					0,		true,		false,			"C",	02},
 
 	};
 

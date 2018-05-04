@@ -31,13 +31,13 @@ float SckUrban::getReading(OneSensor* wichSensor) {
 		case SENSOR_CO_HEAT_TIME: return gasHeatingTime(SENSOR_CO); break;
 		case SENSOR_CO_HEAT_CURRENT: return gasGetHeaterCurrent(SENSOR_CO); break;
 		case SENSOR_CO_HEAT_SUPPLY_VOLTAGE: return gasGetRegulatorVoltage(SENSOR_CO); break;
-		case SENSOR_CO_HEAT_DROP_VOLTAGE: return (SENSOR_CO); break;
+		case SENSOR_CO_HEAT_DROP_VOLTAGE: return gasGetDropVoltage(SENSOR_CO); break;
 		case SENSOR_CO_LOAD_RESISTANCE: return gasGetLoadResistance(SENSOR_CO); break;
 		case SENSOR_NO2: return gasRead(SENSOR_NO2); break;
 		case SENSOR_NO2_HEAT_TIME: return gasHeatingTime(SENSOR_NO2); break;
 		case SENSOR_NO2_HEAT_CURRENT: return gasGetHeaterCurrent(SENSOR_NO2); break;
 		case SENSOR_NO2_HEAT_SUPPLY_VOLTAGE: return gasGetRegulatorVoltage(SENSOR_NO2); break;
-		case SENSOR_NO2_HEAT_DROP_VOLTAGE: return (SENSOR_NO2); break;
+		case SENSOR_NO2_HEAT_DROP_VOLTAGE: return gasGetDropVoltage(SENSOR_NO2); break;
 		case SENSOR_NO2_LOAD_RESISTANCE: return gasGetLoadResistance(SENSOR_NO2); break;
 		default: break;
 	}
@@ -63,14 +63,14 @@ String SckUrban::control(OneSensor* wichSensor, String command) {
 			} else if (command.startsWith("set current")) {
 				command.replace("set current", "");
 				command.trim();
-				int wichValue = command.toInt();
+				float wichValue = command.toFloat();
 				gasHeat(wichSensor->type, wichValue);
 				return String F("Setting current to: ") + String(wichValue) + F(" mA\n\rActual value: ") + String(gasGetHeaterCurrent(wichSensor->type)) + F(" mA");
 
 			} else if (command.startsWith("set voltage")) {
 				command.replace("set voltage", "");
 				command.trim();
-				int wichValue = command.toInt();
+				int wichValue = command.toFloat();
 				gasSetRegulatorVoltage(wichSensor->type, wichValue);
 				return String F("Setting heater voltage to: ") + String(wichValue) + F(" mV\n\rActual value: ") + String(gasGetRegulatorVoltage(wichSensor->type)) + F(" mV");
 
@@ -173,24 +173,23 @@ void SckUrban::gainChange(uint8_t value) {
 
 float SckUrban::getsound() {
 
-		return ((float)(analogRead(S4)) + 1) / RESOLUTION_ANALOG * VCC;
+	return ((float)(analogRead(S4)) + 1) / RESOLUTION_ANALOG * VCC;
 }
 
 void SckUrban::writeResistorRaw(byte resistor, int value) {
 
-	 if (value>255) value = 0;
-	 else if (value<0) value = 255;
+	if (value>255) value = 0;
+	else if (value<0) value = 255;
 
-	 byte POT = POT1;
-	 byte ADDR = resistor;
+	byte POT = POT1;
+	byte ADDR = resistor;
 
-	 if ((resistor==6)||(resistor==7))
-		 {
-			 POT = POT4;
-			 ADDR = resistor - 6;
-		 }
-	 writeI2C(POT, 16, 192);        // select WR (volatile) registers in POT
-	 writeI2C(POT, ADDR, value);
+	if ((resistor==6)||(resistor==7)) {
+		POT = POT4;
+		ADDR = resistor - 6;
+	}
+	writeI2C(POT, 16, 192);        // select WR (volatile) registers in POT
+	writeI2C(POT, ADDR, value);
 }
 
 void SckUrban::writeI2C(byte deviceaddress, byte address, byte data ) {
@@ -307,7 +306,6 @@ void SckUrban::gasOn(SensorType wichSensor) {
 		setPot(POT_CO_LOAD_RESISTOR, 100000);
 		
 		gasHeat(wichSensor, CO_HEATING_CURRENT);
-		// TODO do i need to correct current here???
 
 	} else if (wichSensor == SENSOR_NO2) {
 
@@ -340,7 +338,7 @@ void SckUrban::gasOff(SensorType wichSensor) {
 	}
 }
 
-void SckUrban::gasHeat(SensorType wichSensor, uint32_t wichCurrent) {
+void SckUrban::gasHeat(SensorType wichSensor, float wichCurrent) {
 
 	if (wichSensor == SENSOR_CO) {
 
@@ -604,7 +602,7 @@ uint32_t SckUrban::getPot(Resistor wichPot) {
 
 float SckUrban::average(uint8_t wichPin) {
 
-	uint32_t numReadings = 100;
+	uint8_t numReadings = 5;
 	long total = 0;
 	float average = 0;
 	for(uint32_t i=0; i<numReadings; i++) {

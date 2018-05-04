@@ -56,11 +56,9 @@ void SckESP::setup() {
 	readNetwork();
 	loadToken();
 
-	scanAP();
-
 	if (countSavedNetworks() <= 0) {
 		espStatus.wifi = ESP_WIFI_NOT_CONFIGURED;
-		ledBlink(ledRight, 100);
+		ledBlink(ledRight, 70);
 		startAP();
 	} else {
 		tryConnection();
@@ -83,27 +81,14 @@ void SckESP::update() {
 		// WL_CONNECTED after successful connection is established
 		if (actualWIFIStatus == WL_CONNECTED) {
 			debugOUT(String F("Conected to wifi: ") + String(config.ssid) + " - " + String(config.pass));
+
+			msgOut.com = ESP_WIFI_CONNECTED;
+			clearParam();
+			SAMsendMsg();
+
 			espStatus.wifi = ESP_WIFI_CONNECTED_EVENT;
 			ledSet(ledRight, 1);
-			// setGoodNet();
-			stopAP();
 
-			startWebServer();	// CHECK if it doesnt mess with NTP
-
-			// mDNS
-			if (!MDNS.begin(hostname)) {
-				debugOUT(F("ERROR: mDNS service failed to start!!"));
-			} else {
-				debugOUT(F("mDNS service started!!"));
-				MDNS.addService("http", "tcp", 80);
-			}
-
-
-		// WL_DISCONNECTED if module is not configured in station mode
-		} else if (actualWIFIStatus == WL_DISCONNECTED) {
-
-			// tryConnection();
-		
 		// (NOT) WL_IDLE_STATUS when Wi-Fi is in process of changing between statuses
 		} else if (actualWIFIStatus != WL_IDLE_STATUS) {
 			
@@ -185,6 +170,7 @@ bool SckESP::processMsg() {
 			break;
 
 		} case ESP_CLEAR_WIFI_COM: {
+
 			debugOUT(F("Clearing network configuration..."));
 			clearNetworks();
 
@@ -207,7 +193,6 @@ bool SckESP::processMsg() {
 			jsonIP["hn"] = hostname;
 			jsonIP["ip"] = tip;
 			jsonIP["mac"] = tmac;
-			// clearParam();
 			jsonIP.printTo(msgOut.param, 240);
 			SAMsendMsg();
 			break;
@@ -224,31 +209,14 @@ bool SckESP::processMsg() {
 	 		break;
 
 	 	} case ESP_CLEAR_TOKEN_COM: {
+	 		debugOUT(F("Clearing token..."));
+	 		clearToken();
 
 	 		// ACK
 			msgOut.com = ESP_CLEAR_TOKEN_COM;
 			clearParam();
 			SAMsendMsg();
 
-			clearToken();
-			break;
-
-	 	} case ESP_GET_CONF_COM: {
-
-	 		msgOut.com = ESP_GET_CONF_COM;
-	 		
- 			StaticJsonBuffer<240> jsonBuffer;
-			JsonObject& jsonConf = jsonBuffer.createObject();
-			jsonConf["mo"] = config.persistentMode;
-			jsonConf["ri"] = config.publishInterval;
-			jsonConf["ss"] = config.ssid;
-			jsonConf["pa"] = config.pass;
-			jsonConf["to"] = config.token;
-
-			clearParam();
-			jsonConf.printTo(msgOut.param, 240);
-			SAMsendMsg();
-			espStatus.conf = ESP_CONF_NOT_CHANGED_EVENT;
 			break;
 
 	 	} case ESP_START_AP_COM: {
@@ -273,21 +241,6 @@ bool SckESP::processMsg() {
 	 		stopWebserver();
 	 		break;
 
-	 	} case ESP_DEEP_SLEEP_COM: {
-
-	 		ESP.deepSleep(0);			// Microseconds
-	 		break;
-
-	 	} case ESP_GET_APCOUNT_COM: {
-	 		
-	 		scanAP();
-			String sn = String(netNumber);
-			clearParam();
-			sn.toCharArray(msgOut.param, 240);
-			msgOut.com = ESP_GET_APCOUNT_COM;
-	 		SAMsendMsg();
-	 		break;
-
 	 	} case ESP_GET_APLIST_COM: {
 	 		msgOut.com = ESP_GET_APLIST_COM;
 	 		
@@ -307,40 +260,20 @@ bool SckESP::processMsg() {
 
 	 	} case ESP_GET_TIME_COM: {
 
+			// ACK response
+			msgOut.com = ESP_GET_TIME_COM;
+			clearParam();
+			SAMsendMsg();
+
 			// Update time
 			if (espStatus.time != ESP_TIME_UPDATED_EVENT) {
 				debugOUT(F("Trying NTP Sync..."));
 				Udp.begin(8888);
 				setSyncProvider(ntpProvider);
 				setSyncInterval(300);
-			}
+			} else sendTimeToSAM(now());
 
-			// Send time
-			debugOUT(F("Sending time to SAM..."));
-			String epochSTR = String(now());
-			clearParam();
-			epochSTR.toCharArray(msgOut.param, 240);
-			msgOut.com = ESP_GET_TIME_COM;
-			SAMsendMsg();
 	 		break;
-
-		} case ESP_SET_TIME_COM: {
-
-			String tepoch = msgIn.param;
-			uint32_t iepoch = tepoch.toInt();
-			const unsigned long DEFAULT_TIME = 1357041600; // Jan 1 2013
-
-			if (iepoch >= DEFAULT_TIME) { 
-
-				setTime(iepoch);
-       			espStatus.time = ESP_TIME_UPDATED_EVENT;
-       			debugOUT(F("Time updated from SAM!!!"));
-
-       			msgOut.com = ESP_SET_TIME_COM;
-       			SAMsendMsg();
-			}
-			break;
-
 
 		} case ESP_SYNC_HTTP_TIME_COM: {
 
@@ -379,7 +312,7 @@ bool SckESP::processMsg() {
 			espStatus.mqtt = ESP_NULL_EVENT;
 			
 			// Parse input
-			StaticJsonBuffer<240> jsonBuffer;
+			StaticJsonBuffer<MQTTbufferSize> jsonBuffer;
 			JsonObject& jsonSensors = jsonBuffer.parseObject(msgIn.param);
 
 			// Iterate over all sensors
@@ -399,8 +332,11 @@ bool SckESP::processMsg() {
 				}
 			}
 
-			if (mqttPublish()) espStatus.mqtt = ESP_MQTT_PUBLISH_OK_EVENT;
-			else espStatus.mqtt = ESP_MQTT_ERROR_EVENT;
+			if (mqttPublish()) {
+				espStatus.mqtt = ESP_MQTT_PUBLISH_OK_EVENT;
+			} else {
+				espStatus.mqtt = ESP_MQTT_ERROR_EVENT;
+			}
 	 		break;
 
 	 	} case ESP_MQTT_SUBSCRIBE_COM: {
@@ -597,6 +533,8 @@ void SckESP::tryConnection() {
 //
 void SckESP::startAP(){
 
+	scanAP();
+
 	debugOUT(String F("Starting Ap with ssid: ") + String(hostname));
 
 	// IP for DNS
@@ -709,7 +647,6 @@ void SckESP::startWebServer() {
     SSDP.setModelName("1.5");
     SSDP.setModelURL("http://www.smartcitizen.me");
 	SSDP.begin();
-	
 }
 void SckESP::stopWebserver() {
 
@@ -719,6 +656,8 @@ void SckESP::stopWebserver() {
 void SckESP::webSet() {
 
 	debugOUT(F("Received web configuration request."));
+	StaticJsonBuffer<240> jsonBuffer;
+	JsonObject& jsonConf = jsonBuffer.createObject();
 
 	String json = "{";
 
@@ -739,9 +678,10 @@ void SckESP::webSet() {
 			tpass.toCharArray(config.pass, 64);
 
 			if (addNetwork()) {
-				espStatus.conf = ESP_CONF_CHANGED_EVENT;
 				json += "\"ssid\":\"true\",";
 				debugOUT(F("Wifi credentials updated from apmode web!!!"));
+				jsonConf["ss"] = config.ssid;
+				jsonConf["pa"] = config.pass;
 			}
 		} else {
 			debugOUT(F("Invalid Wifi credentials received from apmode web!!!"));
@@ -757,16 +697,16 @@ void SckESP::webSet() {
 		if (stringMode.equals("sdcard")) {
 
 			config.persistentMode = MODE_SD;
-			espStatus.conf = ESP_CONF_CHANGED_EVENT;
 			json += "\"mode\":\"true\",";
 			debugOUT(F("Mode set to sdcard from apmode web!!!"));
+			jsonConf["mo"] = (uint8_t)MODE_SD;
 
 		} else if (stringMode.equals("network")) {
 
 			config.persistentMode = MODE_NET;
-			espStatus.conf = ESP_CONF_CHANGED_EVENT;
 			json += "\"mode\":\"true\",";
 			debugOUT(F("Mode set to network from apmode web!!!"));
+			jsonConf["mo"] = (uint8_t)MODE_NET;
 
 		} else {
 
@@ -781,10 +721,11 @@ void SckESP::webSet() {
 		String stringToken = webServer.arg("token");
 		if (stringToken.length() == 6) {
 			stringToken.toCharArray(config.token, 8);
+			espStatus.token = ESP_TOKEN_OK;
 			saveToken();
-			espStatus.conf = ESP_CONF_CHANGED_EVENT;
 			json += "\"token\":\"true\",";
 			debugOUT(F("Token updated from apmode web!!!"));
+			jsonConf["to"] = config.token;
 		} else {
 			debugOUT(F("Invalid Token received from apmode web!!!"));
 			json += "\"token\":\"false\",";
@@ -802,15 +743,8 @@ void SckESP::webSet() {
 
 		if (iepoch >= DEFAULT_TIME) { 
        		setTime(iepoch);
-       		espStatus.conf = ESP_CONF_CHANGED_EVENT;
       		debugOUT(F("Time updated from apmode web!!!"));
-
-      		debugOUT(F("Sending time to SAM..."));
-			String epochSTR = String(now());
-			clearParam();
-			epochSTR.toCharArray(msgOut.param, 240);
-			msgOut.com = ESP_GET_TIME_COM;
-			SAMsendMsg();
+      		jsonConf["tm"] = String(now());
 
 			json += "\"time\":\"true\",";
 		} else {
@@ -830,10 +764,10 @@ void SckESP::webSet() {
 
 		if (intTinterval < max_publish_interval && intTinterval > minimal_publish_interval) {
 			
-			espStatus.conf = ESP_CONF_CHANGED_EVENT;
 			config.publishInterval = intTinterval;
 
 			debugOUT(F("Publish interval changed from apmode web!!!"));
+			jsonConf["ri"] = config.publishInterval;
 
 			json += "\"pubint\":\"true\"";
 
@@ -847,6 +781,14 @@ void SckESP::webSet() {
 	}
 	
 	json += "}";
+	
+	if (jsonConf.size() > 0) {
+		msgOut.com = ESP_GET_CONF_COM;
+		clearParam();
+		jsonConf.printTo(msgOut.param, 240);
+		SAMsendMsg();
+	}
+
 	webServer.send(200, "text/json", json);
 
 	if (WiFi.status() != WL_CONNECTED) tryConnection();
@@ -862,7 +804,7 @@ void SckESP::webStatus() {
 	json += "\"ssid\":\"" + String(config.ssid) + "\",";
 	json += "\"password\":\"" + String(config.pass) + "\",";
 
-	// Mode
+	// Mode TODO right now on ESP reboot we loose the config of the mode
 	if (config.persistentMode == MODE_SD) json += "\"mode\":\"sdcard\",";
 	else if (config.persistentMode == MODE_NET) json += "\"mode\":\"network\",";
 
@@ -912,9 +854,6 @@ void SckESP::webStatus() {
 
 	// Wifi status
 	json += "\"wifi\":\"" + String(espStatus.eventTitle[espStatus.wifi]) + "\",";
-
-	// Net status
-	json += "\"net\":\"" + String(espStatus.eventTitle[espStatus.net]) + "\",";
 
 	// MQTT status
 	json += "\"mqtt\":\"" + String(espStatus.eventTitle[espStatus.mqtt]) + "\",";
@@ -1331,7 +1270,9 @@ time_t SckESP::getNtpTime() {
       secsSince1900 |= (unsigned long)packetBuffer[43];
       
       espStatus.time = ESP_TIME_UPDATED_EVENT;
-      debugOUT(F("Time updated!!!"));
+      debugOUT(String F("Time updated: ") + epoch2iso(secsSince1900 - 2208988800UL));
+
+      sendTimeToSAM(secsSince1900 - 2208988800UL);
 
       return secsSince1900 - 2208988800UL;
     }
@@ -1433,8 +1374,9 @@ bool SckESP::getHttpTime() {
 					setTime(numbers[3], numbers[4], numbers[5], numbers[2], numbers[1], numbers[0]);
 
 					if (year() > 2010) {
-						debugOUT(F("Time updated!!!"));
+						debugOUT(F("Time updated via HTTP!!!"));
 						espStatus.time = ESP_TIME_UPDATED_EVENT;
+						sendTimeToSAM(now());
 						return true;
 					} else {
 						debugOUT(F("Error in HTTP time reception!!!"));
@@ -1457,7 +1399,15 @@ bool SckESP::getHttpTime() {
 	espStatus.time = ESP_TIME_FAIL_EVENT;
 	return false;
 }
-
+void SckESP::sendTimeToSAM(uint32_t wichTime) {
+	// Send time
+	debugOUT(F("Sending time to SAM..."));
+	String epochSTR = String(wichTime);
+	clearParam();
+	epochSTR.toCharArray(msgOut.param, 240);
+	msgOut.com = ESP_GET_TIME_COM;
+	SAMsendMsg();
+}
 
 // 	------------
 // 	|	Leds   |

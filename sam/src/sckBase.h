@@ -14,7 +14,6 @@
 #include <Sensors.h>
 #include "sckAux.h"
 #include "ReadLight.h"
-#include "ReadSound.h"
 #include "sckUrban.h"
 #include "Constants.h"
 
@@ -151,7 +150,8 @@ public:
 		ACTION_SAVE_SD_CONFIG,				// 15
 		ACTION_MQTT_SUBSCRIBE,				// 16
 		ACTION_RETRY_READ_SENSOR,			// 17
-		ACTION_SLEEP						// 18
+		ACTION_SLEEP,						// 18
+		ACTION_PUBLISH 						// 19
 	};
 	struct OneTimer	{
 		TimerAction action = ACTION_NULL;
@@ -197,8 +197,8 @@ public:
 	uint32_t globalLastReading = 0;
 	bool publishRuning = false;
 	uint32_t publishStarted = 0;
-	uint8_t sensorDisplayIndex = 0;					// For LCD sensor display
-	static const uint8_t publish_timeout = 120;		// Time out for publish (in seconds)
+	uint8_t sensorDisplayIndex = 0;		// For LCD sensor display
+	uint8_t publish_timeout = 5;		// If there are this amount of publish failures in a row the reset.
 
 	// Configuration
 	bool triggerHello = false;
@@ -221,11 +221,9 @@ public:
 	void factoryReset();
 
 	// Flags
-	bool onWifi();
 	bool hostNameSet = false;
 	bool helloPublished = false;
-	bool onTime = false;
-
+	
 	// Modes
 	void changeMode(SCKmodes newMode);
 	void errorMode();
@@ -237,7 +235,6 @@ public:
 		"network",		// modeTitles[MODE_NET]
 		"sdcard",		// modeTitles[MODE_SD]
 		"esp flash",	// modeTitles[MODE_FLASH]
-		"esp bridge",	// modeTitles[MODE_BRIDGE]
 		"off"			// modeTitles[MODE_OFF]
 	};
 
@@ -251,8 +248,6 @@ public:
 		EXTCOM_ESP_STOP_AP,
 		EXTCOM_ESP_START_WEB,
 		EXTCOM_ESP_STOP_WEB,
-		EXTCOM_ESP_SLEEP,
-		EXTCOM_ESP_WAKEUP,
 		EXTCOM_GET_APLIST,
 		EXTCOM_ESP_SERIAL_DEBUG_TOGGLE,
 		EXTCOM_ESP_LED_ON,
@@ -340,8 +335,6 @@ public:
 	"esp stop ap",			// 	EXTCOM_ESP_STOP_AP,
 	"esp start web",		// 	EXTCOM_ESP_START_WEB,
 	"esp stop web",			// 	EXTCOM_ESP_STOP_WEB,
-	"esp sleep",			// 	EXTCOM_ESP_SLEEP,
-	"esp wakeup",			// 	EXTCOM_ESP_WAKEUP,
 	"get aplist",			// 	EXTCOM_GET_APLIST,
 	"esp debug",			// 	EXTCOM_ESP_SERIAL_DEBUG_TOGGLE,
 	"esp led on",			// 	EXTCOM_ESP_LED_ON,
@@ -471,6 +464,7 @@ public:
 	bool ISOtime();
 	char ISOtimeBuff[20];
 	void epoch2iso(uint32_t epochTime, char* isoTime);
+	// bool onTime = false;
 
 	// Button
 	void buttonEvent();
@@ -479,7 +473,7 @@ public:
 	void longPress();
 	void veryLongPress();
 	uint16_t longPressInterval = 4000;
-	uint16_t veryLongPressInterval = 11000;
+	uint16_t veryLongPressInterval = 9000;
 	uint32_t butLastEvent = 0;
 	
 	// SDcard
@@ -529,11 +523,6 @@ public:
 	dataLight lightResults;
 	bool readLightEnabled = false;
 
-	// SoundRead
-	ReadSound readSound;
-	dataSound soundResults;
-	bool readSoundEnabled = false;
-
 	// Serial buffers
 	String serialBuff;
 	String espBuff;
@@ -548,6 +537,10 @@ public:
 	bool urbanPresent = false;
 
 private:
+
+	bool onTime = false;
+	bool onWifi = false;
+	bool waitingWifi = false;
 };
 
 // Utility functions

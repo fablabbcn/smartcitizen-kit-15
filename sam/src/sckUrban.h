@@ -44,7 +44,7 @@ public:
 	void gasSetup(SensorType wichSensor);
 	void gasOn(SensorType wichSensor);
 	void gasOff(SensorType wichSensor);
-	void gasHeat(SensorType wichSensor, uint32_t wichCurrent);
+	void gasHeat(SensorType wichSensor, float wichCurrent);
 	float gasGetRegulatorVoltage(SensorType wichSensor);
 	float gasGetDropVoltage(SensorType wichSensor);
 	void gasSetRegulatorVoltage(SensorType wichSensor, uint32_t wichVoltage);
@@ -69,11 +69,11 @@ public:
 	Resistor POT_CO_LOAD_RESISTOR = {POT3, 0x00};
 	Resistor POT_CO_REGULATOR = {POT2, 0x00};
 	const uint8_t CO_HEATER_RESISTOR = 10; 									// (Ohm) RDRED Resistencia en el sensor CO sensor
-	uint32_t CO_HEATING_CURRENT = 32;										// (mA) Normal operational current
-	uint32_t CO_HEATER_RESISTANCE = 74;										// (Ohm) Heating resistance at nominal power 
+	float CO_HEATING_CURRENT = 32;										// (mA) Normal operational current
+	float CO_HEATER_RESISTANCE = 74;										// (Ohm) Heating resistance at nominal power 
 	bool gasCOheaterState = false;
 	uint32_t startHeaterTime_CO = 0;
-	static const uint16_t CO_PREHEATING_TIME = 3600;							// Seconds needed for the heater to reach the right temperature
+	static const uint16_t CO_PREHEATING_TIME = 600;							// Seconds needed for the heater to reach the right temperature
 
 	// Nitrogen Dioxide
 	const uint8_t SHUTDOWN_CONTROL_REGULATOR_NO2_SENSOR_HEATER_PIN = 8;		// (pin) 8-PA6 Low disables sensor heater
@@ -82,11 +82,11 @@ public:
 	Resistor POT_NO2_LOAD_RESISTOR = {POT3, 0x01};
 	Resistor POT_NO2_REGULATOR = {POT2, 0x01};
 	const uint8_t NO2_HEATER_RESISTOR = 39; 								// (Ohm) Resistencia en el sensor NO2 sensor
-	uint32_t NO2_HEATING_CURRENT = 26;										// (mA) Normal operational current
-	uint32_t NO2_HEATER_RESISTANCE = 66;									// (Ohm) Heating resistance at nominal power
+	float NO2_HEATING_CURRENT = 26;										// (mA) Normal operational current
+	float NO2_HEATER_RESISTANCE = 66;									// (Ohm) Heating resistance at nominal power
 	bool gasNO2heaterState = false;
 	uint32_t startHeaterTime_NO2 = 0;
-	static const uint16_t NO2_PREHEATING_TIME = 3600;							// Seconds needed for the heater to reach the right temperature
+	static const uint16_t NO2_PREHEATING_TIME = 600;							// Seconds needed for the heater to reach the right temperature
 
 	// Utility functions
 	void setPot(Resistor wichPot, uint32_t value);
@@ -99,25 +99,3 @@ public:
 
 private:
 };
-
-
-
-/*
-NOTAS
-
--- Por I2C tenemos:
-	* El potenciometro digital
-	* Humidity
-	* Temperature
-	* UV
-	* Light
-
--- Por pines analogicos
-	* CO Sensor
-	* NO Sensor
-	* CO Current
-	* NO Current
-	* Sound Sensor
-
-*/
-

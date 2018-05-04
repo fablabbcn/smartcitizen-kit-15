@@ -143,31 +143,24 @@ bool ReadLight::calibrate() {
   if (!getLight()) return false;
 
   // If the new value difference from previous is less than tolerance we use it.
-  if (abs(newReading - OldReading) <= (float)(newReading / (newLevel + 1) / 3.0)) {
-    readingRepetitions++;
-    sumAverage += newReading;
-  } else { 
-    debugOUT(" | ", false);
-    readingRepetitions = 0;
-    sumAverage = 0;
-  }
-
-  debugOUT(String(newReading) + " ", false);
+  if (abs(newReading - OldReading) <= (float)(newReading / (newLevel + 1) / 3.0)) readingRepetitions++;
+  else readingRepetitions = 0;
   
   // Save old reading for future comparisons
   OldReading = newReading;
 
   // We need MIN_REP repetitions in reading to consider it valid.
-  if (readingRepetitions == MIN_REP) newValue = sumAverage / readingRepetitions;
+  if (readingRepetitions == MIN_REP) newValue = newReading;
   else return false;
   
   // If value is bigger than previous go up one level
   if (newValue > oldValue) {
     newLevel ++;
     levels[newLevel] = newValue;
-    debugOUT("--> " + String(newLevel) + ":" + String(levels[newLevel]));
     oldValue = newValue;
-
+    return false;                       // Not yet there!
+  } else {
+    // If we reach the levelnum we are done!
     if (newLevel + 1 == levelNum) {
 
       debugOUT(F("Calibrated!!"));
@@ -177,14 +170,11 @@ bool ReadLight::calibrate() {
       // Keep the watchdog timer cool
       feedDOG();
       return true;
-    }
-    return false;                       // Not yet there!
-  } else {
+    } 
 
-    // no calibration sequence found yet, keep searching starting from zero
-    newLevel = 0;
-    debugOUT("--> 0:0");
+    // no calibration sequence found, return false
     oldValue = newValue;
+    newLevel = 0;
     return false;
   }
   return false;
@@ -209,7 +199,7 @@ bool ReadLight::getLight() {
   * The best working option is 0xFB: using 9 values and printing output from screen at intervals of 70ms
   */
 
-  if (millis() - readyTimer > 10) {
+  if (millis() - readyTimer > 20) {
     readyTimer = millis();
     Wire.requestFrom(BH1730, 4);
     uint16_t DATA0 = Wire.read();
@@ -237,6 +227,7 @@ char ReadLight::getChar() {
       }  
     }
     
+
     octalString.concat(newLevel);
 
     if (octalString.length() > 3) {
@@ -248,7 +239,7 @@ char ReadLight::getChar() {
       // Convert ASCII to char
       char newChar = newInt;
 
-      debugOUT(String(newInt, OCT) + " -->> " + String(newChar));
+      debugOUT(String F("  ") + String(newChar));
 
       // Return the obtained char
       return newChar;
@@ -270,21 +261,20 @@ bool ReadLight::getLevel() {
     // If we do get a reading and is different from previous, start counting repetitions
     if (newLevel != oldLevel) {
       oldLevel = newLevel;
-      levelRepetitions = 0;
-      debugOUT("| ", false);
+      levelRepetitions = 1;
       return false;
+
     } else levelRepetitions++;
   }
 
   // If we have MIN_REP repetitions, we have a good reading!
   if (levelRepetitions == MIN_REP) {
 
-    // If we have a repetition use last level
+    debugOUT(String(newLevel), false);
+
     if (newLevel+1 == levelNum) {
       newLevel = lastGoodLevel;
     } 
-
-    debugOUT(" -> " + String(newLevel));
 
     // Store the new level for future comparisons
     lastGoodLevel = newLevel;
@@ -311,7 +301,7 @@ bool ReadLight::getRawLevel() {
       newLevel = i;
     }
   }
-  debugOUT(String(newReading)+ ":" + String(newLevel) + " ", false);
+
   return true;
 }
 
