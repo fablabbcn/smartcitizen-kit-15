@@ -541,6 +541,7 @@ private:
 	bool onTime = false;
 	bool onWifi = false;
 	bool waitingWifi = false;
+	uint32_t errorCounter = 0;
 };
 
 // Utility functions

@@ -3435,9 +3435,13 @@ bool SckBase::timerRun() {
 
 					} case ACTION_RECOVER_ERROR: {
 
+						if (errorCounter >= 120) softReset();
+						else errorCounter++;
+
 						if (config.persistentMode == MODE_SD) {
 
 							if (onTime && sdPresent()) {
+								errorCounter = 0;
 								timerClear(ACTION_RECOVER_ERROR);
 								changeMode(MODE_SD);
 							}
@@ -3447,6 +3451,7 @@ bool SckBase::timerRun() {
 							if (digitalRead(POWER_WIFI)) ESPcontrol(ESP_ON);
 
 							if (onTime && onWifi && tokenSet) {
+								errorCounter = 0;
 								timerClear(ACTION_RECOVER_ERROR);
 								timerClear(ACTION_START_AP_MODE);
 								changeMode(MODE_NET);
