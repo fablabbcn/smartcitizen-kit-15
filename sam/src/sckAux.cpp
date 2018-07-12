@@ -11,7 +11,7 @@ Atlas				atlasEC = Atlas(SENSOR_ATLAS_EC);
 Atlas				atlasDO = Atlas(SENSOR_ATLAS_DO);
 Atlas 				atlasTEMP = Atlas(SENSOR_ATLAS_TEMPERATURE);
 Moisture 			moistureChirp;
-Groove_SHT31 		groove_SHT31;
+SHT31 			groove_SHT31;
 
 bool I2Cdetect(byte address) {
 
@@ -774,74 +774,102 @@ void Moisture::sleep() {
 	chirp.sleep();
 }
 
-bool Groove_SHT31::begin() {
+bool SHT31::begin()
+{
+        Wire.begin();
+        Wire.beginTransmission(address);
+        byte error = Wire.endTransmission();
+        if (error != 0) return false;
 
-	Wire.begin();
+        delay(1);               // In case the device was off
+        sendComm(SOFT_RESET);   // Send reset command
+        delay(50);              // Give time to finish reset
+        update(true);
 
-	if (!I2Cdetect(deviceAddress)) return false;
-	
-	// Send reset command
-	sendComm(SOFT_RESET);
-
-	update();
-
-	return true;
+        return true;
 }
+bool SHT31::stop()
+{
 
-bool Groove_SHT31::update() {
-
-	uint8_t readbuffer[6];
-	sendComm(SINGLE_SHOT_HIGH_REP);
-  	
-  	Wire.requestFrom(deviceAddress, (uint8_t)6);
-
-  	// Wait for answer (datasheet says 15ms is the max)
-  	uint32_t started = millis();
-  	while(Wire.available() != 6) {
-  		if (millis() - started > timeout) return false;
-   	}
-
-  	// Read response
-	for (uint8_t i=0; i<6; i++) {
-		readbuffer[i] = Wire.read();
-	}
-
-	uint16_t ST, SRH;
-	ST = readbuffer[0];
-	ST <<= 8;
-	ST |= readbuffer[1];
-
-	// Check Temperature crc
-	if (readbuffer[2] != crc8(readbuffer, 2)) return false;
-
-	SRH = readbuffer[3];
-	SRH <<= 8;
-	SRH |= readbuffer[4];
-
-	// check Humidity crc
-	if (readbuffer[5] != crc8(readbuffer+3, 2)) return false;
-
-	double temp = ST;
-	temp *= 175;
-	temp /= 0xffff;
-	temp = -45 + temp;
-	temperature = (float)temp;
-
-	double shum = SRH;
-	shum *= 100;
-	shum /= 0xFFFF;
-	humidity = (float)shum;
-
-	lastUpdate = millis();
-
-	return true;
+        // It will go to idle state by itself after 1ms
+        return true;
 }
+bool SHT31::update(bool wait)
+{
+        uint32_t elapsed = millis() - lastTime;
+        if (elapsed < timeout) delay(timeout - elapsed);
 
-void Groove_SHT31::sendComm(uint16_t comm) {
-  Wire.beginTransmission(deviceAddress);
-  Wire.write(comm >> 8);
-  Wire.write(comm & 0xFF);
-  Wire.endTransmission();  
+        uint8_t readbuffer[6];
+        sendComm(SINGLE_SHOT_HIGH_REP);
+
+        Wire.requestFrom(address, (uint8_t)6);
+        // Wait for answer (datasheet says 15ms is the max)
+        uint32_t started = millis();
+        while(Wire.available() != 6) {
+                if (millis() - started > timeout) return 0;
+        }
+
+        // Read response
+        for (uint8_t i=0; i<6; i++) readbuffer[i] = Wire.read();
+
+        uint16_t ST, SRH;
+        ST = readbuffer[0];
+        ST <<= 8;
+        ST |= readbuffer[1];
+
+        // Check Temperature crc
+        if (readbuffer[2] != crc8(readbuffer, 2)) return false;
+        SRH = readbuffer[3];
+        SRH <<= 8;
+        SRH |= readbuffer[4];
+
+        // check Humidity crc
+        if (readbuffer[5] != crc8(readbuffer+3, 2)) return false;
+        double temp = ST;
+        temp *= 175;
+        temp /= 0xffff;
+        temp = -45 + temp;
+        temperature = (float)temp;
+
+        double shum = SRH;
+        shum *= 100;
+        shum /= 0xFFFF;
+        humidity = (float)shum;
+
+        lastTime = millis();
+
+        return true;
+}
+void SHT31::sendComm(uint16_t comm)
+{
+        Wire.beginTransmission(address);
+        Wire.write(comm >> 8);
+        Wire.write(comm & 0xFF);
+        Wire.endTransmission();
+}
+uint8_t SHT31::crc8(const uint8_t *data, int len)
+{
+
+        /* CRC-8 formula from page 14 of SHT spec pdf */
+
+        /* Test data 0xBE, 0xEF should yield 0x92 */
+
+        /* Initialization data 0xFF */
+        /* Polynomial 0x31 (x8 + x5 +x4 +1) */
+        /* Final XOR 0x00 */
+
+        const uint8_t POLYNOMIAL(0x31);
+        uint8_t crc(0xFF);
+
+        for ( int j = len; j; --j ) {
+                crc ^= *data++;
+                for ( int i = 8; i; --i ) {
+                        crc = ( crc & 0x80 )
+                                ? (crc << 1) ^ POLYNOMIAL
+                                : (crc << 1);
+                }
+        }
+        return crc;
 }
 
 uint8_t Groove_SHT31::crc8(const uint8_t *data, int len) {

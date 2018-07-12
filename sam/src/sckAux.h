@@ -358,6 +358,33 @@ class Moisture {
 		void sleep();
 };
 
+// Temperature and Humidity
+class SHT31
+{
+        // Datasheet
+        // https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/2_Humidity_Sensors/Sensirion_Humidity_Sensors_SHT3x_Datasheet_digital.pdf
+        // This code is based on Adafruit SHT31 library, thanks! (https://github.com/adafruit/Adafruit_SHT31)
+        private:
+
+                // Commands
+                const uint16_t SOFT_RESET = 0x30A2;
+                const uint16_t SINGLE_SHOT_HIGH_REP = 0x2400;
+
+                uint32_t timeout = 15;  // Time in ms to wait for a reading
+                uint32_t lastTime = 0;
+                void sendComm(uint16_t comm);
+                uint8_t crc8(const uint8_t *data, int len);
+        public:
+                uint8_t address = 0x44;
+
+                float temperature;
+                float humidity;
+                bool begin();
+                bool stop();
+                bool update(bool wait=true);
+};
+
+
 class Groove_SHT31 {
 	// Datasheet
 	// https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/2_Humidity_Sensors/Sensirion_Humidity_Sensors_SHT3x_Datasheet_digital.pdf
