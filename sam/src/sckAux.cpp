@@ -360,7 +360,7 @@ bool Groove_OLED::begin() {
 	U8g2_oled.clearDisplay();
 	
 	U8g2_oled.firstPage();
-	do { U8g2_oled.drawXBM( 0, 0, 96, 96, scLogo); } while (U8g2_oled.nextPage());
+	do { U8g2_oled.drawXBM(0, 0, 96, 96, scLogo); } while (U8g2_oled.nextPage());
 
 	return true;;
 }

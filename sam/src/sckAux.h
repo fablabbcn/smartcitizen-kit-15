@@ -213,7 +213,13 @@ class Groove_OLED {
 
 		const byte deviceAddress = 0x3c;
 
-		U8G2_SSD1327_SEEED_96X96_F_HW_I2C U8g2_oled = U8G2_SSD1327_SEEED_96X96_F_HW_I2C(U8G2_R0, U8X8_PIN_NONE, SCL, SDA);
+		// This is for OLD seeed oled screen
+		/* U8G2_SSD1327_SEEED_96X96_F_HW_I2C U8g2_oled = U8G2_SSD1327_SEEED_96X96_F_HW_I2C(U8G2_R0, U8X8_PIN_NONE, SCL, SDA); */ 
+
+		// This is NOT working with (https://www.seeedstudio.com/Grove-OLED-Display-1.12%27%27-V2-p-3031.html)
+		/* U8G2_SH1107_128X128_F_HW_I2C U8g2_oled = U8G2_SH1107_128X128_F_HW_I2C(U8G2_R0, U8X8_PIN_NONE, SCL, SDA); */
+		// For now it only works with 96x96 pixels
+		U8G2_SH1107_SEEED_96X96_F_HW_I2C U8g2_oled = U8G2_SH1107_SEEED_96X96_F_HW_I2C(U8G2_R0, U8X8_PIN_NONE, SCL, SDA);
 
 		bool begin();
 		void print(String payload);
