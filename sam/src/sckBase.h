@@ -16,7 +16,11 @@
 #include "ReadLight.h"
 #include "sckUrban.h"
 #include "Constants.h"
+#include "SckAquapioneers.h"
 
+// Uncoment installed board
+/* #define INSTALLED_BOARD BOARD_URBAN */
+#define INSTALLED_BOARD BOARD_AQP
 
 /* 	-----------------
  	|	 Button 	|

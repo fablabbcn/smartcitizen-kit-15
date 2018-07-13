@@ -66,6 +66,9 @@ EasyTransfer BUS_in, BUS_out;
 // Urban board
 SckUrban urban;
 
+// Aquapioneers board
+SckAqp aqpBoard;
+
 // Auxiliary I2C devices
 AuxBoards auxBoards;
 
@@ -136,19 +139,6 @@ void SckBase::setup() {
 	// Configuration
 	loadConfig();
 
-	// Urban board
-	urbanPresent = urbanBoardDetected();
-	if (urbanPresent) {
-		sckOut("Enabling urban board...");
-		readLightEnabled = true;
-		readLight.setup();
-		urban.setup();
-
-		// Turn on MICS heaters if they are enabled
-		if (sensors[SENSOR_CO].enabled) urban.gasOn(SENSOR_CO);
-		if (sensors[SENSOR_NO2].enabled) urban.gasOn(SENSOR_NO2);
-	}
-
 	// Detect and enable auxiliary boards
 	for (uint8_t i=0; i<SENSOR_COUNT; i++) {
 
@@ -159,9 +149,7 @@ void SckBase::setup() {
 
 			sprintf(outBuff, "Detecting: %s... ", wichSensor->title);
 			sckOut(PRIO_MED, false);
-
 			if (auxBoards.begin(wichSensor)) {
-
 				if (!wichSensor->enabled) {
 					sckOut("found!!!");
 					enableSensor(wichSensor);
@@ -178,6 +166,40 @@ void SckBase::setup() {
 			}
 		}
 	}
+	
+	
+	switch(INSTALLED_BOARD) {
+	
+		case BOARD_URBAN: {
+				  
+			  urbanPresent = urbanBoardDetected();
+			  if (urbanPresent) {
+				  sckOut("Enabling urban board...");
+				  readLightEnabled = true;
+				  readLight.setup();
+				  urban.setup();
+
+				  // Turn on MICS heaters if they are enabled
+				  if (sensors[SENSOR_CO].enabled) urban.gasOn(SENSOR_CO);
+				  if (sensors[SENSOR_NO2].enabled) urban.gasOn(SENSOR_NO2);
+			  }
+				  
+				  
+		} case BOARD_AQP: {
+		
+			if(aqpBoard.begin()) sckOut("Enabling Aquapioneers board");
+			/* if (auxBoards.begin(&sensors[SENSOR_GROOVE_OLED])) { */
+			/* 	sckOut("Found OLED screen!!!"); */
+			/* 	enableSensor(&sensors[SENSOR_GROOVE_OLED]); */
+			/* } else disableSensor(&sensors[SENSOR_GROOVE_OLED]); */
+		
+			/* disableSensor(&sensors[SENSOR_GROOVE_TEMP_SHT31]); */
+			/* disableSensor(&sensors[SENSOR_GROOVE_HUM_SHT31]); */
+		}
+	
+	}
+
+
 
 	// Dont go to sleep until some time has passed
 	userLastAction = rtc.getEpoch();
@@ -2385,8 +2407,15 @@ bool SckBase::getReading(OneSensor* wichSensor) {
 				wichSensor->reading = auxBoards.getReading(wichSensor);
 				wichSensor->valid = true;
 			}
-
 			break;
+		} case BOARD_AQP: {
+
+			wichSensor->busy = auxBoards.getBusyState(wichSensor);
+			if (!wichSensor->busy){
+				wichSensor->reading = aqpBoard.getReading(wichSensor);
+				wichSensor->valid = true;
+			}
+
 		} default: {
 			;
 		}

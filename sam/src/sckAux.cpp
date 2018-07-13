@@ -1,16 +1,16 @@
 #include "sckAux.h"
 
-AlphaDelta			alphaDelta;
+AlphaDelta		alphaDelta;
 GrooveI2C_ADC		grooveI2C_ADC;
-INA219				ina219;
-Groove_OLED			groove_OLED;
+INA219			ina219;
+Groove_OLED		groove_OLED;
 WaterTemp_DS18B20 	waterTemp_DS18B20;
 I2Cexp_TCA9548A 	i2Cexpander;
-Atlas				atlasPH = Atlas(SENSOR_ATLAS_PH);
-Atlas				atlasEC = Atlas(SENSOR_ATLAS_EC);
-Atlas				atlasDO = Atlas(SENSOR_ATLAS_DO);
-Atlas 				atlasTEMP = Atlas(SENSOR_ATLAS_TEMPERATURE);
-Moisture 			moistureChirp;
+Atlas			atlasPH = Atlas(SENSOR_ATLAS_PH);
+Atlas			atlasEC = Atlas(SENSOR_ATLAS_EC);
+Atlas			atlasDO = Atlas(SENSOR_ATLAS_DO);
+Atlas 			atlasTEMP = Atlas(SENSOR_ATLAS_TEMPERATURE);
+Moisture 		moistureChirp;
 SHT31 			groove_SHT31;
 
 bool I2Cdetect(byte address) {
@@ -358,9 +358,9 @@ bool Groove_OLED::begin() {
 
 	U8g2_oled.begin();
 	U8g2_oled.clearDisplay();
-	
+
 	U8g2_oled.firstPage();
-	do { U8g2_oled.drawXBM(0, 0, 96, 96, scLogo); } while (U8g2_oled.nextPage());
+	do { U8g2_oled.drawXBM(16, 16, 96, 96, scLogo); } while (U8g2_oled.nextPage());
 
 	return true;;
 }
@@ -381,6 +381,8 @@ void Groove_OLED::print(String payload) {
 
 void Groove_OLED::displayReading(String title, String reading, String unit, String time) {
 
+	uint8_t screenW = 128;
+
 	String date;
 	String hour;
 
@@ -394,34 +396,34 @@ void Groove_OLED::displayReading(String title, String reading, String unit, Stri
 
 		// Title
 		U8g2_oled.setFont(u8g2_font_helvB10_tf);
-		if (U8g2_oled.getStrWidth(title.c_str()) > 96 && title.indexOf(" ") > -1) {
+		if (U8g2_oled.getStrWidth(title.c_str()) > screenW && title.indexOf(" ") > -1) {
 			
 			String first = title.substring(0, title.indexOf(" "));
 			String second = title.substring(title.indexOf(" ")+1);
 
-			U8g2_oled.drawStr((96-U8g2_oled.getStrWidth(first.c_str()))/2,11, first.c_str());
-			U8g2_oled.drawStr((96-U8g2_oled.getStrWidth(second.c_str()))/2,23, second.c_str());
+			U8g2_oled.drawStr((screenW-U8g2_oled.getStrWidth(first.c_str()))/2,11, first.c_str());
+			U8g2_oled.drawStr((screenW-U8g2_oled.getStrWidth(second.c_str()))/2,23, second.c_str());
 
-		} else U8g2_oled.drawStr((96-U8g2_oled.getStrWidth(title.c_str()))/2,11, title.c_str());
+		} else U8g2_oled.drawStr((screenW-U8g2_oled.getStrWidth(title.c_str()))/2,11, title.c_str());
 
 		// Reading
 		U8g2_oled.setFont(u8g2_font_helvB24_tf);
-		if (U8g2_oled.getStrWidth(reading.c_str()) > 96) U8g2_oled.setFont(u8g2_font_helvB18_tf);
-		U8g2_oled.drawStr((96-U8g2_oled.getStrWidth(reading.c_str()))/2, 55,  reading.c_str());
+		if (U8g2_oled.getStrWidth(reading.c_str()) > screenW) U8g2_oled.setFont(u8g2_font_helvB18_tf);
+		U8g2_oled.drawStr((screenW-U8g2_oled.getStrWidth(reading.c_str()))/2, 70,  reading.c_str());
 
 		// Unit
-		U8g2_oled.setFont(u8g2_font_helvB12_tf);
-		U8g2_oled.drawStr((96-U8g2_oled.getStrWidth(unit.c_str()))/2,75, unit.c_str());
+		U8g2_oled.setFont(u8g2_font_helvB14_tf);
+		U8g2_oled.drawStr((screenW-U8g2_oled.getStrWidth(unit.c_str()))/2,90, unit.c_str());
 
 		if (time.toInt() != 0) {
 			
 			// Date
 			U8g2_oled.setFont(u8g2_font_helvB10_tf);
-			U8g2_oled.drawStr(0,96,date.c_str());
+			U8g2_oled.drawStr(0,screenW,date.c_str());
 
 			// Time
-			U8g2_oled.drawStr(96-U8g2_oled.getStrWidth(hour.c_str()),96,hour.c_str());
-			U8g2_oled.drawStr(96-U8g2_oled.getStrWidth(hour.c_str()),96,hour.c_str());
+			U8g2_oled.drawStr(screenW-U8g2_oled.getStrWidth(hour.c_str()),screenW,hour.c_str());
+			U8g2_oled.drawStr(screenW-U8g2_oled.getStrWidth(hour.c_str()),screenW,hour.c_str());
 		}
 
 	} while (U8g2_oled.nextPage());
@@ -796,6 +798,8 @@ bool SHT31::stop()
 }
 bool SHT31::update(bool wait)
 {
+	Wire.setClock(100000); 
+
         uint32_t elapsed = millis() - lastTime;
         if (elapsed < timeout) delay(timeout - elapsed);
 
