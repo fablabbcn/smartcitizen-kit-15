@@ -76,6 +76,7 @@ enum SensorType {
 	SENSOR_AQP_WATER_LVL,
 	SENSOR_AQP_RISING_TIME,
 	SENSOR_AQP_DECREASING_TIME,
+	SENSOR_AQP_STAGNATING_TIME,
 
 	// Put one here for each muxed sensor
 	// SENSOR_MUX01A,
@@ -218,10 +219,11 @@ public:
 
 		// Aquapioneers sensor board
 		OneSensor { BOARD_AQP, 		SENSOR_AQP_WATER_TEMP, 			"Water Temperature AQP",			0, 		true, 		false, 			"C"},
-		OneSensor { BOARD_AQP, 		SENSOR_AQP_WATER_LVL, 			"Water Level AQP",			0, 		true, 		false, 			"cm"},
-		// OneSensor { BOARD_AQP, 		SENSOR_AQP_WATER_LVLAVG, 			"Water Level Average AQP",			0, 		false, 		false, 			"cm"},
-		OneSensor { BOARD_AQP, 		SENSOR_AQP_RISING_TIME, 			"Water Rising Time AQP",			0, 		true, 		false, 			"min"},
-		OneSensor { BOARD_AQP, 		SENSOR_AQP_DECREASING_TIME, 			"Water Decreasing Time AQP",			0, 		true, 		false, 			"min"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_WATER_LVL, 			"Water Level AQP",                      	0,              true,           false,                  "cm"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_RISING_TIME, 		"Water Rising Time AQP",                        0,              true,           false,                  "min"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_DECREASING_TIME, 		"Water Decreasing Time AQP",                    0,              true,           false,                  "min"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_STAGNATING_TIME, 		"Water Stagnating Time AQP",                    0,              true,           false,                  "min"},
+
 
 		//-----------------------
 		// Add New Sensor Here!!!

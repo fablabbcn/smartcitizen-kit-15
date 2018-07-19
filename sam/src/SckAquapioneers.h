@@ -16,7 +16,8 @@ const uint8_t SIG3 = 4;
 bool I2Cdetect(byte address);
 
 
-class SckAqp {
+class SckAqp
+{
 
 	public:
 
@@ -36,42 +37,45 @@ class SckAqp {
 	private:
 };
 
-class AqpUltraSonic {
+class AqpUltraSonic
+{
 
 	public:
+		const uint8_t TANK_HEIGHT = 30; 			// distance between bottom of tank and PING sensor in cm */
+		const uint8_t PING_HEIGHT = TANK_HEIGHT + 15; 		// Height of tank in cm */
+		const uint8_t IDEAL_WATER_LEVEL = TANK_HEIGHT - 7;
+		const uint8_t STAGNATION_THRESHOLD = 1;
+
+		// Create a moving average with alpha
+		MovingAverage lvlFiltered = MovingAverage(0.005);
+		MovingAverage lvlMoreFiltered = MovingAverage(0.001);
 
 		bool begin();
 		float getReading(OneSensor* wichSensor);
+		bool updateWaterLevel();
+		bool updateCounters();
 		bool getBusyState(OneSensor* wichSensor);
 		String control(OneSensor* wichSensor, String command);
 
+		uint32_t tRising, tDecreasing, tStagnating;
+
 	private:
 		float measureDistance ();
-		void getWaterLevel();
-		void updateCounters();
-		void getState();
+		int getState();
+
+		const int pinULTRASONIC = (SIG2);
+
+		float lvlMoreFilteredPrevious;
+		uint8_t tPrevious;
+		int previousState = 0;
 
 
-		const int ultrasonic = (SIG2);
-
-		// Create a moving average with alpha
-		MovingAverage lvlFiltered(0.005);
-		MovingAverage lvlMoreFiltered(0.001);
-
-
-		// distance between bottom of tank and PING sensor in cm
-		float pingHeight = 45;
-		// Height of tank in cm
-		float tankHeight = 30;
-
+		// TODO alarms
 		//acceptable maximum water level in tank in cm
-		float maxLvlIdeal = tankHeight - 5;
-		float minLvlIdeal = tankHeight - 10;
+		float maxLvlIdeal = TANK_HEIGHT - 5;
+		float minLvlIdeal = TANK_HEIGHT - 10;
 
-		float tRiseIdeal = 3 * 1000; //Ideal rise time in milliseconds
-		float tDecreaseIdeal = 5 *1000; //Ideal decrease time in milliseconds;
-
-		float tRising, tDecreasing, tStagnating, tStagPrevious, tRisePrevious, tDecPrevious, tCurrent, tDif, lvlFilteredPrevious, lvlFilteredValue, lvlMoreFilteredPrevious, lvlMoreFilteredValue;
-		int currentState, previousState;
+		float tRiseIdeal = 3 * 1000; 		//Ideal rise time in milliseconds
+		float tDecreaseIdeal = 5 *1000; 	//Ideal decrease time in milliseconds;
 
 };
