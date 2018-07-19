@@ -188,13 +188,6 @@ void SckBase::setup() {
 		} case BOARD_AQP: {
 		
 			if(aqpBoard.begin()) sckOut("Enabling Aquapioneers board");
-			/* if (auxBoards.begin(&sensors[SENSOR_GROOVE_OLED])) { */
-			/* 	sckOut("Found OLED screen!!!"); */
-			/* 	enableSensor(&sensors[SENSOR_GROOVE_OLED]); */
-			/* } else disableSensor(&sensors[SENSOR_GROOVE_OLED]); */
-		
-			/* disableSensor(&sensors[SENSOR_GROOVE_TEMP_SHT31]); */
-			/* disableSensor(&sensors[SENSOR_GROOVE_HUM_SHT31]); */
 		}
 	
 	}
