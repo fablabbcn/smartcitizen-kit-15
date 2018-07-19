@@ -61,7 +61,7 @@ enum SensorType {
 	SENSOR_ATLAS_EC_SG,
 	SENSOR_ATLAS_DO,
 	SENSOR_ATLAS_DO_SAT,
-	
+
 	SENSOR_CHIRP_MOISTURE,
 	SENSOR_CHIRP_TEMPERATURE,
 	SENSOR_CHIRP_LIGHT,
@@ -73,13 +73,16 @@ enum SensorType {
 	SENSOR_GROOVE_OLED,
 
 	SENSOR_AQP_WATER_TEMP,
+	SENSOR_AQP_WATER_LVL,
+	SENSOR_AQP_RISING_TIME,
+	SENSOR_AQP_DECREASING_TIME,
 
 	// Put one here for each muxed sensor
 	// SENSOR_MUX01A,
 	// SENSOR_MUX01B,
 	// SENSOR_MUX02,
 
-	SENSOR_COUNT	
+	SENSOR_COUNT
 };
 
 const uint32_t minimal_sensor_reading_interval = 60;
@@ -95,7 +98,7 @@ struct SensorGroupByTime {		// 5 bytes
 
 struct SingleSensorReading {	// 5 bytes
 	SensorType sensor;
-	float reading;	
+	float reading;
 };
 
 struct SensorGroupBuffer{
@@ -139,12 +142,12 @@ public:
 
 class AllSensors {
 public:
-	
+
 	OneSensor list[SENSOR_COUNT] {
-	
-		//	SensorLocation 		SensorType 				title 						id		enabled		controllable	unit 		
-						
-		// Base Sensors						
+
+		//	SensorLocation 		SensorType 				title 						id		enabled		controllable	unit
+
+		// Base Sensors
 		OneSensor {BOARD_BASE, 		SENSOR_BATTERY, 			"Battery", 					10,		true,		false,			"%"},
 		OneSensor {BOARD_BASE, 		SENSOR_VOLTIN,				"Input voltage", 				0,		false,		false,			"V"},
 
@@ -167,7 +170,7 @@ public:
 		OneSensor {BOARD_URBAN, 	SENSOR_NO2_LOAD_RESISTANCE, 		"Nitrogen dioxide load resistance",		0,		false,		false,			"Ohms"},
 
 		// I2C Auxiliary Sensors
-		
+
 		// I2C Expander TCA9548A
 		OneSensor {BOARD_AUX, 		SENSOR_I2C_EXPANDER_TCA9548A,		"I2C Expander", 				0,		false,		false,			},
 
@@ -180,7 +183,7 @@ public:
 		OneSensor {BOARD_AUX,		SENSOR_ALPHADELTA_SLOT_3W, 		"AlphaDelta 3W",				0,		false,		true,			},
 		OneSensor {BOARD_AUX,		SENSOR_ALPHADELTA_TEMPERATURE, 		"AlphaDelta Temperature", 			0,		false,		false,			"C"},
 		OneSensor {BOARD_AUX,		SENSOR_ALPHADELTA_HUMIDITY, 		"AlphaDelta Humidity",				0,		false,		false,			"%"},
-	
+
 		// Groove I2C ADC
 		OneSensor { BOARD_AUX,		SENSOR_GROOVE_I2C_ADC,			"Groove ADC",					25,		false,		false,			"V"},
 
@@ -215,6 +218,10 @@ public:
 
 		// Aquapioneers sensor board
 		OneSensor { BOARD_AQP, 		SENSOR_AQP_WATER_TEMP, 			"Water Temperature AQP",			0, 		true, 		false, 			"C"},
+		OneSensor { BOARD_AQP, 		SENSOR_AQP_WATER_LVL, 			"Water Level AQP",			0, 		true, 		false, 			"cm"},
+		// OneSensor { BOARD_AQP, 		SENSOR_AQP_WATER_LVLAVG, 			"Water Level Average AQP",			0, 		false, 		false, 			"cm"},
+		OneSensor { BOARD_AQP, 		SENSOR_AQP_RISING_TIME, 			"Water Rising Time AQP",			0, 		true, 		false, 			"min"},
+		OneSensor { BOARD_AQP, 		SENSOR_AQP_DECREASING_TIME, 			"Water Decreasing Time AQP",			0, 		true, 		false, 			"min"},
 
 		//-----------------------
 		// Add New Sensor Here!!!
@@ -232,5 +239,5 @@ public:
 	}
 
 private:
-	
+
 };
