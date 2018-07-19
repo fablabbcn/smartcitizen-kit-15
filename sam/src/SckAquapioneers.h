@@ -52,8 +52,8 @@ class AqpUltraSonic
 		const uint8_t tDecreaseIdeal = 5 *1000 * 60; 	//Ideal decrease time in milliseconds;
 
 		// Create a moving average with alpha
-		MovingAverage lvlFiltered = MovingAverage(0.005);
-		MovingAverage lvlMoreFiltered = MovingAverage(0.001);
+		MovingAverage lvlFiltered = MovingAverage(0.9);
+		MovingAverage lvlMoreFiltered = MovingAverage(0.1);
 
 		bool begin();
 		float getReading(OneSensor* wichSensor);

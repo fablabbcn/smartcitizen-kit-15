@@ -26,10 +26,10 @@ float SckAqp::getReading(OneSensor* wichSensor)
 	switch(wichSensor->type) {
 
 		case SENSOR_AQP_WATER_TEMP:		aqp_WaterTemp.requestTemperatures(); return aqp_WaterTemp.getTempCByIndex(0); break;
-		case SENSOR_AQP_WATER_LVL:		aqpUltraSonic.updateWaterLevel(); return aqpUltraSonic.lvlFiltered.get(); break;
-		case SENSOR_AQP_RISING_TIME: 		aqpUltraSonic.updateCounters(); return aqpUltraSonic.tRising/60000.0; break;
-		case SENSOR_AQP_DECREASING_TIME: 	aqpUltraSonic.updateCounters(); return aqpUltraSonic.tDecreasing/60000.0; break;
-		case SENSOR_AQP_STAGNATING_TIME: 	aqpUltraSonic.updateCounters(); return aqpUltraSonic.tStagnating/60000.0; break;
+		case SENSOR_AQP_WATER_LVL:		aqpUltraSonic.updateWaterLevel(); aqpUltraSonic.updateCounters(); return aqpUltraSonic.lvlFiltered.get(); break;
+		case SENSOR_AQP_RISING_TIME: 		return aqpUltraSonic.tRising/60000.0; break;
+		case SENSOR_AQP_DECREASING_TIME: 	return aqpUltraSonic.tDecreasing/60000.0; break;
+		case SENSOR_AQP_STAGNATING_TIME: 	return aqpUltraSonic.tStagnating/60000.0; break;
 
 		default: break;
 	}
