@@ -45,7 +45,7 @@ bool AuxBoards::begin(OneSensor* wichSensor) {
 		case SENSOR_INA219_SHUNT: 			
 		case SENSOR_INA219_CURRENT: 		
 		case SENSOR_INA219_LOADVOLT: 			return ina219.begin(); break;
-		case SENSOR_GROOVE_OLED: 				wichSensor->interval = 2; return groove_OLED.begin(); break;
+		case SENSOR_GROOVE_OLED: 				wichSensor->interval = 4; return groove_OLED.begin(); break;
 		case SENSOR_WATER_TEMP_DS18B20:			return waterTemp_DS18B20.begin(); break;
 		case SENSOR_ATLAS_PH:					return atlasPH.begin();
 		case SENSOR_ATLAS_EC:
