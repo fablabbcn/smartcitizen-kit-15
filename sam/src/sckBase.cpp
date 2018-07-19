@@ -2365,23 +2365,23 @@ bool SckBase::getReading(OneSensor* wichSensor) {
 			if (!urban.ESR) wichSensor->valid = true;
 			break;
 		} case BOARD_AUX: {
-
+			
 			// Exception for groove oled (instead of read i will write...)
 			if (wichSensor->type == SENSOR_GROOVE_OLED) {
 
+				sensorDisplayIndex ++;
+				if (sensorDisplayIndex == SENSOR_COUNT) sensorDisplayIndex = 0;
 				SensorType displaySensorType = static_cast<SensorType>(sensorDisplayIndex);
-				OneSensor *displaySensor = &sensors[displaySensorType];
 
-				while (!displaySensor->enabled) {
+				while (!sensors[displaySensorType].enabled || sensors[displaySensorType].type == SENSOR_GROOVE_OLED) {
 					sensorDisplayIndex ++;
 					if (sensorDisplayIndex == SENSOR_COUNT) sensorDisplayIndex = 0;
 					displaySensorType = static_cast<SensorType>(sensorDisplayIndex);
 				}
 
-				sensorDisplayIndex ++;
-				if (sensorDisplayIndex == SENSOR_COUNT) sensorDisplayIndex = 0;
+				SerialUSB.println(displaySensorType);
 
-				if (displaySensor->type == SENSOR_GROOVE_OLED) break;
+				OneSensor *displaySensor = &sensors[displaySensorType];
 
 				ISOtime();
 				String Stitle = displaySensor->title;
@@ -2389,17 +2389,21 @@ bool SckBase::getReading(OneSensor* wichSensor) {
 				String Sunit = displaySensor->unit;
 				auxBoards.displayReading(Stitle, Sreading, Sunit, ISOtimeBuff);
 
-				displaySensor->lastReadingTime = startedTime;
-				break;
-			}
-
-			// Check if the sensor is busy (and ping the sensor to continue working)
-			wichSensor->busy = auxBoards.getBusyState(wichSensor);
-
-			if (!wichSensor->busy){
-				wichSensor->reading = auxBoards.getReading(wichSensor);
+				wichSensor->lastReadingTime = startedTime;
 				wichSensor->valid = true;
+				return false;
+
+				break;
+			} else {
+				// Check if the sensor is busy (and ping the sensor to continue working)
+				wichSensor->busy = auxBoards.getBusyState(wichSensor);
+
+				if (!wichSensor->busy){
+					wichSensor->reading = auxBoards.getReading(wichSensor);
+					wichSensor->valid = true;
+				}
 			}
+
 			break;
 		} case BOARD_AQP: {
 
