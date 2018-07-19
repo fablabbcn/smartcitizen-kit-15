@@ -45,16 +45,24 @@ bool AqpUltraSonic::begin()
 
 bool AqpUltraSonic::updateWaterLevel()
 {
-	float lvlRaw = measureDistance();
 
-	// TODO do a retry sequence on bad readings
-	//Remove weird values
-	if ((lvlRaw < 10) || (lvlRaw > TANK_HEIGHT)) return false;
 
-	lvlMoreFilteredPrevious = lvlMoreFiltered.get();
-	lvlFiltered.update( lvlRaw );
-	lvlMoreFiltered.update( lvlRaw );
-	return true;
+	// TODO do a retry sequence on bad readings DONE, to be checked with Victor
+	int k = 0;
+	while (k < 3)
+	{
+		float lvlRaw = measureDistance();
+		//Remove weird values
+		if ((lvlRaw < 10) || (lvlRaw > TANK_HEIGHT)) k += 1;
+		else{
+			lvlMoreFilteredPrevious = lvlMoreFiltered.get();
+			lvlFiltered.update( lvlRaw );
+			lvlMoreFiltered.update( lvlRaw );
+			return true;
+		}
+	}
+
+	return false;
 }
 
 float AqpUltraSonic::measureDistance()

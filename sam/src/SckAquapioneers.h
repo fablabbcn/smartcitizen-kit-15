@@ -44,7 +44,12 @@ class AqpUltraSonic
 		const uint8_t TANK_HEIGHT = 30; 			// distance between bottom of tank and PING sensor in cm */
 		const uint8_t PING_HEIGHT = TANK_HEIGHT + 15; 		// Height of tank in cm */
 		const uint8_t IDEAL_WATER_LEVEL = TANK_HEIGHT - 7;
+		const uint8_t MAX_WATER_LEVEL = TANK_HEIGHT - 2;
 		const uint8_t STAGNATION_THRESHOLD = 1;
+
+		// TODO alarms
+		const uint8_t tRiseIdeal = 3 * 1000 * 60; 		//Ideal rise time in milliseconds
+		const uint8_t tDecreaseIdeal = 5 *1000 * 60; 	//Ideal decrease time in milliseconds;
 
 		// Create a moving average with alpha
 		MovingAverage lvlFiltered = MovingAverage(0.005);
@@ -70,12 +75,6 @@ class AqpUltraSonic
 		int previousState = 0;
 
 
-		// TODO alarms
-		//acceptable maximum water level in tank in cm
-		float maxLvlIdeal = TANK_HEIGHT - 5;
-		float minLvlIdeal = TANK_HEIGHT - 10;
 
-		float tRiseIdeal = 3 * 1000; 		//Ideal rise time in milliseconds
-		float tDecreaseIdeal = 5 *1000; 	//Ideal decrease time in milliseconds;
 
 };
