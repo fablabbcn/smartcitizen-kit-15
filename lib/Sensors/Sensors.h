@@ -210,19 +210,19 @@ public:
 
 
 		// Temperature and Humidity Groove - SHT31
-		OneSensor { BOARD_AUX,		SENSOR_GROOVE_TEMP_SHT31, 		"Temperature SHT31", 				0,		false,		false,			"C"},
-		OneSensor { BOARD_AUX, 		SENSOR_GROOVE_HUM_SHT31,		"Humidity SHT31", 				0,		false,		false,			"%"},
+		OneSensor { BOARD_AUX,		SENSOR_GROOVE_TEMP_SHT31, 		"Temperature SHT31", 				55,		false,		false,			"C"},
+		OneSensor { BOARD_AUX, 		SENSOR_GROOVE_HUM_SHT31,		"Humidity SHT31", 				56,		false,		false,			"%"},
 
 		// Later this will be moved to a Actuators.h file
 		// Groove I2C Oled Display 96x96
 		OneSensor { BOARD_AUX,		SENSOR_GROOVE_OLED,			"Groove OLED",					0,		false,		false,			},
 
 		// Aquapioneers sensor board
-		OneSensor { BOARD_AQP, 		SENSOR_AQP_WATER_TEMP, 			"Water Temperature AQP",			0, 		true, 		false, 			"C"},
-		OneSensor { BOARD_AQP,          SENSOR_AQP_WATER_LVL, 			"Water Level AQP",                      	0,              true,           false,                  "cm"},
-		OneSensor { BOARD_AQP,          SENSOR_AQP_RISING_TIME, 		"Water Rising Time AQP",                        0,              true,           false,                  "min"},
-		OneSensor { BOARD_AQP,          SENSOR_AQP_DECREASING_TIME, 		"Water Decreasing Time AQP",                    0,              true,           false,                  "min"},
-		OneSensor { BOARD_AQP,          SENSOR_AQP_STAGNATING_TIME, 		"Water Stagnating Time AQP",                    0,              true,           false,                  "min"},
+		OneSensor { BOARD_AQP, 		SENSOR_AQP_WATER_TEMP, 			"Water Temperature AQP",			42, 		true, 		false, 			"C"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_WATER_LVL, 			"Water Level AQP",                      	91,              true,           false,                  "cm"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_RISING_TIME, 		"Water Rising Time AQP",                        92,              true,           false,                  "min"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_DECREASING_TIME, 		"Water Decreasing Time AQP",                    93,              true,           false,                  "min"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_STAGNATING_TIME, 		"Water Stagnating Time AQP",                    94,              true,           false,                  "min"},
 
 
 		//-----------------------

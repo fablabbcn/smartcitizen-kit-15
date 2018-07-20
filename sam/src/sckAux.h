@@ -25,7 +25,7 @@
 bool I2Cdetect(byte address);
 
 class AuxBoards {
-	
+
 	public:
 
 		// List for storing Auxiliary sensors I2C address (SENSOR_COUNT - (BASE AND URBAN SENSORS))
@@ -205,7 +205,7 @@ static const unsigned char scLogo[] PROGMEM = {
 	0x00, 0x00, 0x00, 0x80, 0xff, 0xff, 0xff, 0xff, 0x01, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x7f, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0xc0, 0xff, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00 
+	0x00, 0x00, 0x00, 0x00, 0x00, 0xf0, 0x1f, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 class Groove_OLED {
@@ -214,11 +214,11 @@ class Groove_OLED {
 		const byte deviceAddress = 0x3c;
 
 		// This is for OLD seeed oled screen
-		/* U8G2_SSD1327_SEEED_96X96_F_HW_I2C U8g2_oled = U8G2_SSD1327_SEEED_96X96_F_HW_I2C(U8G2_R0, U8X8_PIN_NONE, SCL, SDA); */ 
+		/* U8G2_SSD1327_SEEED_96X96_F_HW_I2C U8g2_oled = U8G2_SSD1327_SEEED_96X96_F_HW_I2C(U8G2_R0, U8X8_PIN_NONE, SCL, SDA); */
 
 		// This is NOT working well with (https://www.seeedstudio.com/Grove-OLED-Display-1.12%27%27-V2-p-3031.html)
 		// As temp fix comment line 341 (display offset) on u8x8_d_sh1107.c of u8g2 library
-		U8G2_SH1107_128X128_F_HW_I2C U8g2_oled = U8G2_SH1107_128X128_F_HW_I2C(U8G2_R0, U8X8_PIN_NONE, SCL, SDA);
+		U8G2_SH1107_128X128_F_HW_I2C U8g2_oled = U8G2_SH1107_128X128_F_HW_I2C(U8G2_R1, U8X8_PIN_NONE, SCL, SDA);
 
 
 		bool begin();
@@ -279,7 +279,7 @@ class Atlas {
 			ASKED_READING,
 		};
 		State state = REST;
-		
+
 		// Constructor varies by sensor type
 		Atlas(SensorType wichSensor) {
 			atlasType = wichSensor;
@@ -300,7 +300,7 @@ class Atlas {
 				case SENSOR_ATLAS_DO_SAT: {
 					deviceAddress = 0x61;
 					DO = true;
-					break;				
+					break;
 
 				} case SENSOR_ATLAS_TEMPERATURE: {
 
@@ -317,12 +317,12 @@ class Atlas {
 		bool beginDone = false;
 		float getReading();
 		bool getBusyState();
-		
+
 		void goToSleep();
 		bool sendCommand(char* command);
 		bool tempCompensation();
 		uint8_t getResponse();
-		
+
 		uint16_t longWait = 910; //ms
 		uint16_t mediumWait = 610; //ms
 		uint16_t shortWait = 310; //ms
@@ -350,10 +350,10 @@ class Moisture {
 		float getReading(typeOfReading wichReading);
 		bool getBusyState(typeOfReading wichReading);
 		bool changeAddress(byte newAddress);
-		uint8_t getVersion(); 
-		
-		// TODO 
-		// * Measure sensor consumption 
+		uint8_t getVersion();
+
+		// TODO
+		// * Measure sensor consumption
 		// * Send sensor to sleep between readings (needs FIX, it hangs)
 		void sleep();
 };
@@ -394,10 +394,10 @@ class Groove_SHT31 {
 		uint8_t deviceAddress = 0x44;
 		const uint16_t SOFT_RESET = 0x30A2;
 		const uint16_t SINGLE_SHOT_HIGH_REP = 0x2400;
-		
+
 		// TO be removed with state machine asynchronous
 		uint32_t timeout = 20;	// Time in ms to wait for a reading
-		
+
 		void sendComm(uint16_t comm);
 		uint8_t crc8(const uint8_t *data, int len);
 		uint32_t lastUpdate = 0;

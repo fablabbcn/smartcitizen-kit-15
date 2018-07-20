@@ -166,12 +166,12 @@ void SckBase::setup() {
 			}
 		}
 	}
-	
-	
+
+
 	switch(INSTALLED_BOARD) {
-	
+
 		case BOARD_URBAN: {
-				  
+
 			  urbanPresent = urbanBoardDetected();
 			  if (urbanPresent) {
 				  sckOut("Enabling urban board...");
@@ -183,13 +183,13 @@ void SckBase::setup() {
 				  if (sensors[SENSOR_CO].enabled) urban.gasOn(SENSOR_CO);
 				  if (sensors[SENSOR_NO2].enabled) urban.gasOn(SENSOR_NO2);
 			  }
-				  
-				  
+
+
 		} case BOARD_AQP: {
-		
+
 			if(aqpBoard.begin()) sckOut("Enabling Aquapioneers board");
 		}
-	
+
 	}
 
 
@@ -207,7 +207,7 @@ void SckBase::update() {
 
 		if (SerialUSB.available()) Serial1.write(SerialUSB.read());
 		if (Serial1.available()) SerialUSB.write(Serial1.read());
-	
+
 	} else {
 
 		// update ESP communications
@@ -1064,7 +1064,7 @@ void SckBase::ESPprocessMsg() {
 			StaticJsonBuffer<240> jsonBuffer;
 			JsonObject& jsonConf = jsonBuffer.parseObject(msgIn.param);
 
-			if (jsonConf.containsKey("mo")) { 
+			if (jsonConf.containsKey("mo")) {
 				String tmode = jsonConf["mo"];
 				sckOut(tmode);
 				config.persistentMode = static_cast<SCKmodes>(tmode.toInt());
@@ -2365,7 +2365,7 @@ bool SckBase::getReading(OneSensor* wichSensor) {
 			if (!urban.ESR) wichSensor->valid = true;
 			break;
 		} case BOARD_AUX: {
-			
+
 			// Exception for groove oled (instead of read i will write...)
 			if (wichSensor->type == SENSOR_GROOVE_OLED) {
 
@@ -2379,7 +2379,6 @@ bool SckBase::getReading(OneSensor* wichSensor) {
 					displaySensorType = static_cast<SensorType>(sensorDisplayIndex);
 				}
 
-				SerialUSB.println(displaySensorType);
 
 				OneSensor *displaySensor = &sensors[displaySensorType];
 
