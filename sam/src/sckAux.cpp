@@ -1,19 +1,20 @@
 #include "sckAux.h"
 
-AlphaDelta			alphaDelta;
+GasesBoard              gasBoard;
 GrooveI2C_ADC		grooveI2C_ADC;
-INA219				ina219;
-Groove_OLED			groove_OLED;
+INA219			ina219;
+Groove_OLED		groove_OLED;
 WaterTemp_DS18B20 	waterTemp_DS18B20;
 I2Cexp_TCA9548A 	i2Cexpander;
-Atlas				atlasPH = Atlas(SENSOR_ATLAS_PH);
-Atlas				atlasEC = Atlas(SENSOR_ATLAS_EC);
-Atlas				atlasDO = Atlas(SENSOR_ATLAS_DO);
-Atlas 				atlasTEMP = Atlas(SENSOR_ATLAS_TEMPERATURE);
-Moisture 			moistureChirp;
+Atlas			atlasPH = Atlas(SENSOR_ATLAS_PH);
+Atlas			atlasEC = Atlas(SENSOR_ATLAS_EC);
+Atlas			atlasDO = Atlas(SENSOR_ATLAS_DO);
+Atlas 			atlasTEMP = Atlas(SENSOR_ATLAS_TEMPERATURE);
+Moisture 		moistureChirp;
 Groove_SHT31 		groove_SHT31;
 
-bool I2Cdetect(byte address) {
+bool I2Cdetect(byte address)
+{
 
 	Wire.beginTransmission(address);
     byte error = Wire.endTransmission();
@@ -22,7 +23,8 @@ bool I2Cdetect(byte address) {
 	else return false;
 }
 
-bool AuxBoards::begin(OneSensor* wichSensor) {
+bool AuxBoards::begin(OneSensor* wichSensor)
+{
 
 	if (i2Cexpander.detected) {
 		if (wichSensor->muxPort >= 0) i2Cexpander.selectPort(wichSensor->muxPort);
@@ -32,14 +34,17 @@ bool AuxBoards::begin(OneSensor* wichSensor) {
 	switch (wichSensor->type) {
 
 		case SENSOR_I2C_EXPANDER_TCA9548A:		i2Cexpander.begin(); return false; break;
-		case SENSOR_ALPHADELTA_SLOT_1A:
-		case SENSOR_ALPHADELTA_SLOT_1W:
-		case SENSOR_ALPHADELTA_SLOT_2A:
-		case SENSOR_ALPHADELTA_SLOT_2W:
-		case SENSOR_ALPHADELTA_SLOT_3A:
-		case SENSOR_ALPHADELTA_SLOT_3W:
-		case SENSOR_ALPHADELTA_HUMIDITY:
-		case SENSOR_ALPHADELTA_TEMPERATURE: 	return alphaDelta.begin(); break;
+		case SENSOR_GASESBOARD_SLOT_1A:
+		case SENSOR_GASESBOARD_SLOT_1W:
+		case SENSOR_GASESBOARD_SLOT_2A:
+		case SENSOR_GASESBOARD_SLOT_2W:
+		case SENSOR_GASESBOARD_SLOT_3A:
+		case SENSOR_GASESBOARD_SLOT_3W:
+		/* case SENSOR_GASESBOARD_SLOT_1_CAL: */
+		/* case SENSOR_GASESBOARD_SLOT_2_CAL: */
+		/* case SENSOR_GASESBOARD_SLOT_3_CAL: */ 		
+		case SENSOR_GASESBOARD_HUMIDITY:   		
+		case SENSOR_GASESBOARD_TEMPERATURE:		return gasBoard.begin(); break;
 		case SENSOR_GROOVE_I2C_ADC: 			return grooveI2C_ADC.begin(); break;
 		case SENSOR_INA219_BUSVOLT: 		
 		case SENSOR_INA219_SHUNT: 			
@@ -56,15 +61,16 @@ bool AuxBoards::begin(OneSensor* wichSensor) {
 		case SENSOR_CHIRP_TEMPERATURE:
 		case SENSOR_CHIRP_LIGHT:
 		case SENSOR_CHIRP_MOISTURE:				return moistureChirp.begin(); break;
-		case SENSOR_GROOVE_TEMP_SHT31: 			
-		case SENSOR_GROOVE_HUM_SHT31: 			return groove_SHT31.begin(); break;
+		/* case SENSOR_SHT31_TEMP: */ 			
+		/* case SENSOR_SHT31_HUM: 			return groove_SHT31.begin(); break; */
 		default: break;
 	}
 
 	return false;
 }
 
-float AuxBoards::getReading(OneSensor* wichSensor) {
+float AuxBoards::getReading(OneSensor* wichSensor) 
+{
 	
 	if (i2Cexpander.detected) {
 		if (wichSensor->muxPort >= 0) {
@@ -74,14 +80,17 @@ float AuxBoards::getReading(OneSensor* wichSensor) {
 	}
 
 	switch (wichSensor->type) {
-		case SENSOR_ALPHADELTA_SLOT_1A:	 	return alphaDelta.getElectrode(alphaDelta.Slot1.electrode_A); break;
-		case SENSOR_ALPHADELTA_SLOT_1W: 	return alphaDelta.getElectrode(alphaDelta.Slot1.electrode_W); break;
-		case SENSOR_ALPHADELTA_SLOT_2A: 	return alphaDelta.getElectrode(alphaDelta.Slot2.electrode_A); break;
-		case SENSOR_ALPHADELTA_SLOT_2W: 	return alphaDelta.getElectrode(alphaDelta.Slot2.electrode_W); break;
-		case SENSOR_ALPHADELTA_SLOT_3A: 	return alphaDelta.getElectrode(alphaDelta.Slot3.electrode_A); break;
-		case SENSOR_ALPHADELTA_SLOT_3W: 	return alphaDelta.getElectrode(alphaDelta.Slot3.electrode_W); break;
-		case SENSOR_ALPHADELTA_HUMIDITY: 	return alphaDelta.getHumidity(); break;
-		case SENSOR_ALPHADELTA_TEMPERATURE: return alphaDelta.getTemperature(); break;
+		case SENSOR_GASESBOARD_SLOT_1A:	 	return gasBoard.getElectrode(gasBoard.Slot1.electrode_A); break;
+		case SENSOR_GASESBOARD_SLOT_1W: 	return gasBoard.getElectrode(gasBoard.Slot1.electrode_W); break;
+		case SENSOR_GASESBOARD_SLOT_2A: 	return gasBoard.getElectrode(gasBoard.Slot2.electrode_A); break;
+		case SENSOR_GASESBOARD_SLOT_2W: 	return gasBoard.getElectrode(gasBoard.Slot2.electrode_W); break;
+		case SENSOR_GASESBOARD_SLOT_3A: 	return gasBoard.getElectrode(gasBoard.Slot3.electrode_A); break;
+		case SENSOR_GASESBOARD_SLOT_3W: 	return gasBoard.getElectrode(gasBoard.Slot3.electrode_W); break;
+		/* case SENSOR_GASESBOARD_SLOT_1_CAL: 	return gasBoard.getPPM(gasBoard.Slot1); break; */
+		/* case SENSOR_GASESBOARD_SLOT_2_CAL: 	return gasBoard.getPPM(gasBoard.Slot2); break; */
+		/* case SENSOR_GASESBOARD_SLOT_3_CAL: 	return gasBoard.getPPM(gasBoard.Slot3); break; */
+		case SENSOR_GASESBOARD_HUMIDITY: 	return gasBoard.getHumidity(); break;
+		case SENSOR_GASESBOARD_TEMPERATURE: 	return gasBoard.getTemperature(); break;
 		case SENSOR_GROOVE_I2C_ADC: 		return grooveI2C_ADC.getReading(); break;
 		case SENSOR_INA219_BUSVOLT: 		return ina219.getReading(ina219.BUS_VOLT); break;
 		case SENSOR_INA219_SHUNT: 			return ina219.getReading(ina219.SHUNT_VOLT); break;
@@ -97,15 +106,16 @@ float AuxBoards::getReading(OneSensor* wichSensor) {
 		case SENSOR_CHIRP_MOISTURE:			return moistureChirp.getReading(moistureChirp.CHIRP_MOISTURE); break;
 		case SENSOR_CHIRP_TEMPERATURE:		return moistureChirp.getReading(moistureChirp.CHIRP_TEMPERATURE); break;
 		case SENSOR_CHIRP_LIGHT:			return moistureChirp.getReading(moistureChirp.CHIRP_LIGHT); break;
-		case SENSOR_GROOVE_TEMP_SHT31: 		if (groove_SHT31.update()) return groove_SHT31.temperature; break;
-		case SENSOR_GROOVE_HUM_SHT31: 		if (groove_SHT31.update()) return groove_SHT31.humidity; break;
+		/* case SENSOR_SHT31_TEMP: 		if (groove_SHT31.update()) return groove_SHT31.temperature; break; */
+		/* case SENSOR_SHT31_HUM: 		if (groove_SHT31.update()) return groove_SHT31.humidity; break; */
 		default: break;
 	}
 
 	return -9999;
 }
 
-bool AuxBoards::getBusyState(OneSensor* wichSensor) {
+bool AuxBoards::getBusyState(OneSensor* wichSensor) 
+{
 
 	if (i2Cexpander.detected) {
 		if (wichSensor->muxPort >= 0) i2Cexpander.selectPort(wichSensor->muxPort);
@@ -127,7 +137,8 @@ bool AuxBoards::getBusyState(OneSensor* wichSensor) {
 	}
 }
 
-String AuxBoards::control(OneSensor* wichSensor, String command) {
+String AuxBoards::control(OneSensor* wichSensor, String command) 
+{
 
 	if (i2Cexpander.detected) {
 		if (wichSensor->muxPort >= 0) i2Cexpander.selectPort(wichSensor->muxPort);
@@ -135,36 +146,37 @@ String AuxBoards::control(OneSensor* wichSensor, String command) {
 	}
 
 	switch(wichSensor->type) {
-		case SENSOR_ALPHADELTA_SLOT_1A:
-		case SENSOR_ALPHADELTA_SLOT_1W:
-		case SENSOR_ALPHADELTA_SLOT_2A:
-		case SENSOR_ALPHADELTA_SLOT_2W:
-		case SENSOR_ALPHADELTA_SLOT_3A:
-		case SENSOR_ALPHADELTA_SLOT_3W: {
+		
+		case SENSOR_GASESBOARD_SLOT_1A:
+		case SENSOR_GASESBOARD_SLOT_1W:
+		case SENSOR_GASESBOARD_SLOT_2A:
+		case SENSOR_GASESBOARD_SLOT_2W:
+		case SENSOR_GASESBOARD_SLOT_3A:
+		case SENSOR_GASESBOARD_SLOT_3W: {
 
 			if (command.startsWith("set pot")) {
 
 				Electrode wichElectrode;
 
 				switch(wichSensor->type) {
-					case SENSOR_ALPHADELTA_SLOT_1A: wichElectrode = alphaDelta.Slot1.electrode_A;
-					case SENSOR_ALPHADELTA_SLOT_1W: wichElectrode = alphaDelta.Slot1.electrode_W;
-					case SENSOR_ALPHADELTA_SLOT_2A: wichElectrode = alphaDelta.Slot2.electrode_A;
-					case SENSOR_ALPHADELTA_SLOT_2W: wichElectrode = alphaDelta.Slot2.electrode_W;
-					case SENSOR_ALPHADELTA_SLOT_3A: wichElectrode = alphaDelta.Slot3.electrode_A;
-					case SENSOR_ALPHADELTA_SLOT_3W: wichElectrode = alphaDelta.Slot3.electrode_W;
+					case SENSOR_GASESBOARD_SLOT_1A: wichElectrode = gasBoard.Slot1.electrode_A;
+					case SENSOR_GASESBOARD_SLOT_1W: wichElectrode = gasBoard.Slot1.electrode_W;
+					case SENSOR_GASESBOARD_SLOT_2A: wichElectrode = gasBoard.Slot2.electrode_A;
+					case SENSOR_GASESBOARD_SLOT_2W: wichElectrode = gasBoard.Slot2.electrode_W;
+					case SENSOR_GASESBOARD_SLOT_3A: wichElectrode = gasBoard.Slot3.electrode_A;
+					case SENSOR_GASESBOARD_SLOT_3W: wichElectrode = gasBoard.Slot3.electrode_W;
 					default: break;
 				}
 				
 				command.replace("set pot", "");
 				command.trim();
 				int wichValue = command.toInt();
-				alphaDelta.setPot(wichElectrode, wichValue);
-				return String F("Setting pot to: ") + String(wichValue) + F(" Ohms\n\rActual value: ") + String(alphaDelta.getPot(wichElectrode)) + F(" Ohms");
+				gasBoard.setPot(wichElectrode, wichValue);
+				return String F("Setting pot to: ") + String(wichValue) + F(" Ohms\n\rActual value: ") + String(gasBoard.getPot(wichElectrode)) + F(" Ohms");
 
 			} else if (command.startsWith("get uid")) {
 			
-				return String F("Eeprom UID: ") + String(alphaDelta.getUID());
+				return String F("Eeprom UID: ") + String(gasBoard.getUID());
 
 			} else if (command.startsWith("help")) {
 			
@@ -265,17 +277,20 @@ String AuxBoards::control(OneSensor* wichSensor, String command) {
 	return "Unknown error on control command!!!";
 }
 
-void AuxBoards::print(String payload) {
+void AuxBoards::print(String payload) 
+{
 
 	groove_OLED.print(payload);
 }
 
-void AuxBoards::displayReading(String title, String reading, String unit, String time) {
+void AuxBoards::displayReading(String title, String reading, String unit, String time) 
+{
 
 	groove_OLED.displayReading(title, reading, unit, time);
 }
 
-bool GrooveI2C_ADC::begin() {
+bool GrooveI2C_ADC::begin() 
+{
 
 	if (!I2Cdetect(deviceAddress)) return false;
 
@@ -286,7 +301,8 @@ bool GrooveI2C_ADC::begin() {
 	return true;
 }
 
-float GrooveI2C_ADC::getReading() {
+float GrooveI2C_ADC::getReading() 
+{
 
 	uint32_t data = 0;
 
@@ -305,7 +321,8 @@ float GrooveI2C_ADC::getReading() {
 	return data * V_REF * 2.0 / 4096.0;
 }
 
-bool INA219::begin() {
+bool INA219::begin() 
+{
 
 	if (!I2Cdetect(deviceAddress)) return false;
 
@@ -320,7 +337,8 @@ bool INA219::begin() {
 	return true;
 }
 
-float INA219::getReading(typeOfReading wichReading) {
+float INA219::getReading(typeOfReading wichReading) 
+{
 
 	switch(wichReading) {
 		case BUS_VOLT: {
@@ -352,7 +370,8 @@ float INA219::getReading(typeOfReading wichReading) {
 	return 0;
 }
 
-bool Groove_OLED::begin() {
+bool Groove_OLED::begin() 
+{
 
 	if (!I2Cdetect(deviceAddress)) return false;
 
@@ -365,7 +384,8 @@ bool Groove_OLED::begin() {
 	return true;;
 }
 
-void Groove_OLED::print(String payload) {
+void Groove_OLED::print(String payload) 
+{
 
 	// uint8_t length = payload.length();
 	char charPayload[payload.length()];
@@ -379,7 +399,8 @@ void Groove_OLED::print(String payload) {
 	} while (U8g2_oled.nextPage());
 }
 
-void Groove_OLED::displayReading(String title, String reading, String unit, String time) {
+void Groove_OLED::displayReading(String title, String reading, String unit, String time) 
+{
 
 	String date;
 	String hour;
@@ -427,7 +448,8 @@ void Groove_OLED::displayReading(String title, String reading, String unit, Stri
 	} while (U8g2_oled.nextPage());
 }
 
-bool WaterTemp_DS18B20::begin() {
+bool WaterTemp_DS18B20::begin() 
+{
 
 	if (!I2Cdetect(deviceAddress)) return false;
 
@@ -443,7 +465,8 @@ bool WaterTemp_DS18B20::begin() {
 	return true;
 }
 
-float WaterTemp_DS18B20::getReading() {
+float WaterTemp_DS18B20::getReading() 
+{
 	
  	while ( !DS_bridge.wireSearch(addr)) {
 
@@ -490,7 +513,8 @@ float WaterTemp_DS18B20::getReading() {
 	return 0;
 }
 
-bool Atlas::begin() {
+bool Atlas::begin() 
+{
 
 	if (!I2Cdetect(deviceAddress)) return false;
 
@@ -539,12 +563,14 @@ bool Atlas::begin() {
 	return true;
 }
 
-float Atlas::getReading() {
+float Atlas::getReading() 
+{
 
 	return newReading;
 }
 
-bool Atlas::getBusyState() {
+bool Atlas::getBusyState() 
+{
 
 
 
@@ -614,14 +640,16 @@ bool Atlas::getBusyState() {
 	return true;
 }
 
-void Atlas::goToSleep() {
+void Atlas::goToSleep() 
+{
 
 	Wire.beginTransmission(deviceAddress);
 	Wire.write("Sleep");
 	Wire.endTransmission();
 }
 
-bool Atlas::sendCommand(char* command) {
+bool Atlas::sendCommand(char* command) 
+{
 
 	uint8_t retrys = 5;
 
@@ -644,7 +672,8 @@ bool Atlas::sendCommand(char* command) {
 	return false;
 }
 
-bool Atlas::tempCompensation() {
+bool Atlas::tempCompensation() 
+{
 	
 	String stringData;
 	char data[10];
@@ -668,7 +697,8 @@ bool Atlas::tempCompensation() {
 	return false;
 }
 
-uint8_t Atlas::getResponse() {
+uint8_t Atlas::getResponse() 
+{
 
 	uint8_t code;
 	
@@ -705,7 +735,8 @@ uint8_t Atlas::getResponse() {
     }
 }
 
-bool Moisture::begin() {
+bool Moisture::begin() 
+{
 
 	if (!I2Cdetect(deviceAddress)) return false;
 	if (alreadyStarted) return true;
@@ -716,7 +747,8 @@ bool Moisture::begin() {
 	return true;
 }
 
-float Moisture::getReading(typeOfReading wichReading) {
+float Moisture::getReading(typeOfReading wichReading) 
+{
 
 	switch(wichReading) {
 		case CHIRP_MOISTURE: {
@@ -741,7 +773,8 @@ float Moisture::getReading(typeOfReading wichReading) {
 	return 0;
 }
 
-bool Moisture::getBusyState(typeOfReading wichReading) {
+bool Moisture::getBusyState(typeOfReading wichReading) 
+{
 
 	if (chirp.isBusy()) return true;		
 	
@@ -764,17 +797,20 @@ bool Moisture::getBusyState(typeOfReading wichReading) {
 	return false;
 }
 
-uint8_t Moisture::getVersion() {
+uint8_t Moisture::getVersion() 
+{
 
 	return chirp.getVersion();
 }
 
-void Moisture::sleep() {
+void Moisture::sleep() 
+{
 
 	chirp.sleep();
 }
 
-bool Groove_SHT31::begin() {
+bool Groove_SHT31::begin() 
+{
 
 	Wire.begin();
 
@@ -788,7 +824,8 @@ bool Groove_SHT31::begin() {
 	return true;
 }
 
-bool Groove_SHT31::update() {
+bool Groove_SHT31::update() 
+{
 
 	uint8_t readbuffer[6];
 	sendComm(SINGLE_SHOT_HIGH_REP);
@@ -837,14 +874,16 @@ bool Groove_SHT31::update() {
 	return true;
 }
 
-void Groove_SHT31::sendComm(uint16_t comm) {
+void Groove_SHT31::sendComm(uint16_t comm) 
+{
   Wire.beginTransmission(deviceAddress);
   Wire.write(comm >> 8);
   Wire.write(comm & 0xFF);
   Wire.endTransmission();  
 }
 
-uint8_t Groove_SHT31::crc8(const uint8_t *data, int len) {
+uint8_t Groove_SHT31::crc8(const uint8_t *data, int len) 
+{
 
  /* CRC-8 formula from page 14 of SHT spec pdf
  *
@@ -868,7 +907,8 @@ uint8_t Groove_SHT31::crc8(const uint8_t *data, int len) {
 	return crc;
 }
 
-bool I2Cexp_TCA9548A::begin() {
+bool I2Cexp_TCA9548A::begin() 
+{
 
 	for (uint8_t i=0; i<7; i++) {
 		if (I2Cdetect(devices[i].address)) {
@@ -879,7 +919,8 @@ bool I2Cexp_TCA9548A::begin() {
 	return detected;
 }
 
-bool I2Cexp_TCA9548A::selectPort(uint8_t wichMuxPort) {
+bool I2Cexp_TCA9548A::selectPort(uint8_t wichMuxPort) 
+{
 
 	uint8_t wichDevice = wichMuxPort / 10;
 	uint8_t wichPort = wichMuxPort % 10;
@@ -895,7 +936,8 @@ bool I2Cexp_TCA9548A::selectPort(uint8_t wichMuxPort) {
 	return true;
 }
 
-bool I2Cexp_TCA9548A::disable() {
+bool I2Cexp_TCA9548A::disable() 
+{
 
 	for (uint8_t i=0; i<7; i++) {
 		if (devices[i].present) {
@@ -908,14 +950,16 @@ bool I2Cexp_TCA9548A::disable() {
 }
 
 
-void writeI2C(byte deviceaddress, byte instruction, byte data ) {
+void writeI2C(byte deviceaddress, byte instruction, byte data ) 
+{
   Wire.beginTransmission(deviceaddress);
   Wire.write(instruction);
   Wire.write(data);
   Wire.endTransmission();
 }
 
-byte readI2C(byte deviceaddress, byte instruction) {
+byte readI2C(byte deviceaddress, byte instruction) 
+{
   byte  data = 0x0000;
   Wire.beginTransmission(deviceaddress);
   Wire.write(instruction);

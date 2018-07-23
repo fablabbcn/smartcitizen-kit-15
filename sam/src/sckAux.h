@@ -7,8 +7,7 @@
 #include <Adafruit_INA219.h>
 
 // AlphaDelta libs
-// #define deltaTest 			// Uncomment this line to enable AlphaDelta tester board support
-#include <AlphaDelta.h>
+#include <GasesBoard.h>
 
 // Groove_OLED libs
 #include <U8g2lib.h>
@@ -20,7 +19,6 @@
 #include <I2CSoilMoistureSensor.h>
 
 #include <Sensors.h>
-
 
 bool I2Cdetect(byte address);
 
