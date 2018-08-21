@@ -26,7 +26,7 @@ float SckAqp::getReading(OneSensor* wichSensor)
 	switch(wichSensor->type) {
 
 		case SENSOR_AQP_WATER_TEMP:		aqp_WaterTemp.requestTemperatures(); return aqp_WaterTemp.getTempCByIndex(0); break;
-		case SENSOR_AQP_WATER_LVL:		aqpUltraSonic.updateWaterLevel(); aqpUltraSonic.updateCounters(); return aqpUltraSonic.lvlFiltered.get(); break;
+		case SENSOR_AQP_WATER_LVL:		aqpUltraSonic.updateWaterLevel(); aqpUltraSonic.updateCounters(); return round(aqpUltraSonic.lvlAverage); break;
 		case SENSOR_AQP_RISING_TIME: 		return aqpUltraSonic.tRising/60000.0; break;
 		case SENSOR_AQP_DECREASING_TIME: 	return aqpUltraSonic.tDecreasing/60000.0; break;
 		case SENSOR_AQP_STAGNATING_TIME: 	return aqpUltraSonic.tStagnating/60000.0; break;
@@ -38,28 +38,31 @@ float SckAqp::getReading(OneSensor* wichSensor)
 
 bool AqpUltraSonic::begin()
 {
-	lvlFiltered.reset(IDEAL_WATER_LEVEL);
 	lvlMoreFiltered.reset(IDEAL_WATER_LEVEL);
 	return true;
 }
 
 bool AqpUltraSonic::updateWaterLevel()
 {
-	uint32_t retrys = 0;
-	while (retrys < 3)
+	uint8_t i = 1;
+	while (i <= 100)
 	{
 		float lvlRaw = measureDistance();
 		// If value is out of range, retry
-		if ((lvlRaw < 10) || (lvlRaw > TANK_HEIGHT)) retrys ++;
-		else{
-			lvlMoreFilteredPrevious = lvlMoreFiltered.get();
-			lvlFiltered.update( lvlRaw );
-			lvlMoreFiltered.update( lvlRaw );
-			return true;
+		if ((lvlRaw > 10) && (lvlRaw < TANK_HEIGHT)) {
+			if (i > 1) lvlAverage = ((i-1) * lvlAverage + lvlRaw)/(float)i;
+			else lvlAverage = lvlRaw;
+			SerialUSB.print(lvlRaw);
+			SerialUSB.print("\t");
+			SerialUSB.println(lvlAverage);
+			i++;
 		}
+		else SerialUSB.println("error");
+		delay(10);
 	}
-
-	return false;
+	lvlMoreFilteredPrevious = lvlMoreFiltered.get();
+	lvlMoreFiltered.update( lvlAverage );
+	return true;
 }
 
 float AqpUltraSonic::measureDistance()
@@ -82,8 +85,10 @@ float AqpUltraSonic::measureDistance()
 	durationTimeUs = pulseIn(pinULTRASONIC, HIGH);
 
 	// convert the time into a distance in cm
+	//v = 29.154519 microsecond per centimeter
 	float distCm = (float)durationTimeUs / 29.0 / 2.0;
-	return PING_HEIGHT - distCm;
+	if (distCm == 0) return 0;
+	else return (PING_HEIGHT - distCm);
 }
 
 int AqpUltraSonic::getState()
