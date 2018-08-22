@@ -5,6 +5,7 @@ OneWire oneWire(SIG3);
 DallasTemperature aqp_WaterTemp(&oneWire);
 
 AqpUltraSonic aqpUltraSonic;
+AqpLightSensor aqpLightSensor;
 
 bool SckAqp::begin()
 {
@@ -16,6 +17,9 @@ bool SckAqp::begin()
 
 	// ultrasonic sensor
 	aqpUltraSonic.begin();
+
+	// light sensor
+	aqpLightSensor.begin();
 
 	return true;
 };
@@ -30,6 +34,7 @@ float SckAqp::getReading(OneSensor* wichSensor)
 		case SENSOR_AQP_RISING_TIME: 		return aqpUltraSonic.tRising/60000.0; break;
 		case SENSOR_AQP_DECREASING_TIME: 	return aqpUltraSonic.tDecreasing/60000.0; break;
 		case SENSOR_AQP_STAGNATING_TIME: 	return aqpUltraSonic.tStagnating/60000.0; break;
+		case SENSOR_AQP_LIGHT: 	return TSL2561.readVisibleLux(); break;
 
 		default: break;
 	}
@@ -131,5 +136,12 @@ bool AqpUltraSonic::updateCounters()
 	previousState = currentState;
 	tPrevious = tCurrent;
 
+	return true;
+}
+
+bool AqpLightSensor::begin()
+{
+	Wire.begin();
+	TSL2561.init();
 	return true;
 }

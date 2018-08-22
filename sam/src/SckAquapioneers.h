@@ -3,6 +3,8 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 
+#include <Digital_Light_TSL2561.h>
+
 #include <MovingAverage.h>
 
 #include <Arduino.h>
@@ -77,4 +79,10 @@ class AqpUltraSonic
 
 
 
+};
+
+class AqpLightSensor
+{
+	public:
+		bool begin();
 };

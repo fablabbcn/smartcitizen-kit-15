@@ -77,6 +77,7 @@ enum SensorType {
 	SENSOR_AQP_RISING_TIME,
 	SENSOR_AQP_DECREASING_TIME,
 	SENSOR_AQP_STAGNATING_TIME,
+	SENSOR_AQP_LIGHT,
 
 	// Put one here for each muxed sensor
 	// SENSOR_MUX01A,
@@ -223,7 +224,7 @@ public:
 		OneSensor { BOARD_AQP,          SENSOR_AQP_RISING_TIME, 		"Water Rising Time AQP",                        92,              true,           false,                  "min"},
 		OneSensor { BOARD_AQP,          SENSOR_AQP_DECREASING_TIME, 		"Water Decreasing Time AQP",                    93,              true,           false,                  "min"},
 		OneSensor { BOARD_AQP,          SENSOR_AQP_STAGNATING_TIME, 		"Water Stagnating Time AQP",                    94,              true,           false,                  "min"},
-
+		OneSensor { BOARD_AQP,          SENSOR_AQP_LIGHT, 		"Light AQP",                    0,              true,           false,                  "Lux"},
 
 		//-----------------------
 		// Add New Sensor Here!!!
