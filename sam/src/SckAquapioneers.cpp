@@ -30,11 +30,11 @@ float SckAqp::getReading(OneSensor* wichSensor)
 	switch(wichSensor->type) {
 
 		case SENSOR_AQP_WATER_TEMP:		aqp_WaterTemp.requestTemperatures(); return aqp_WaterTemp.getTempCByIndex(0); break;
-		case SENSOR_AQP_WATER_LVL:		aqpUltraSonic.updateWaterLevel(); aqpUltraSonic.updateCounters(); return round(aqpUltraSonic.lvlAverage); break;
-		case SENSOR_AQP_RISING_TIME: 		return aqpUltraSonic.tRising/60000.0; break;
-		case SENSOR_AQP_DECREASING_TIME: 	return aqpUltraSonic.tDecreasing/60000.0; break;
-		case SENSOR_AQP_STAGNATING_TIME: 	return aqpUltraSonic.tStagnating/60000.0; break;
-		case SENSOR_AQP_LIGHT: 	return TSL2561.readVisibleLux(); break;
+		case SENSOR_AQP_WATER_LVL:		aqpUltraSonic.updateWaterLevel(); return round(aqpUltraSonic.lvlAverage); break;
+		case SENSOR_AQP_RISING_TIME: 		aqpUltraSonic.updateRisingCounter(); return round(aqpUltraSonic.tRising * 2.0 / 60000.0) / 2.0; break; //convert milliseconds to minutes and round to nearest half
+		case SENSOR_AQP_DECREASING_TIME: 	aqpUltraSonic.updateDecreasingCounter(); return round(aqpUltraSonic.tDecreasing * 2.0 / 60000.0) / 2.0; break;
+		case SENSOR_AQP_STAGNATING_TIME: 	aqpUltraSonic.updateStagnatingCounter(); return round(aqpUltraSonic.tStagnating * 2.0 / 60000.0) / 2.0; break;
+		case SENSOR_AQP_LIGHT: 	return aqpLightSensor.getReading(); break;
 
 		default: break;
 	}
@@ -43,30 +43,29 @@ float SckAqp::getReading(OneSensor* wichSensor)
 
 bool AqpUltraSonic::begin()
 {
-	lvlMoreFiltered.reset(IDEAL_WATER_LEVEL);
+	// lvlMoreFiltered.reset(IDEAL_WATER_LEVEL);
 	return true;
 }
 
 bool AqpUltraSonic::updateWaterLevel()
 {
 	uint8_t i = 1;
-	while (i <= 100)
+	uint8_t errorCounter = 0;
+	lvlAveragePrevious = lvlAverage;
+	while (i <= 100 && errorCounter < 100)
 	{
 		float lvlRaw = measureDistance();
 		// If value is out of range, retry
 		if ((lvlRaw > 10) && (lvlRaw < TANK_HEIGHT)) {
 			if (i > 1) lvlAverage = ((i-1) * lvlAverage + lvlRaw)/(float)i;
 			else lvlAverage = lvlRaw;
-			SerialUSB.print(lvlRaw);
-			SerialUSB.print("\t");
-			SerialUSB.println(lvlAverage);
 			i++;
 		}
-		else SerialUSB.println("error");
+		else errorCounter++;
 		delay(10);
 	}
-	lvlMoreFilteredPrevious = lvlMoreFiltered.get();
-	lvlMoreFiltered.update( lvlAverage );
+
+	updateState();
 	return true;
 }
 
@@ -90,52 +89,52 @@ float AqpUltraSonic::measureDistance()
 	durationTimeUs = pulseIn(pinULTRASONIC, HIGH);
 
 	// convert the time into a distance in cm
-	//v = 29.154519 microsecond per centimeter
+	//1/v = 29.154519 microsecond per centimeter
 	float distCm = (float)durationTimeUs / 29.0 / 2.0;
 	if (distCm == 0) return 0;
 	else return (PING_HEIGHT - distCm);
 }
 
-int AqpUltraSonic::getState()
+void AqpUltraSonic::updateState()
 {
-	updateWaterLevel();
-	if (lvlMoreFiltered.get() > (lvlMoreFilteredPrevious + STAGNATION_THRESHOLD)) return 1;
-	else if (lvlMoreFiltered.get() < (lvlMoreFilteredPrevious - STAGNATION_THRESHOLD)) return -1;
+	previousState = currentState;
 
-	return 0;
+	if (lvlAverage > (lvlAveragePrevious + STAGNATION_THRESHOLD)) currentState = 1;
+	else if (lvlAverage < (lvlAveragePrevious - STAGNATION_THRESHOLD)) currentState = -1;
+	else currentState = 0;
 }
 
-bool AqpUltraSonic::updateCounters()
+
+bool AqpUltraSonic::updateRisingCounter()
 {
-	if (millis() - tPrevious < 1000) return true;
-
-	int currentState = getState();
-
-	uint32_t tCurrent = millis();
-	uint32_t tDif = tCurrent - tPrevious;
-
-	switch(currentState) {
-
-		case 1:
-			if (previousState == 1) tRising += tDif;
-			else tRising = tDif;
-			break;
-
-		case -1:
-			if (previousState == -1) tDecreasing += tDif;
-			else tDecreasing = tDif;
-			break;
-
-		case 0:
-
-			if (previousState == 0) tStagnating += tDif;
-			else tStagnating = tDif;
-			break;
+	uint32_t tDifRising = millis() - tPreviousRising;
+	if(currentState == 1){
+		if (previousState == 1) tRising += tDifRising;
+		else tRising = tDifRising;
 	}
+	tPreviousRising = millis();
+	return true;
+}
 
-	previousState = currentState;
-	tPrevious = tCurrent;
+bool AqpUltraSonic::updateDecreasingCounter()
+{
+	uint32_t tDifDecreasing = millis() - tPreviousDecreasing;
+	if(currentState == -1){
+		if (previousState == -1) tDecreasing += tDifDecreasing;
+		else tDecreasing = tDifDecreasing;
+	}
+	tPreviousDecreasing = millis();
+	return true;
+}
 
+bool AqpUltraSonic::updateStagnatingCounter()
+{
+	uint32_t tDifStagnating = millis() - tPreviousStagnating;
+	if(currentState == 0){
+		if (previousState == 0) tStagnating += tDifStagnating;
+		else tStagnating = tDifStagnating;
+	}
+	tPreviousStagnating = millis();
 	return true;
 }
 
@@ -144,4 +143,9 @@ bool AqpLightSensor::begin()
 	Wire.begin();
 	TSL2561.init();
 	return true;
+}
+
+float AqpLightSensor::getReading()
+{
+	return TSL2561.readVisibleLux();
 }

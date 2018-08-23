@@ -17,7 +17,7 @@ bool I2Cdetect(byte address) {
 
 	Wire.beginTransmission(address);
     byte error = Wire.endTransmission();
- 
+
 	if (error == 0) return true;
 	else return false;
 }
@@ -41,9 +41,9 @@ bool AuxBoards::begin(OneSensor* wichSensor) {
 		case SENSOR_ALPHADELTA_HUMIDITY:
 		case SENSOR_ALPHADELTA_TEMPERATURE: 	return alphaDelta.begin(); break;
 		case SENSOR_GROOVE_I2C_ADC: 			return grooveI2C_ADC.begin(); break;
-		case SENSOR_INA219_BUSVOLT: 		
-		case SENSOR_INA219_SHUNT: 			
-		case SENSOR_INA219_CURRENT: 		
+		case SENSOR_INA219_BUSVOLT:
+		case SENSOR_INA219_SHUNT:
+		case SENSOR_INA219_CURRENT:
 		case SENSOR_INA219_LOADVOLT: 			return ina219.begin(); break;
 		case SENSOR_GROOVE_OLED: 				wichSensor->interval = 4; return groove_OLED.begin(); break;
 		case SENSOR_WATER_TEMP_DS18B20:			return waterTemp_DS18B20.begin(); break;
@@ -56,7 +56,7 @@ bool AuxBoards::begin(OneSensor* wichSensor) {
 		case SENSOR_CHIRP_TEMPERATURE:
 		case SENSOR_CHIRP_LIGHT:
 		case SENSOR_CHIRP_MOISTURE:				return moistureChirp.begin(); break;
-		case SENSOR_GROOVE_TEMP_SHT31: 			
+		case SENSOR_GROOVE_TEMP_SHT31:
 		case SENSOR_GROOVE_HUM_SHT31: 			return groove_SHT31.begin(); break;
 		default: break;
 	}
@@ -65,7 +65,7 @@ bool AuxBoards::begin(OneSensor* wichSensor) {
 }
 
 float AuxBoards::getReading(OneSensor* wichSensor) {
-	
+
 	if (i2Cexpander.detected) {
 		if (wichSensor->muxPort >= 0) {
 			if (!i2Cexpander.selectPort(wichSensor->muxPort)) return -9998;
@@ -111,7 +111,7 @@ bool AuxBoards::getBusyState(OneSensor* wichSensor) {
 		if (wichSensor->muxPort >= 0) i2Cexpander.selectPort(wichSensor->muxPort);
 		else i2Cexpander.disable();
 	}
-	
+
 	switch(wichSensor->type) {
 		case SENSOR_GROOVE_OLED:		return true; break;
 		case SENSOR_ATLAS_PH: 			return atlasPH.getBusyState(); break;
@@ -155,7 +155,7 @@ String AuxBoards::control(OneSensor* wichSensor, String command) {
 					case SENSOR_ALPHADELTA_SLOT_3W: wichElectrode = alphaDelta.Slot3.electrode_W;
 					default: break;
 				}
-				
+
 				command.replace("set pot", "");
 				command.trim();
 				int wichValue = command.toInt();
@@ -163,13 +163,13 @@ String AuxBoards::control(OneSensor* wichSensor, String command) {
 				return String F("Setting pot to: ") + String(wichValue) + F(" Ohms\n\rActual value: ") + String(alphaDelta.getPot(wichElectrode)) + F(" Ohms");
 
 			} else if (command.startsWith("get uid")) {
-			
+
 				return String F("Eeprom UID: ") + String(alphaDelta.getUID());
 
 			} else if (command.startsWith("help")) {
-			
+
 				return F("Available commands for this sensor:\n\r* set pot \n\r* get UID");
-			
+
 			#ifdef deltaTest
 			} else if (command.startsWith("test")) {
 
@@ -206,10 +206,10 @@ String AuxBoards::control(OneSensor* wichSensor, String command) {
 			} else {
 				return F("Unrecognized command!! please try again...");
 			}
-			
+
 			break;
 
-		} 
+		}
 		case SENSOR_ATLAS_PH:
 		case SENSOR_ATLAS_EC:
 		case SENSOR_ATLAS_EC_SG:
@@ -397,7 +397,7 @@ void Groove_OLED::displayReading(String title, String reading, String unit, Stri
 		// Title
 		U8g2_oled.setFont(u8g2_font_helvB10_tf);
 		if (U8g2_oled.getStrWidth(title.c_str()) > screenW && title.indexOf(" ") > -1) {
-			
+
 			String first = title.substring(0, title.indexOf(" "));
 			String second = title.substring(title.indexOf(" ")+1);
 
@@ -416,7 +416,7 @@ void Groove_OLED::displayReading(String title, String reading, String unit, Stri
 		U8g2_oled.drawStr((screenW-U8g2_oled.getStrWidth(unit.c_str()))/2,90, unit.c_str());
 
 		if (time.toInt() != 0) {
-			
+
 			// Date
 			U8g2_oled.setFont(u8g2_font_helvB10_tf);
 			U8g2_oled.drawStr(0,screenW,date.c_str());
@@ -446,7 +446,7 @@ bool WaterTemp_DS18B20::begin() {
 }
 
 float WaterTemp_DS18B20::getReading() {
-	
+
  	while ( !DS_bridge.wireSearch(addr)) {
 
 		DS_bridge.wireResetSearch();
@@ -480,12 +480,12 @@ float WaterTemp_DS18B20::getReading() {
 
 		// If Temperature is negative
 		if (SignBit) TReading = (TReading ^ 0xffff) + 1;
-		
+
 		int Tc_100 = (double)TReading * 0.0625 * 10;
 
 		// If the reading is negative make it efective
 		if (SignBit) Tc_100 = 0 - Tc_100;
-		
+
 		return ((float)(Tc_100) / 10) + 1;
 	}
 
@@ -551,7 +551,7 @@ bool Atlas::getBusyState() {
 
 
 	switch (state) {
-		
+
 		case REST: {
 
 			if (TEMP) {
@@ -578,7 +578,7 @@ bool Atlas::getBusyState() {
 
 				uint8_t code = getResponse();
 
-				if (code == 254) {	
+				if (code == 254) {
 					// Still working (wait a little more)
 					lastCommandSent = lastCommandSent + 200;
 					break;
@@ -600,7 +600,7 @@ bool Atlas::getBusyState() {
 					break;
 
 				} else {
-					
+
 					// Error
 					state = REST;
 					newReading = 0;
@@ -610,9 +610,9 @@ bool Atlas::getBusyState() {
 				}
 			}
 			break;
-		} 
+		}
 	}
-	
+
 	return true;
 }
 
@@ -647,12 +647,12 @@ bool Atlas::sendCommand(char* command) {
 }
 
 bool Atlas::tempCompensation() {
-	
+
 	String stringData;
 	char data[10];
 	float temperature = 0;
 
-	if (waterTemp_DS18B20.detected) temperature = waterTemp_DS18B20.getReading();	
+	if (waterTemp_DS18B20.detected) temperature = waterTemp_DS18B20.getReading();
 	else if (atlasTEMP.detected) temperature = atlasTEMP.getReading();
 	else {
 
@@ -673,12 +673,12 @@ bool Atlas::tempCompensation() {
 uint8_t Atlas::getResponse() {
 
 	uint8_t code;
-	
+
 	Wire.requestFrom(deviceAddress, 20, 1);
 	code = Wire.read();
 
 	atlasResponse = "";
-	
+
 	switch (code) {
 		case 0: 		// Undefined
 		case 2:			// Error
@@ -689,19 +689,19 @@ uint8_t Atlas::getResponse() {
 			break;
 
 		} default : {
-			
+
 			while (Wire.available()) {
 				char buff = Wire.read();
 				atlasResponse += buff;
 			}
 			Wire.endTransmission();
-			
+
 			goToSleep();
 
 			if (atlasResponse.length() > 0) {
 				return 1;
 			}
-			
+
 			return 2;
 		}
     }
@@ -745,8 +745,8 @@ float Moisture::getReading(typeOfReading wichReading) {
 
 bool Moisture::getBusyState(typeOfReading wichReading) {
 
-	if (chirp.isBusy()) return true;		
-	
+	if (chirp.isBusy()) return true;
+
 	if (wichReading == CHIRP_LIGHT) {
 
 		if (measuringLight) {
@@ -761,7 +761,7 @@ bool Moisture::getBusyState(typeOfReading wichReading) {
 			return true;
 
 		}
-	} 
+	}
 
 	return false;
 }
@@ -798,7 +798,7 @@ bool SHT31::stop()
 }
 bool SHT31::update(bool wait)
 {
-	Wire.setClock(100000); 
+	Wire.setClock(100000);
 
         uint32_t elapsed = millis() - lastTime;
         if (elapsed < timeout) delay(timeout - elapsed);
@@ -906,7 +906,7 @@ bool I2Cexp_TCA9548A::begin() {
 		if (I2Cdetect(devices[i].address)) {
 			devices[i].present = 1;
 			detected = true;
-		} 
+		}
 	}
 	return detected;
 }
@@ -958,4 +958,3 @@ byte readI2C(byte deviceaddress, byte instruction) {
   data = Wire.read();
   return data;
 }
-

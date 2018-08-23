@@ -220,11 +220,11 @@ public:
 
 		// Aquapioneers sensor board
 		OneSensor { BOARD_AQP, 		SENSOR_AQP_WATER_TEMP, 			"Water Temperature AQP",			42, 		true, 		false, 			"C"},
-		OneSensor { BOARD_AQP,          SENSOR_AQP_WATER_LVL, 			"Water Level AQP",                      	91,              true,           false,                  "cm"},
-		OneSensor { BOARD_AQP,          SENSOR_AQP_RISING_TIME, 		"Water Rising Time AQP",                        92,              true,           false,                  "min"},
-		OneSensor { BOARD_AQP,          SENSOR_AQP_DECREASING_TIME, 		"Water Decreasing Time AQP",                    93,              true,           false,                  "min"},
-		OneSensor { BOARD_AQP,          SENSOR_AQP_STAGNATING_TIME, 		"Water Stagnating Time AQP",                    94,              true,           false,                  "min"},
-		OneSensor { BOARD_AQP,          SENSOR_AQP_LIGHT, 		"Light AQP",                    0,              true,           false,                  "Lux"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_WATER_LVL, 			"Water Level",                      	91,              true,           false,                  "cm"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_RISING_TIME, 		"Water Rising Time",                        92,              true,           false,                  "min"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_DECREASING_TIME, 		"Water Decreasing Time",                    93,              true,           false,                  "min"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_STAGNATING_TIME, 		"Water Stagnating Time",                    94,              true,           false,                  "min"},
+		OneSensor { BOARD_AQP,          SENSOR_AQP_LIGHT, 		"Light AQP",                    95,              true,           false,                  "Lux"},
 
 		//-----------------------
 		// Add New Sensor Here!!!

@@ -100,7 +100,7 @@ public:
 	// Hard pulses
 	uint16_t slowHard = 300;
 	uint16_t fastHard = 80;
-	uint32_t hardTimer; 
+	uint32_t hardTimer;
 
 	pulseModes pulseMode = PULSE_SOFT;
 	uint32_t timerReading;   //substituir esto por una libreria de timers
@@ -129,13 +129,13 @@ private:
  */
 class SckBase {
 public:
-   
+
 	void setup();
 	void update();
 
 	// Timer
 	bool timerRun();
-	enum TimerAction { 
+	enum TimerAction {
 		ACTION_NULL,						// 0
 		ACTION_CLEAR_ESP_BOOTING,			// 1
 		ACTION_ESP_ON,						// 2
@@ -227,7 +227,7 @@ public:
 	// Flags
 	bool hostNameSet = false;
 	bool helloPublished = false;
-	
+
 	// Modes
 	void changeMode(SCKmodes newMode);
 	void errorMode();
@@ -275,7 +275,7 @@ public:
 
 		// Mode commands
 		EXTCOM_RESET,
-				
+
 		// Other configuration
 		EXTCOM_SET_OUTLEVEL,
 		EXTCOM_GET_OUTLEVEL,
@@ -365,7 +365,7 @@ public:
 	"reset",				// EXTCOM_RESET,
 
 	// Other configuration
-	"set outlevel",			// EXTCOM_SET_OUTLEVEL,		
+	"set outlevel",			// EXTCOM_SET_OUTLEVEL,
 	"get outlevel",			// EXTCOM_GET_OUTLEVEL,
 	"set led",				// EXTCOM_SET_LED,			@params: off, (to implement: red, blue, green, etc)
 	"urban present",		// EXTCOM_GET_URBAN_PRESENT,
@@ -404,13 +404,13 @@ public:
 	"get power",			// EXTCOM_GET_POWER_STATE,
 	"set charger",			// EXTCOM_SET_CHARGER_CURRENT,
 	"rcause",				// EXTCOM_RESET_CAUSE,
-	
+
 	// Other
 	"get freeram",			// EXTCOM_GET_FREE_RAM,
 	"list timers",			// EXTCOM_LIST_TIMERS,
 
 	"help",					// EXTCOM_HELP,
-	
+
 	};
 
 	//INPUT/OUTPUT
@@ -461,7 +461,7 @@ public:
 	ESPstatus espStatus;
 	ESPstatus prevEspStatus;
 	float statusPoolingInterval = 500;		// ESP status pooling interval in ms
-	const uint32_t ESP_FLASH_SPEED = 921600;
+	const uint32_t ESP_FLASH_SPEED = 115200;
 
 	// Time
 	bool setTime(String epoch);
@@ -479,7 +479,7 @@ public:
 	uint16_t longPressInterval = 4000;
 	uint16_t veryLongPressInterval = 9000;
 	uint32_t butLastEvent = 0;
-	
+
 	// SDcard
 	uint32_t FileSizeLimit = 64000000;
 	uint32_t headersChanged = 0;
@@ -534,7 +534,7 @@ public:
 	// Peripherals
 	Led led;
 	RTCZero rtc;
-	
+
 	// Urban board
 	friend class SckUrban;
 	bool urbanBoardDetected();

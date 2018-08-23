@@ -5,7 +5,6 @@
 
 #include <Digital_Light_TSL2561.h>
 
-#include <MovingAverage.h>
 
 #include <Arduino.h>
 #include <Sensors.h>
@@ -43,24 +42,25 @@ class AqpUltraSonic
 {
 
 	public:
-		const uint8_t TANK_HEIGHT = 30; 			// distance between bottom of tank and PING sensor in cm */
-		const uint8_t PING_HEIGHT = TANK_HEIGHT - 1; 		// Height of tank in cm */
+		const uint8_t TANK_HEIGHT = 30; 			// Height of tank in cm */
+		const uint8_t PING_HEIGHT = TANK_HEIGHT - 1; 		// distance between bottom of tank and PING sensor in cm */
 		const uint8_t IDEAL_WATER_LEVEL = TANK_HEIGHT - 7;
 		const uint8_t MAX_WATER_LEVEL = TANK_HEIGHT - 2;
-		const uint8_t STAGNATION_THRESHOLD = 1;
+		const float STAGNATION_THRESHOLD = 0.5;
 
 		// TODO alarms
 		const uint8_t tRiseIdeal = 3 * 1000 * 60; 		//Ideal rise time in milliseconds
 		const uint8_t tDecreaseIdeal = 5 *1000 * 60; 	//Ideal decrease time in milliseconds;
 
 		float lvlAverage;
-		// Create a moving average with alpha = 0.8
-		MovingAverage lvlMoreFiltered = MovingAverage(0.8);
+		float lvlAveragePrevious;
 
 		bool begin();
 		float getReading(OneSensor* wichSensor);
 		bool updateWaterLevel();
-		bool updateCounters();
+		bool updateRisingCounter();
+		bool updateDecreasingCounter();
+		bool updateStagnatingCounter();
 		bool getBusyState(OneSensor* wichSensor);
 		String control(OneSensor* wichSensor, String command);
 
@@ -68,12 +68,15 @@ class AqpUltraSonic
 
 	private:
 		float measureDistance ();
-		int getState();
+		void updateState();
 
 		const int pinULTRASONIC = (SIG2);
 
 		float lvlMoreFilteredPrevious;
-		uint8_t tPrevious;
+		uint32_t tPreviousRising = 0;
+		uint32_t tPreviousDecreasing = 0;
+		uint32_t tPreviousStagnating = 0;
+		int currentState = 0;
 		int previousState = 0;
 
 
@@ -85,4 +88,6 @@ class AqpLightSensor
 {
 	public:
 		bool begin();
+		float getReading();
+
 };
