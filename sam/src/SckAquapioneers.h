@@ -89,5 +89,6 @@ class AqpLightSensor
 	public:
 		bool begin();
 		float getReading();
-
+	private:
+		byte I2Caddress = 0x29;
 };

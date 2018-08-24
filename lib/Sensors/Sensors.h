@@ -87,7 +87,7 @@ enum SensorType {
 	SENSOR_COUNT
 };
 
-const uint32_t minimal_sensor_reading_interval = 60;
+const uint32_t minimal_sensor_reading_interval = 25;
 const uint32_t default_sensor_reading_interval = 60;
 const uint32_t max_sensor_reading_interval = 86400;		// One day
 

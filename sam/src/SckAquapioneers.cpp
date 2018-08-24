@@ -147,5 +147,6 @@ bool AqpLightSensor::begin()
 
 float AqpLightSensor::getReading()
 {
+	if (!I2Cdetect(I2Caddress)) return -9999;
 	return TSL2561.readVisibleLux();
 }
