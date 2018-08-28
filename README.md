@@ -1,3 +1,16 @@
+# Aquapioneers Monitoring Kit
+
+**This is the firmware for the Aquapioneers Monitoring Kit based on the Smart Citizen Kit version 1.5**
+
+This firmware is meant to be used with the **Aquapioneers** custom board made for the Aquaponics kit.
+The plans for the PCB, the casing of the sensors and the board are available on Aquapioneers Github page:
+
+https://github.com/aquapioneers
+
+Also check out the documentation available for assembling your own Monitoring system.
+
+.
+
 **NOTICE!**
 
 **This is a legacy version 1.5**
@@ -7,7 +20,7 @@
 https://github.com/fablabbcn/smartcitizen-kit-20
 
 
-# SmartCitizenKit 1.5 [![Build Status](https://travis-ci.org/fablabbcn/smartcitizen-kit-15.svg?branch=master)](https://travis-ci.org/fablabbcn/smartcitizen-kit-15)
+## SmartCitizenKit 1.5 [![Build Status](https://travis-ci.org/fablabbcn/smartcitizen-kit-15.svg?branch=master)](https://travis-ci.org/fablabbcn/smartcitizen-kit-15)
 
 Developer version of Smart Citizen Kit 1.5 Firmware
 
